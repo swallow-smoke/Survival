@@ -61,7 +61,7 @@ namespace _001_Scripts.Controller
             var dir = input.MovementHandler.Dir;
             
             var velocity = new Vector3(dir.x, 0, dir.y) * speed;
-            _rigidbody.velocity = velocity;
+            _rigidbody.linearVelocity = velocity;
         }
     }
 }
