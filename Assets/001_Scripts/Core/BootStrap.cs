@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using _001_Scripts.Interface;
+using _001_Scripts.Managers;
+using UnityEngine;
 
 namespace _001_Scripts.Core
 {
@@ -7,12 +10,14 @@ namespace _001_Scripts.Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         public static void Boot()
         {
-            
+            InitializeGame();
         }
 
         public static void InitializeGame()
         {
-            
+            ServiceLocator.RegisterService(GameManager.Instance);
+            ServiceLocator.RegisterService(UIManager.Instance);
+            ServiceLocator.RegisterService(InputManager.Instance);
         }
     }
 }

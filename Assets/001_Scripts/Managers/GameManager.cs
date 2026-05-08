@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace _001_Scripts.Managers
 {
-    public class GameManager : Sin<GameManager>, IGameManager
+    public class GameManager : Sin<GameManager>, IGameService, IManager
     {
         public void Initialize()
         {

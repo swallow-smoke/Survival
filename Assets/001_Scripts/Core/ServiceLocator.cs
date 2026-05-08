@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using _001_Scripts.Controller;
 using _001_Scripts.Interface;
 
 namespace _001_Scripts.Core
 {
     public static class ServiceLocator
     {
-        private static readonly Dictionary<Type, IManager> _managers = new Dictionary<Type, IManager>();
+        private static readonly Dictionary<System.Type, IManager> _managers = new Dictionary<System.Type, IManager>();
 
         public static T GetService<T>() where T : IManager
         {
@@ -16,6 +17,10 @@ namespace _001_Scripts.Core
             return (T)_managers[typeof(T)];
         }
 
-        public static void RegisterService<T>(T service) where T : IManager => _managers.Add(typeof(T), service);
+        public static void RegisterService<T>(T service) where T : IManager
+        {
+            _managers.Add(typeof(T), service);
+            service.Initialize();
+        }
     }
 }
