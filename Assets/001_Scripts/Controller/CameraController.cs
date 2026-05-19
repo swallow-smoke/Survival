@@ -4,6 +4,9 @@ using UnityEngine.InputSystem;
 
 namespace _001_Scripts.Controller
 {
+    // why cinemachine built-in cam controller is not working for 3.6.1;;
+    // so i made this.
+    // damper is not valid for this one, so i'll make it later;
     public class CameraController : MonoBehaviour
     {
         [SerializeField] public Transform _trs;
