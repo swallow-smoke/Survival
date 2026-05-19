@@ -15,9 +15,8 @@ namespace _001_Scripts.Core
 
         public static void InitializeGame()
         {
-            ServiceLocator.RegisterService(GameManager.Instance);
-            ServiceLocator.RegisterService(UIManager.Instance);
-            ServiceLocator.RegisterService(InputManager.Instance);
+        //     ServiceLocator.RegisterService(GameManager.Instance);
+        //     ServiceLocator.RegisterService(UIManager.Instance);
         }
     }
 }
