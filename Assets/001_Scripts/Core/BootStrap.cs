@@ -7,16 +7,16 @@ namespace _001_Scripts.Core
 {
     public class BootStrap : MonoBehaviour
     {
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        public static void Boot()
+        [SerializeField] private List<MonoBehaviour> _managers;
+        
+        public void Awake()
         {
             InitializeGame();
         }
 
-        public static void InitializeGame()
+        public void InitializeGame()
         {
-        //     ServiceLocator.RegisterService(GameManager.Instance);
-        //     ServiceLocator.RegisterService(UIManager.Instance);
+            
         }
     }
 }
