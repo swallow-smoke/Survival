@@ -1,5 +1,6 @@
 ﻿using _001_Scripts.Data.Item;
 using _001_Scripts.Data.Message;
+using _001_Scripts.Type;
 using MessagePipe;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -13,6 +14,8 @@ namespace _001_Scripts.Controller
         private Animator _animator;
         IPublisher<InvMessage> _invMessagePublisher;
         IPublisher<CraftReqMessage> _craftMessagePublisher;
+        private PlayerState curState = PlayerState.Idle;
+        
         
         private void Awake()
         {
@@ -41,11 +44,21 @@ namespace _001_Scripts.Controller
             _invMessagePublisher.Publish(invMsg);
         }
 
-        [Inject]
-        public void Constructor(IPublisher<InvMessage> invMessagePublisher, IPublisher<CraftReqMessage> craftMessagePublisher)
+        public void OnStateChange(PlayerStateMessage msg)
         {
+            curState = msg.state;
+        }
+
+        [Inject]
+        public void Constructor(IPublisher<InvMessage> invMessagePublisher, 
+            IPublisher<CraftReqMessage> craftMessagePublisher, 
+            ISubscriber<PlayerStateMessage> playerStateSubscriber)
+        {
+            var bag = DisposableBag.CreateBuilder();
+            
             _invMessagePublisher = invMessagePublisher;
             _craftMessagePublisher = craftMessagePublisher;
+            playerStateSubscriber.Subscribe(msg => OnStateChange(msg));
         }
     }
 }

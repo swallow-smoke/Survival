@@ -8,6 +8,7 @@
         Attack,
         Craft,
         Inventory,
-        Pause
+        Pause,
+        Build
     }
 }

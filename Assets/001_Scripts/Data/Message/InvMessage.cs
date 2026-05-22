@@ -10,7 +10,7 @@ namespace _001_Scripts.Data.Message
         public InvMessage(InvMessageType msgType, Item.Item items)
         {
             this.msgType = msgType;
-            this.item = items;  
+            this.item = items;
         }
     }
 
