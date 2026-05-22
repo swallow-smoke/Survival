@@ -17,11 +17,6 @@ namespace _001_Scripts.Controller
             _animator = GetComponent<Animator>();
         }
 
-        private void FixedUpdate()
-        {
-            
-        }
-
         public void OnInteract()
         {
             RaycastHit hit;
@@ -30,15 +25,5 @@ namespace _001_Scripts.Controller
                 Debug.Log("Interacted with: " + hit.collider.name);
             }
         }
-
-        // public void OnMovement()
-        // {
-        //     if (input == null) return;
-        //     
-        //     var dir = input.MovementController.Dir;
-        //     
-        //     var velocity = new Vector3(dir.x, 0, dir.y) * speed;
-        //     _rigidbody.linearVelocity = velocity;
-        // }
     }
 }

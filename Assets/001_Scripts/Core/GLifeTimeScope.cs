@@ -1,4 +1,5 @@
-﻿using _001_Scripts.Interface;
+﻿using _001_Scripts.Data.Message;
+using _001_Scripts.Interface;
 using _001_Scripts.Managers;
 using MessagePipe;
 using VContainer;
@@ -10,7 +11,8 @@ namespace _001_Scripts.Core
     {
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterMessagePipe();
+            var options = builder.RegisterMessagePipe();
+            builder.RegisterMessageBroker<GameStateMessage>(options);
             
             builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>();
             builder.RegisterComponentInHierarchy<UIManager>().As<IUIService>();

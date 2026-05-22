@@ -4,4 +4,13 @@
     {
         
     }
+
+    public enum BaseMsgType
+    {
+        Create,
+        Destroy,
+        Update,
+        Edit,
+        Configure
+    }
 }
