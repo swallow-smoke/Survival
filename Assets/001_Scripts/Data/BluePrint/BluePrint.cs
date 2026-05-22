@@ -12,7 +12,6 @@ namespace _001_Scripts.Data.BluePrint
         public bool isUnlocked;
         public string bluePrintName;
         public int bluePrintId;
-        public int craftCount;
 
         public BluePrint Clone()
         {

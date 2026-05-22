@@ -1,9 +1,9 @@
-﻿using System;
-using _001_Scripts.Core;
-using _001_Scripts.Interface;
-using _001_Scripts.Managers;
+﻿using _001_Scripts.Data.Item;
+using _001_Scripts.Data.Message;
+using MessagePipe;
 using UnityEngine;
-using EventType = _001_Scripts.Type.EventType;
+using UnityEngine.InputSystem;
+using VContainer;
 
 namespace _001_Scripts.Controller
 {
@@ -11,19 +11,41 @@ namespace _001_Scripts.Controller
     public class PlayerController : MonoBehaviour
     {
         private Animator _animator;
+        IPublisher<InvMessage> _invMessagePublisher;
+        IPublisher<CraftReqMessage> _craftMessagePublisher;
         
         private void Awake()
         {
             _animator = GetComponent<Animator>();
         }
 
-        public void OnInteract()
+        public void OnInteract(InputAction.CallbackContext context)
         {
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, transform.forward, out hit, 2.0f))
+            if (context.started)
             {
-                Debug.Log("Interacted with: " + hit.collider.name);
+                RaycastHit hit;
+                if (Physics.Raycast(transform.position, transform.forward, out hit, 2.0f))
+                {
+                    Debug.Log("Interacted with: " + hit.collider.name);
+                }
             }
+        }
+
+        public void OnGetItem(Item item)
+        {
+            var invMsg = new InvMessage(
+                InvMessageType.Added,
+                item
+                );
+            
+            _invMessagePublisher.Publish(invMsg);
+        }
+
+        [Inject]
+        public void Constructor(IPublisher<InvMessage> invMessagePublisher, IPublisher<CraftReqMessage> craftMessagePublisher)
+        {
+            _invMessagePublisher = invMessagePublisher;
+            _craftMessagePublisher = craftMessagePublisher;
         }
     }
 }

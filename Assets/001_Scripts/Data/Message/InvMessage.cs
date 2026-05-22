@@ -2,18 +2,21 @@
 
 namespace _001_Scripts.Data.Message
 {
-    public class InvMessage
+    public readonly struct InvMessage
     {
-        public InvMessageType msgType;
-        public List<Item.Item> items;
-        public string desc;
+        public readonly InvMessageType msgType;
+        public readonly Item.Item item;
+
+        public InvMessage(InvMessageType msgType, Item.Item items)
+        {
+            this.msgType = msgType;
+            this.item = items;  
+        }
     }
 
     public enum InvMessageType
     {
         Added,
-        Removed,
-        Updated,
-        Revert
+        Removed
     }
 }

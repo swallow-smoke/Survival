@@ -35,7 +35,6 @@ namespace _001_Scripts.Controller
         public void OnMove(InputAction.CallbackContext context)
         {
             inputValue = context.ReadValue<Vector2>();
-            
             moveDir.y = 0;
         }
 
