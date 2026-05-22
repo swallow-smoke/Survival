@@ -1,6 +1,6 @@
-﻿using _001_Scripts.Type;
+﻿using _001_Scripts.Type.Item;
 
-namespace _001_Scripts.Data
+namespace _001_Scripts.Data.Item
 {
     [System.Serializable]
     public class ItemAttributes

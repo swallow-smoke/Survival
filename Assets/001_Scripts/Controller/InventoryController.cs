@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using _001_Scripts.Data;
+using _001_Scripts.Data.Item;
 using _001_Scripts.Data.SOJ;
 using UnityEngine;
 

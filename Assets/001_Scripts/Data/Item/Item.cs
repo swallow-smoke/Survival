@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using _001_Scripts.Type;
+using _001_Scripts.Type.Item;
 
-namespace _001_Scripts.Data
+namespace _001_Scripts.Data.Item
 {
     [System.Serializable]
     public class Item
@@ -17,8 +17,9 @@ namespace _001_Scripts.Data
         {
             Item cloneItem = (Item)this.MemberwiseClone();
             cloneItem.ItemAttributes = new();
-            ItemAttributes.ForEach(
-                item => cloneItem.ItemAttributes.Add(item.Clone()));
+            ItemAttributes.ForEach(item => { 
+                cloneItem.ItemAttributes.Add(item.Clone()); 
+            });
             return cloneItem;
         }
     }

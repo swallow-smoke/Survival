@@ -3,18 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Sin<T> : MonoBehaviour where T : MonoBehaviour
+namespace _001_Scripts.Base
 {
-    public static T Instance;
-
-    protected void Awake()
+    public class Sin<T> : MonoBehaviour where T : MonoBehaviour
     {
-        if (Instance == null)
+        public static T Instance;
+
+        protected void Awake()
         {
-            Instance = this as T;
-            DontDestroyOnLoad(gameObject);
+            if (Instance == null)
+            {
+                Instance = this as T;
+                DontDestroyOnLoad(gameObject);
+            }
+            else 
+                Destroy(gameObject);
         }
-        else 
-            Destroy(gameObject);
     }
 }
