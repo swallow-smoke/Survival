@@ -21,7 +21,11 @@ namespace _001_Scripts.Core
             builder.RegisterMessageBroker<InvMessage>(options);
             builder.RegisterMessageBroker<CraftReqMessage>(options);
             builder.RegisterMessageBroker<CraftResultMessage>(options);
-
+            builder.RegisterMessageBroker<UIReqMessage>(options);
+            builder.RegisterMessageBroker<PlayerMovementMessage>(options);
+            builder.RegisterMessageBroker<PlayerStatMessage>(options);
+            builder.RegisterMessageBroker<StateMessage>(options);
+                
             builder.RegisterComponentInHierarchy<InventoryController>().As<IInventoryService>();
             builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>();
             builder.RegisterComponentInHierarchy<UIManager>().As<IUIService>();

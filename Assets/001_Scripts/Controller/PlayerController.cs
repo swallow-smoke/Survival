@@ -14,6 +14,7 @@ namespace _001_Scripts.Controller
         private Animator _animator;
         IPublisher<InvMessage> _invMessagePublisher;
         IPublisher<CraftReqMessage> _craftMessagePublisher;
+        IPublisher<PlayerStatMessage> _playerStatMessagePublisher;
         private PlayerState curState = PlayerState.Idle;
         
         
@@ -44,7 +45,7 @@ namespace _001_Scripts.Controller
             _invMessagePublisher.Publish(invMsg);
         }
 
-        public void OnStateChange(PlayerStateMessage msg)
+        public void OnStateChange(StateMessage msg)
         {
             curState = msg.state;
         }
@@ -52,13 +53,17 @@ namespace _001_Scripts.Controller
         [Inject]
         public void Constructor(IPublisher<InvMessage> invMessagePublisher, 
             IPublisher<CraftReqMessage> craftMessagePublisher, 
-            ISubscriber<PlayerStateMessage> playerStateSubscriber)
+            ISubscriber<StateMessage> StateSubscriber,
+            IPublisher<PlayerStatMessage> playerStatMessagePublisher
+            )
         {
             var bag = DisposableBag.CreateBuilder();
             
             _invMessagePublisher = invMessagePublisher;
             _craftMessagePublisher = craftMessagePublisher;
-            playerStateSubscriber.Subscribe(msg => OnStateChange(msg));
+            _playerStatMessagePublisher = playerStatMessagePublisher;
+            
+            StateSubscriber.Subscribe(OnStateChange);
         }
     }
 }

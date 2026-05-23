@@ -1,6 +1,9 @@
 ﻿using System;
+using _001_Scripts.Data.Message;
+using MessagePipe;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VContainer;
 
 namespace _001_Scripts.Controller
 {
@@ -14,6 +17,8 @@ namespace _001_Scripts.Controller
         private Vector3 moveDir;
         private Vector2 inputValue;
         private bool isCanJump;
+
+        private IPublisher<PlayerMovementMessage> iMovementPublisher;
 
         [SerializeField] private float maxDistance = 1f;
 
@@ -30,12 +35,19 @@ namespace _001_Scripts.Controller
             {
                 isCanJump = true;
             }
+
+            if (_rb.linearVelocity.magnitude > 0)
+            {
+                iMovementPublisher.Publish(new PlayerMovementMessage());
+            }
         }
 
         public void OnMove(InputAction.CallbackContext context)
         {
             inputValue = context.ReadValue<Vector2>();
             moveDir.y = 0;
+            
+            
         }
 
         public void OnJump(InputAction.CallbackContext context)
@@ -45,6 +57,12 @@ namespace _001_Scripts.Controller
                 _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
                 isCanJump = false;
             }
+        }
+
+        [Inject]
+        public void Constructor(IPublisher<PlayerMovementMessage> movementPublisher)
+        {
+            iMovementPublisher = movementPublisher;
         }
     }
 }

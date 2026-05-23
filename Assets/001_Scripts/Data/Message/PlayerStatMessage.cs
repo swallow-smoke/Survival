@@ -1,14 +1,11 @@
-﻿using _001_Scripts.Type;
-
-namespace MessagePipe
+﻿namespace _001_Scripts.Data.Message
 {
-    public readonly struct PlayerStateMessage
+    public readonly struct PlayerStatMessage
     {
-        public readonly PlayerState state;
-
-        public PlayerStateMessage(PlayerState state)
-        {
-            this.state = state;
-        }
+        public readonly int hp;
+        public readonly float stamina;
+        public readonly float hungry;
+        public readonly float water;
+        public readonly float oxygen;
     }
 }
