@@ -61,14 +61,16 @@ namespace _001_Scripts.UI.Component
         {
             if (_tweenOut != null)
                 _tweenOut.Kill();
-
+            
             _tweenOut = DOTween.Sequence()
                 .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 0, 2)
                     .SetEase(Ease.OutQuad).OnComplete(() =>
                     {
                         canvasGroup.interactable = false;
                         canvasGroup.blocksRaycasts = false;
-                    }));
+                    }))                
+                .Join(_rectTrs.DOAnchorPos(originPos + Vector2.up * upOffSet, 2).SetEase(Ease.OutQuad))
+                .Join(_rectTrs.DOSizeDelta(new Vector2(0, originSize.y), 1).SetEase(Ease.OutQuad));
         }
 
         private void FadeIn()
@@ -93,8 +95,8 @@ namespace _001_Scripts.UI.Component
                         canvasGroup.interactable = true;
                         canvasGroup.blocksRaycasts = true;
                     }))
-                .Join(_rectTrs.DOAnchorPos(originPos, 4).SetEase(Ease.OutQuad))
-                .Join(_rectTrs.DOSizeDelta(originSize, 4).SetEase(Ease.OutQuad));
+                .Join(_rectTrs.DOAnchorPos(originPos, 1).SetEase(Ease.OutQuad))
+                .Join(_rectTrs.DOSizeDelta(originSize, 0).SetEase(Ease.OutQuad));
         }
     }
 }
