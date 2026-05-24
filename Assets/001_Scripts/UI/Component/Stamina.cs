@@ -34,12 +34,14 @@ namespace _001_Scripts.UI.Component
         {
             _cts?.Cancel();
             _cts?.Dispose();
-            FadeIn();
 
             image.fillAmount = value / 100;
+
             _cts = new CancellationTokenSource();
             var token = _cts.Token;
 
+            if (_tweenIn == null || !_tweenIn.IsPlaying()) FadeIn();
+            
             var cancelled = await UniTask.Delay(millisecondsDelay: hideTime, cancellationToken: token)
                 .SuppressCancellationThrow();
 
@@ -61,30 +63,28 @@ namespace _001_Scripts.UI.Component
         {
             if (_tweenOut != null)
                 _tweenOut.Kill();
-            
+
             _tweenOut = DOTween.Sequence()
                 .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 0, 2)
                     .SetEase(Ease.OutQuad).OnComplete(() =>
                     {
                         canvasGroup.interactable = false;
                         canvasGroup.blocksRaycasts = false;
-                    }))                
+                    }))
                 .Join(_rectTrs.DOAnchorPos(originPos + Vector2.up * upOffSet, 2).SetEase(Ease.OutQuad))
-                .Join(_rectTrs.DOSizeDelta(new Vector2(0, originSize.y), 1).SetEase(Ease.OutQuad));
+                .Join(_rectTrs.DOSizeDelta(new Vector2(0, originSize.y), 1).SetEase(Ease.OutCirc));
         }
 
         private void FadeIn()
         {
-            if (canvasGroup.alpha >= 0.99f) return;
-            
             _rectTrs.anchoredPosition = originPos + Vector2.up * upOffSet;
             _rectTrs.sizeDelta = new Vector2(0, originSize.y);
-            
-            
+
+
             canvasGroup.alpha = 0;
             canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;
-            
+
             if (_tweenIn != null)
                 _tweenIn.Kill();
 
@@ -95,8 +95,8 @@ namespace _001_Scripts.UI.Component
                         canvasGroup.interactable = true;
                         canvasGroup.blocksRaycasts = true;
                     }))
-                .Join(_rectTrs.DOAnchorPos(originPos, 1).SetEase(Ease.OutQuad))
-                .Join(_rectTrs.DOSizeDelta(originSize, 0).SetEase(Ease.OutQuad));
+                .Join(_rectTrs.DOAnchorPos(originPos, 1).SetEase(Ease.OutCirc))
+                .Join(_rectTrs.DOSizeDelta(originSize, 0).SetEase(Ease.InCubic));
         }
     }
 }
