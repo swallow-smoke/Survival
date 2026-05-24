@@ -28,8 +28,8 @@ namespace _001_Scripts.Core
             builder.RegisterMessageBroker<ForceWalkMessage>(options);
                 
             builder.RegisterComponentInHierarchy<InventoryController>().As<IInventoryService>();
-            builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>();
-            builder.RegisterComponentInHierarchy<UIManager>().As<IUIService>();
+            builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>().As<IInitializable>();
+            builder.RegisterComponentInHierarchy<UIManager>().As<IUIService>().As<IInitializable>();
             // builder.RegisterComponentInHierarchy<CraftController>().As<ICraftService>();
         }
     }
