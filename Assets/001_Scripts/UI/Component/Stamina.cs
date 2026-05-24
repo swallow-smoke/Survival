@@ -15,6 +15,7 @@ namespace _001_Scripts.UI.Component
         private CancellationTokenSource _cts;
         private Tween _tweenIn;
         private Tween _tweenOut;
+        private bool isViz = false;
 
 
         [SerializeField] private CanvasGroup canvasGroup;
@@ -22,12 +23,10 @@ namespace _001_Scripts.UI.Component
         [SerializeField] private RectTransform _rectTrs;
         [SerializeField] private int upOffSet = 10;
         private Vector2 originPos;
-        private Vector2 originSize;
 
         private void Awake()
         {
             originPos = _rectTrs.anchoredPosition;
-            originSize = _rectTrs.sizeDelta;
         }
 
         public async UniTaskVoid StatUpdate(float value)
@@ -40,7 +39,7 @@ namespace _001_Scripts.UI.Component
             _cts = new CancellationTokenSource();
             var token = _cts.Token;
 
-            if (_tweenIn == null || !_tweenIn.IsPlaying()) FadeIn();
+            if (!isViz && (_tweenIn == null || !_tweenIn.IsPlaying()) && (_tweenOut == null || !_tweenOut.IsPlaying())) FadeIn();
             
             var cancelled = await UniTask.Delay(millisecondsDelay: hideTime, cancellationToken: token)
                 .SuppressCancellationThrow();
@@ -70,15 +69,14 @@ namespace _001_Scripts.UI.Component
                     {
                         canvasGroup.interactable = false;
                         canvasGroup.blocksRaycasts = false;
+                        isViz = false;
                     }))
-                .Join(_rectTrs.DOAnchorPos(originPos + Vector2.up * upOffSet, 2).SetEase(Ease.OutQuad))
-                .Join(_rectTrs.DOSizeDelta(new Vector2(0, originSize.y), 1).SetEase(Ease.OutCirc));
+                .Join(_rectTrs.DOAnchorPos(originPos + Vector2.up * upOffSet, 2).SetEase(Ease.OutQuad));
         }
 
         private void FadeIn()
         {
             _rectTrs.anchoredPosition = originPos + Vector2.up * upOffSet;
-            _rectTrs.sizeDelta = new Vector2(0, originSize.y);
 
 
             canvasGroup.alpha = 0;
@@ -89,14 +87,14 @@ namespace _001_Scripts.UI.Component
                 _tweenIn.Kill();
 
             _tweenIn = DOTween.Sequence()
-                .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 1, 4)
+                .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 1, 1)
                     .SetEase(Ease.OutQuad).OnComplete(() =>
                     {
                         canvasGroup.interactable = true;
                         canvasGroup.blocksRaycasts = true;
+                        isViz = true;
                     }))
-                .Join(_rectTrs.DOAnchorPos(originPos, 1).SetEase(Ease.OutCirc))
-                .Join(_rectTrs.DOSizeDelta(originSize, 0).SetEase(Ease.InCubic));
+                .Join(_rectTrs.DOAnchorPos(originPos, 1).SetEase(Ease.OutCirc));
         }
     }
 }

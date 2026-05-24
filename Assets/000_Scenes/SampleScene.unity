@@ -1491,7 +1491,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1445384341}
-  - {fileID: 1639648192}
   m_Father: {fileID: 821212477}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
@@ -1523,10 +1522,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24cdc036c83e4359b22ba09fa4792ff5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.UI.Component.Stamina
-  hideTime: 5000
+  hideTime: 1000
   canvasGroup: {fileID: 787100119}
-  image: {fileID: 1445384344}
-  _rectTrs: {fileID: 1445384341}
+  image: {fileID: 1639648195}
+  _rectTrs: {fileID: 1639648192}
   upOffSet: 100
 --- !u!1 &796939518
 GameObject:
@@ -1903,9 +1902,9 @@ MonoBehaviour:
     water: 100
     oxygen: 100
     staminaUsage: 15
-    staminaCure: 0
-    hungryUsage: 0
-    waterUsage: 0
+    staminaCure: 15
+    hungryUsage: 15
+    waterUsage: 15
 --- !u!114 &1089360010
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2217,7 +2216,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1639648192}
   m_Father: {fileID: 787100118}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -2305,7 +2305,6 @@ GameObject:
   - component: {fileID: 1639648192}
   - component: {fileID: 1639648196}
   - component: {fileID: 1639648195}
-  - component: {fileID: 1639648194}
   m_Layer: 5
   m_Name: fill
   m_TagString: Untagged
@@ -2325,30 +2324,13 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 787100118}
+  m_Father: {fileID: 1445384341}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 800, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1639648194
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1639648191}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24cdc036c83e4359b22ba09fa4792ff5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.UI.Component.Stamina
-  hideTime: 5000
-  canvasGroup: {fileID: 787100119}
-  image: {fileID: 1639648195}
-  _rectTrs: {fileID: 1639648192}
-  upOffSet: 10
 --- !u!114 &1639648195
 MonoBehaviour:
   m_ObjectHideFlags: 0
