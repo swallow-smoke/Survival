@@ -13,7 +13,8 @@ namespace _001_Scripts.UI.Component
         private int hideTime = 5000;
 
         private CancellationTokenSource _cts;
-        private Tween _tween;
+        private Tween _tweenIn;
+        private Tween _tweenOut;
 
 
         [SerializeField] private CanvasGroup canvasGroup;
@@ -52,15 +53,16 @@ namespace _001_Scripts.UI.Component
         {
             _cts?.Cancel();
             _cts?.Dispose();
-            _tween?.Kill();
+            _tweenOut?.Kill();
+            _tweenIn?.Kill();
         }
 
         private void FadeOut()
         {
-            if (_tween != null)
-                _tween.Kill();
+            if (_tweenOut != null)
+                _tweenOut.Kill();
 
-            _tween = DOTween.Sequence()
+            _tweenOut = DOTween.Sequence()
                 .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 0, 2)
                     .SetEase(Ease.OutQuad).OnComplete(() =>
                     {
@@ -72,23 +74,27 @@ namespace _001_Scripts.UI.Component
         private void FadeIn()
         {
             if (canvasGroup.alpha >= 0.99f) return;
-
+            
             _rectTrs.anchoredPosition = originPos + Vector2.up * upOffSet;
             _rectTrs.sizeDelta = new Vector2(0, originSize.y);
-            canvasGroup.alpha = 0;
             
-            if (_tween != null)
-                _tween.Kill();
+            
+            canvasGroup.alpha = 0;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
+            
+            if (_tweenIn != null)
+                _tweenIn.Kill();
 
-            _tween = DOTween.Sequence()
+            _tweenIn = DOTween.Sequence()
                 .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 1, 4)
                     .SetEase(Ease.OutQuad).OnComplete(() =>
                     {
                         canvasGroup.interactable = true;
                         canvasGroup.blocksRaycasts = true;
                     }))
-                .Join(_rectTrs.DOAnchorPos(originPos, 5).SetEase(Ease.OutQuad))
-                .Join(_rectTrs.DOSizeDelta(originSize, 5).SetEase(Ease.OutQuad));
+                .Join(_rectTrs.DOAnchorPos(originPos, 4).SetEase(Ease.OutQuad))
+                .Join(_rectTrs.DOSizeDelta(originSize, 4).SetEase(Ease.OutQuad));
         }
     }
 }
