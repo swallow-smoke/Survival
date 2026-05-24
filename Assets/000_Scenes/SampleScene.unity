@@ -146,7 +146,7 @@ RectTransform:
   m_GameObject: {fileID: 93608411}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 796939519}
@@ -222,7 +222,7 @@ RectTransform:
   m_GameObject: {fileID: 116159620}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 1.4, y: 1.4, z: 1.4}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1104738413}
@@ -825,7 +825,7 @@ RectTransform:
   m_GameObject: {fileID: 419703446}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 1.4, y: 1.4, z: 1.4}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 876963523}
@@ -995,7 +995,7 @@ MonoBehaviour:
   layer:
     serializedVersion: 2
     m_Bits: 512
-  maxDistance: 1
+  maxDistance: 0.97777
   _camCont: {fileID: 622368668}
 --- !u!114 &489975912
 MonoBehaviour:
@@ -1525,7 +1525,7 @@ MonoBehaviour:
   hideTime: 1000
   canvasGroup: {fileID: 787100119}
   image: {fileID: 1639648195}
-  _rectTrs: {fileID: 1639648192}
+  _rectTrs: {fileID: 1445384341}
   upOffSet: 100
 --- !u!1 &796939518
 GameObject:
@@ -1555,7 +1555,7 @@ RectTransform:
   m_GameObject: {fileID: 796939518}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 1.4, y: 1.4, z: 1.4}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 93608412}
@@ -1743,8 +1743,8 @@ MonoBehaviour:
   duration: 4
   stamina: {fileID: 787100120}
   hp: {fileID: 1104738414}
-  hungry: {fileID: 419703448}
-  water: {fileID: 796939520}
+  hungry: {fileID: 876963524}
+  water: {fileID: 93608413}
 --- !u!225 &821212482
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1815,7 +1815,7 @@ RectTransform:
   m_GameObject: {fileID: 876963522}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 419703447}
@@ -1903,8 +1903,8 @@ MonoBehaviour:
     oxygen: 100
     staminaUsage: 15
     staminaCure: 15
-    hungryUsage: 15
-    waterUsage: 15
+    hungryUsage: 1
+    waterUsage: 1
 --- !u!114 &1089360010
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2018,7 +2018,7 @@ RectTransform:
   m_GameObject: {fileID: 1104738412}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 116159621}

@@ -40,6 +40,8 @@ namespace _001_Scripts.Controller
             if (isRunning)
             {
                 stat.ModifyStamina(-stat.GetStaminaUsage() * Time.deltaTime);
+                stat.ModifyHungry(-stat.GetHungryUsage() * Time.deltaTime);
+                stat.ModifyWater(-stat.GetWaterUsage() * Time.deltaTime);
                 
                 if (stat.GetStamina() <= 0)
                 {
