@@ -58,6 +58,6 @@ namespace _001_Scripts.Controller
             }
         }
 
-        private void OnDestroy() => _msgBag.Dispose();
+        private void OnDestroy() => _msgBag?.Dispose();
     }
 }

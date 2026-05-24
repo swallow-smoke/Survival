@@ -17,7 +17,7 @@ namespace _001_Scripts.UI.Component
 
 
         [SerializeField] private CanvasGroup canvasGroup;
-        [SerializeField] private Slider _slider;
+        [SerializeField] private Image image;
         [SerializeField] private RectTransform _rectTrs;
         [SerializeField] private int upOffSet = 10;
         private Vector2 originPos;
@@ -35,7 +35,7 @@ namespace _001_Scripts.UI.Component
             _cts?.Dispose();
             FadeIn();
 
-            _slider.value = value;
+            image.fillAmount = value / 100;
             _cts = new CancellationTokenSource();
             var token = _cts.Token;
 
@@ -61,8 +61,8 @@ namespace _001_Scripts.UI.Component
                 _tween.Kill();
 
             _tween = DOTween.Sequence()
-                .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 0, 4)
-                    .SetEase(Ease.OutQuad).SetTarget(this).OnComplete(() =>
+                .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 0, 2)
+                    .SetEase(Ease.OutQuad).OnComplete(() =>
                     {
                         canvasGroup.interactable = false;
                         canvasGroup.blocksRaycasts = false;
@@ -82,13 +82,13 @@ namespace _001_Scripts.UI.Component
 
             _tween = DOTween.Sequence()
                 .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 1, 4)
-                    .SetEase(Ease.OutQuad).SetTarget(this).OnComplete(() =>
+                    .SetEase(Ease.OutQuad).OnComplete(() =>
                     {
                         canvasGroup.interactable = true;
                         canvasGroup.blocksRaycasts = true;
                     }))
-                .Join(_rectTrs.DOAnchorPos(originPos, 5).SetEase(Ease.OutQuad).SetTarget(this))
-                .Join(_rectTrs.DOSizeDelta(originSize, 5).SetEase(Ease.OutQuad).SetTarget(this));
+                .Join(_rectTrs.DOAnchorPos(originPos, 5).SetEase(Ease.OutQuad))
+                .Join(_rectTrs.DOSizeDelta(originSize, 5).SetEase(Ease.OutQuad));
         }
     }
 }

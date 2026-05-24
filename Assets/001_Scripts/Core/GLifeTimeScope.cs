@@ -25,11 +25,12 @@ namespace _001_Scripts.Core
             builder.RegisterMessageBroker<PlayerMovementMessage>(options);
             builder.RegisterMessageBroker<PlayerStatMessage>(options);
             builder.RegisterMessageBroker<StateMessage>(options);
+            builder.RegisterMessageBroker<ForceWalkMessage>(options);
                 
             builder.RegisterComponentInHierarchy<InventoryController>().As<IInventoryService>();
             builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>();
             builder.RegisterComponentInHierarchy<UIManager>().As<IUIService>();
-            builder.RegisterComponentInHierarchy<CraftController>().As<ICraftService>();
+            // builder.RegisterComponentInHierarchy<CraftController>().As<ICraftService>();
         }
     }
 }   

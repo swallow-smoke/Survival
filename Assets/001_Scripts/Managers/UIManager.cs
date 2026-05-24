@@ -32,7 +32,7 @@ namespace _001_Scripts.Managers
 
         private void OnDestroy()
         {
-            _bag.Dispose();
+            _bag?.Dispose();
         }
 
         private void OnGameStateChanged(GameStateMessage message)

@@ -11,7 +11,7 @@ using VContainer;
 
 namespace _001_Scripts.Controller
 {
-    public class CraftController : MonoBehaviour
+    public class CraftController : MonoBehaviour, ICraftService
     {
         [SerializeField] private BluePrintDataBase bpDB;
         private ISubscriber<CraftReqMessage> _craftMessageSubScriber;
@@ -84,7 +84,7 @@ namespace _001_Scripts.Controller
             Craft(msg.itemName);
         }
 
-        private void OnDestroy() => msgBag.Dispose();
+        private void OnDestroy() => msgBag?.Dispose();
 
         [Inject]
         public void Constructor(IPublisher<InvMessage> invPublisher, IPublisher<CraftResultMessage> craftResultPublisher, IInventoryService invService)

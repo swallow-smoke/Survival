@@ -23,22 +23,25 @@ namespace _001_Scripts.UI
         [Inject]
         public void Constructor(ISubscriber<PlayerStatMessage> playerStatSubscriber)
         {
-            var bag = playerStatSubscriber.Subscribe(UIUpdate);
+            var builder = DisposableBag.CreateBuilder();
+            builder.Add(playerStatSubscriber.Subscribe(UIUpdate));
+
+            _bag = builder.Build();
         }
 
-        public void UIUpdate(PlayerStatMessage msg)
+        private void UIUpdate(PlayerStatMessage msg)
         {
             hp.fillAmount = msg.hp;
             hungry.fillAmount = msg.hungry;
             water.fillAmount = msg.water;
             
-            stamina.StatUpdate(msg.stamina);
+            stamina.StatUpdate(msg.stamina).Forget();
         }
 
         private void OnDestroy()
         {
             base.OnDestroy(); 
-            _bag.Dispose();
+            _bag?.Dispose();
         }
     }
 }
