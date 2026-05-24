@@ -19,7 +19,7 @@ namespace _001_Scripts.UI
         [SerializeField] private Image water;
 
         private IDisposable _bag;
-        
+
         [Inject]
         public void Constructor(ISubscriber<PlayerStatMessage> playerStatSubscriber)
         {
@@ -31,16 +31,16 @@ namespace _001_Scripts.UI
 
         private void UIUpdate(PlayerStatMessage msg)
         {
-            hp.fillAmount = msg.hp;
+            hp.fillAmount = (float)msg.hp / 100;
             hungry.fillAmount = msg.hungry;
             water.fillAmount = msg.water;
-            
+
             stamina.StatUpdate(msg.stamina).Forget();
         }
 
         private void OnDestroy()
         {
-            base.OnDestroy(); 
+            base.OnDestroy();
             _bag?.Dispose();
         }
     }

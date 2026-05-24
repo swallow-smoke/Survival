@@ -7,10 +7,11 @@ using _001_Scripts.Interface;
 using MessagePipe;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
 namespace _001_Scripts.Managers
 {
-    public class UIManager : MonoBehaviour, IUIService
+    public class UIManager : MonoBehaviour, IUIService, IInitializable
     {
         private IDisposable _bag;
         private Dictionary<System.Type, PanelBase> uiPanels = new();

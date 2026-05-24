@@ -1,6 +1,6 @@
 ﻿using _001_Scripts.Type;
 
-namespace MessagePipe
+namespace _001_Scripts.Data.Message
 {
     public readonly struct StateMessage
     {

@@ -4,10 +4,11 @@ using _001_Scripts.Interface;
 using MessagePipe;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
 namespace _001_Scripts.Managers
 {
-    public class GameManager : MonoBehaviour, IGameService, IManager
+    public class GameManager : MonoBehaviour, IGameService, IInitializable
     {
         IPublisher<GameStateMessage> _gameStatePublisher;
         
