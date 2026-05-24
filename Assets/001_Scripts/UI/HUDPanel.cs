@@ -32,8 +32,8 @@ namespace _001_Scripts.UI
         private void UIUpdate(PlayerStatMessage msg)
         {
             hp.fillAmount = (float)msg.hp / 100;
-            hungry.fillAmount = msg.hungry;
-            water.fillAmount = msg.water;
+            hungry.fillAmount = msg.hungry / 100;
+            water.fillAmount = msg.water / 100;
 
             stamina.StatUpdate(msg.stamina).Forget();
         }
