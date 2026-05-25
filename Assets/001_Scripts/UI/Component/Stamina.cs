@@ -64,21 +64,20 @@ namespace _001_Scripts.UI.Component
                 _tweenOut.Kill();
 
             _tweenOut = DOTween.Sequence()
-                .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 0, 2)
+                .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 0, 1)
                     .SetEase(Ease.OutQuad).OnComplete(() =>
                     {
                         canvasGroup.interactable = false;
                         canvasGroup.blocksRaycasts = false;
                         isViz = false;
                     }))
-                .Join(_rectTrs.DOAnchorPos(originPos + Vector2.up * upOffSet, 2).SetEase(Ease.OutQuad));
+                .Join(_rectTrs.DOAnchorPos(originPos + Vector2.up * upOffSet, 2).SetEase(Ease.OutCirc));
         }
 
         private void FadeIn()
         {
             _rectTrs.anchoredPosition = originPos + Vector2.up * upOffSet;
-
-
+            
             canvasGroup.alpha = 0;
             canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;

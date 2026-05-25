@@ -20,6 +20,8 @@ namespace _001_Scripts.Controller
         private Vector2 inputValue;
         private bool isCanJump;
         private bool isRunning;
+        private bool wasMove;
+        private bool isGround = true;
 
         private IPublisher<PlayerMovementMessage> iMovementPublisher;
         private IDisposable _bag;
@@ -27,6 +29,8 @@ namespace _001_Scripts.Controller
         [SerializeField] private float maxDistance = 1f;
 
         [SerializeField] CameraController _camCont;
+
+        [SerializeField] private Transform trs;
 
         private void FixedUpdate()
         {
@@ -38,16 +42,21 @@ namespace _001_Scripts.Controller
                 _rb.linearVelocity =
                     new Vector3(moveDir.x * runningSpeed, _rb.linearVelocity.y, moveDir.z * runningSpeed);
             else _rb.linearVelocity = new Vector3(moveDir.x * speed, _rb.linearVelocity.y, moveDir.z * speed);
-            if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, maxDistance, layer))
-            {
-                isCanJump = true;
-            }
-            else isCanJump = false;
 
             if (_rb.linearVelocity.magnitude > 0)
             {
-                iMovementPublisher.Publish(new PlayerMovementMessage(_rb.linearVelocity.magnitude, isRunning));
+                Quaternion targetRot = Quaternion.Euler(0, trs.rotation.eulerAngles.y, 0);
+                
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, 360f * Time.fixedDeltaTime);
+                
+                // Debug.Log($"{vector} \n {publs}");
             }
+            
+            Vector3 vector = new Vector3(_rb.linearVelocity.x, _rb.linearVelocity.y, _rb.linearVelocity.z);
+            Vector3 publs = transform.InverseTransformDirection(_rb.linearVelocity) / runningSpeed;
+            
+            isGround = Physics.Raycast(transform.position, Vector3.down, maxDistance, layer);
+            iMovementPublisher.Publish(new PlayerMovementMessage(vector.magnitude / runningSpeed, isRunning, isGround, publs));
         }
 
         public void OnMove(InputAction.CallbackContext context)
@@ -58,10 +67,9 @@ namespace _001_Scripts.Controller
 
         public void OnJump(InputAction.CallbackContext context)
         {
-            if (context.started && isCanJump)
+            if (context.started && isGround)
             {
                 _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-                isCanJump = false;
             }
         }
 
