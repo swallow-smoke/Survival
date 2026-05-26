@@ -1,9 +1,9 @@
 ﻿using System;
 using _001_Scripts.Data.Message;
-using _001_Scripts.UI.Component;
 using MessagePipe;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using _001_Scripts.UI.Component;
 using VContainer;
 
 namespace _001_Scripts.Controller
@@ -16,11 +16,10 @@ namespace _001_Scripts.Controller
         [SerializeField] private float jumpForce = 5.0f;
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private LayerMask layer;
+        [SerializeField] private Transform footTrs;
         private Vector3 moveDir;
         private Vector2 inputValue;
-        private bool isCanJump;
         private bool isRunning;
-        private bool wasMove;
         private bool isGround = true;
 
         private IPublisher<PlayerMovementMessage> iMovementPublisher;
@@ -37,7 +36,7 @@ namespace _001_Scripts.Controller
             moveDir = (_camCont._trs.forward * inputValue.y) + (_camCont._trs.right * inputValue.x);
             moveDir.y = 0;
             moveDir.Normalize();
-
+            
             if (isRunning)
                 _rb.linearVelocity =
                     new Vector3(moveDir.x * runningSpeed, _rb.linearVelocity.y, moveDir.z * runningSpeed);
@@ -46,17 +45,17 @@ namespace _001_Scripts.Controller
             if (_rb.linearVelocity.magnitude > 0)
             {
                 Quaternion targetRot = Quaternion.Euler(0, trs.rotation.eulerAngles.y, 0);
-                
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, 360f * Time.fixedDeltaTime);
-                
-                // Debug.Log($"{vector} \n {publs}");
+
+                transform.rotation =
+                    Quaternion.RotateTowards(transform.rotation, targetRot, 360f * Time.fixedDeltaTime);
             }
-            
-            Vector3 vector = new Vector3(_rb.linearVelocity.x, _rb.linearVelocity.y, _rb.linearVelocity.z);
+
             Vector3 publs = transform.InverseTransformDirection(_rb.linearVelocity) / runningSpeed;
-            
-            isGround = Physics.Raycast(transform.position, Vector3.down, maxDistance, layer);
-            iMovementPublisher.Publish(new PlayerMovementMessage(vector.magnitude / runningSpeed, isRunning, isGround, publs));
+
+            isGround = Physics.Raycast(footTrs.position, Vector3.down, maxDistance, layer);
+            iMovementPublisher.Publish(new PlayerMovementMessage(_rb.linearVelocity.magnitude / runningSpeed, isGround,
+                publs));
+            // Debug.Log($"{_rb.linearVelocity} \n {publs}");
         }
 
         public void OnMove(InputAction.CallbackContext context)
@@ -83,19 +82,23 @@ namespace _001_Scripts.Controller
                 isRunning = false;
         }
 
+        public void Stamina(PlayerStatMessage msg)
+        {
+            if (msg.stamina <= 0)
+                isRunning = false;
+        }
+
         [Inject]
         public void Constructor(IPublisher<PlayerMovementMessage> movementPublisher,
-            ISubscriber<ForceWalkMessage> forceWalkSubscriber)
+            ISubscriber<PlayerStatMessage> playerStatSubscriber)
         {
             var builder = DisposableBag.CreateBuilder();
             iMovementPublisher = movementPublisher;
 
-            builder.Add(forceWalkSubscriber.Subscribe(SetRun));
+            builder.Add(playerStatSubscriber.Subscribe(Stamina));
 
             _bag = builder.Build();
         }
-
-        private void SetRun(ForceWalkMessage msg) => isRunning = false;
 
         private void OnDestroy() => _bag?.Dispose();
     }

@@ -1123,7 +1123,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 5c5daf34a1c40a441b38c162011bc3ec, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1581,7 +1581,7 @@ PrefabInstance:
     - target: {fileID: 7869543608362826461, guid: 9bd72731ebe2248478ba4849c274a43b,
         type: 3}
       propertyPath: m_ApplyRootMotion
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1611,6 +1611,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 841331840}
+    - targetCorrespondingSourceObject: {fileID: 3503167532966410781, guid: 9bd72731ebe2248478ba4849c274a43b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 841331841}
   m_SourcePrefab: {fileID: 100100000, guid: 9bd72731ebe2248478ba4849c274a43b, type: 3}
 --- !u!1 &841331830 stripped
 GameObject:
@@ -1821,13 +1825,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed177eb585854dc5a4bab2996ab52045, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Controller.MovementController
-  speed: 5
+  speed: 2
   runningSpeed: 15
   jumpForce: 5
   _rb: {fileID: 841331832}
   layer:
     serializedVersion: 2
     m_Bits: 512
+  footTrs: {fileID: 2119047964}
   maxDistance: 1
   _camCont: {fileID: 622368668}
   trs: {fileID: 622368666}
@@ -1860,6 +1865,20 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &841331841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 841331830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 591517db6c9d428aaaeaac30389bb145, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Controller.PlayerAnimationController
+  animator: {fileID: 841331839}
+  dampTime: 0.1
 --- !u!1 &876963522
 GameObject:
   m_ObjectHideFlags: 0
@@ -2313,6 +2332,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1639648191}
   m_CullTransparentMesh: 1
+--- !u!4 &2119047964 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6025783463650732818, guid: 9bd72731ebe2248478ba4849c274a43b,
+    type: 3}
+  m_PrefabInstance: {fileID: 841331829}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

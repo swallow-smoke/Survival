@@ -25,7 +25,6 @@ namespace _001_Scripts.Core
             builder.RegisterMessageBroker<PlayerMovementMessage>(options);
             builder.RegisterMessageBroker<PlayerStatMessage>(options);
             builder.RegisterMessageBroker<StateMessage>(options);
-            builder.RegisterMessageBroker<ForceWalkMessage>(options);
                 
             builder.RegisterComponentInHierarchy<InventoryController>().As<IInventoryService>();
             builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>().As<IInitializable>();

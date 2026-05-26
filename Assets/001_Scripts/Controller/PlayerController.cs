@@ -18,7 +18,6 @@ namespace _001_Scripts.Controller
         IPublisher<InvMessage> _invMessagePublisher;
         IPublisher<CraftReqMessage> _craftMessagePublisher;
         IPublisher<PlayerStatMessage> _playerStatMessagePublisher;
-        IPublisher<ForceWalkMessage> _forceWalkMessagePublisher;
         private PlayerState curState = PlayerState.Idle;
         private bool isRunning = false;
         private float _lastRun;
@@ -47,7 +46,6 @@ namespace _001_Scripts.Controller
                 
                 if (stat.GetStamina() <= 0)
                 {
-                    _forceWalkMessagePublisher.Publish(new ForceWalkMessage());
                     isRunning = false;
                 }
 
@@ -104,57 +102,14 @@ namespace _001_Scripts.Controller
 
         public void OnStateChange(StateMessage msg) => curState = msg.state;
 
-        private void OnAnimation(PlayerMovementMessage msg)
-        {
-            if (isGrounded != msg.isGround)
-            {
-                if (!msg.isGround)
-                {
-                    if (_landCoroutine != null) 
-                        StopCoroutine(_landCoroutine);
-                    animator.runtimeAnimatorController = falling;
-                    isLanded = false;
-                    animator.SetFloat("SpeedZ", msg.rawVector3.y);
-                }
-                else
-                {
-                    if (isLanded == false)
-                    {
-                        animator.SetBool("isGround", true);
-                        _landCoroutine = StartCoroutine(LandCoroutine());
-                        isLanded = true;
-                    }
-                }
-            }
-            else
-            {
-                Debug.Log($"착지 감지 - isLanded: {isLanded}");
-                animator.SetBool("isGround", true);
-                Debug.Log($"SetBool 호출됨 - 현재 컨트롤러: {animator.runtimeAnimatorController.name}");
-                _landCoroutine = StartCoroutine(LandCoroutine());
-                isLanded = true;
-            }
-            
-            animator.SetFloat("SpeedX", msg.rawVector3.x);
-            animator.SetFloat("SpeedY", msg.rawVector3.z);
+        
 
-            isGrounded = msg.isGround;
-        }
 
-        IEnumerator LandCoroutine()
-        {
-            yield return new WaitForSeconds(LandClip.length);
-            animator.runtimeAnimatorController = movement;
-            animator.SetFloat("SpeedX", 0f);
-            animator.SetFloat("SpeedY", 0f);
-            isLanded = false;
-        }
         
         [Inject]
         public void Construct(IPublisher<InvMessage> invMessagePublisher,
             IPublisher<CraftReqMessage> craftMessagePublisher,
             IPublisher<PlayerStatMessage> playerStatMessagePublisher,
-            IPublisher<ForceWalkMessage> forceWalkMessagePublisher,
             ISubscriber<StateMessage> StateSubscriber,
             ISubscriber<PlayerMovementMessage> movementSubscriber)
         {
@@ -163,10 +118,8 @@ namespace _001_Scripts.Controller
             _invMessagePublisher = invMessagePublisher;
             _craftMessagePublisher = craftMessagePublisher;
             _playerStatMessagePublisher = playerStatMessagePublisher;
-            _forceWalkMessagePublisher = forceWalkMessagePublisher;
 
             builder.Add(StateSubscriber.Subscribe(OnStateChange));
-            builder.Add(movementSubscriber.Subscribe(OnAnimation));
             bag = builder.Build();
         }
 
