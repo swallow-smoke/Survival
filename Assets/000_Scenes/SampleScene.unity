@@ -1160,7 +1160,6 @@ GameObject:
   m_Component:
   - component: {fileID: 787100118}
   - component: {fileID: 787100119}
-  - component: {fileID: 787100120}
   m_Layer: 5
   m_Name: Stamina
   m_TagString: Untagged
@@ -1200,23 +1199,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &787100120
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 787100117}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24cdc036c83e4359b22ba09fa4792ff5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.UI.Component.Stamina
-  hideTime: 1000
-  canvasGroup: {fileID: 787100119}
-  image: {fileID: 1639648195}
-  _rectTrs: {fileID: 1445384341}
-  upOffSet: 50
 --- !u!1 &796939518
 GameObject:
   m_ObjectHideFlags: 0
@@ -1431,7 +1413,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.UI.HUDPanel
   _canvasGroup: {fileID: 821212482}
   duration: 4
-  stamina: {fileID: 787100120}
   hp: {fileID: 1104738414}
   hungry: {fileID: 876963524}
   water: {fileID: 93608413}

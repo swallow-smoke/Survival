@@ -13,7 +13,6 @@ namespace _001_Scripts.UI
 {
     public class HUDPanel : PanelBase
     {
-        [SerializeField] private Stamina stamina;
         [SerializeField] private Image hp;
         [SerializeField] private Image hungry;
         [SerializeField] private Image water;
@@ -34,8 +33,6 @@ namespace _001_Scripts.UI
             hp.fillAmount = (float)msg.hp / 100;
             hungry.fillAmount = msg.hungry / 100;
             water.fillAmount = msg.water / 100;
-
-            stamina.StatUpdate(msg.stamina).Forget();
         }
 
         private void OnDestroy()
