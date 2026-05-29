@@ -1,4 +1,4 @@
-﻿namespace _001_Scripts.Type
+﻿namespace _001_Scripts.Type.States
 {
     public enum GameState
     {

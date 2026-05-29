@@ -1,5 +1,6 @@
 ﻿using _001_Scripts.Controller;
 using _001_Scripts.Data.Message;
+using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Interface;
 using _001_Scripts.Managers;
 using MessagePipe;
@@ -22,9 +23,18 @@ namespace _001_Scripts.Core
             builder.RegisterMessageBroker<CraftReqMessage>(options);
             builder.RegisterMessageBroker<CraftResultMessage>(options);
             builder.RegisterMessageBroker<UIReqMessage>(options);
+  
+
+            #region Player
+            
+            builder.RegisterMessageBroker<PlayerMovementStateMsg>(options);
+            builder.RegisterMessageBroker<PlayerUIStateMsg>(options);
+            builder.RegisterMessageBroker<PlayerVehicleStateMsg>(options);
+            
             builder.RegisterMessageBroker<PlayerMovementMessage>(options);
             builder.RegisterMessageBroker<PlayerStatMessage>(options);
-            builder.RegisterMessageBroker<StateMessage>(options);
+
+            #endregion
                 
             builder.RegisterComponentInHierarchy<InventoryController>().As<IInventoryService>();
             builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>().As<IInitializable>();

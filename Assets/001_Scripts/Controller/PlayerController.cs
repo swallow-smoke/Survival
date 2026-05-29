@@ -4,6 +4,7 @@ using _001_Scripts.Data;
 using _001_Scripts.Data.Item;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Type;
+using _001_Scripts.Type.States;
 using MessagePipe;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -15,14 +16,13 @@ namespace _001_Scripts.Controller
     [RequireComponent(typeof(InventoryController))]
     public class PlayerController : MonoBehaviour
     {
-        IPublisher<InvMessage> _invMessagePublisher;
-        IPublisher<CraftReqMessage> _craftMessagePublisher;
-        IPublisher<PlayerStatMessage> _playerStatMessagePublisher;
-        private PlayerState curState = PlayerState.Idle;
-        private bool isRunning = false;
+        private IPublisher<InvMessage> _invMessagePublisher;
+        private IPublisher<CraftReqMessage> _craftMessagePublisher;
+        private IPublisher<PlayerStatMessage> _playerStatMessagePublisher;
         private float _lastRun;
 
         private PlayerStatMessage postMsg;
+        private PlayerMovementState curState = PlayerMovementState.Idle;
 
         private IDisposable bag;
 
@@ -31,14 +31,12 @@ namespace _001_Scripts.Controller
         [SerializeField] private RuntimeAnimatorController movement;
         [SerializeField] private RuntimeAnimatorController falling;
         [SerializeField] AnimationClip LandClip;
-        private bool isGrounded = true;
-        private bool isLanded;
         private Coroutine _landCoroutine;
 
 
         private void Update()
         {
-            if (isRunning)
+            if (curState == PlayerMovementState.Running)
             {
                 stat.ModifyStamina(-stat.GetStaminaUsage() * Time.deltaTime);
                 stat.ModifyHungry(-stat.GetHungryUsage() * Time.deltaTime);
@@ -46,7 +44,7 @@ namespace _001_Scripts.Controller
                 
                 if (stat.GetStamina() <= 0)
                 {
-                    isRunning = false;
+                    curState = PlayerMovementState.Walking;
                 }
 
                 _lastRun = Time.time;
@@ -65,17 +63,17 @@ namespace _001_Scripts.Controller
                 stat.GetOxygen()
             );
 
-            if (HasSignificantChange(newMsg, postMsg))
-            {
+            // if (HasSignificantChange(newMsg, postMsg))
+            // {
                 _playerStatMessagePublisher.Publish(newMsg);
                 postMsg = newMsg;
-            }
+            // }
         }
 
         public void OnRun(InputAction.CallbackContext ctx)
         {
-            if (ctx.performed) isRunning = true;
-            else isRunning = false;
+            if (ctx.performed) curState = PlayerMovementState.Running;
+            else curState = PlayerMovementState.Walking;
         }
 
         public void OnInteract(InputAction.CallbackContext context)
@@ -100,9 +98,13 @@ namespace _001_Scripts.Controller
             _invMessagePublisher.Publish(invMsg);
         }
 
-        public void OnStateChange(StateMessage msg) => curState = msg.state;
-
-        
+        private void OnMove(PlayerMovementMessage msg)
+        {
+            if (msg.velocity < 0)
+            {
+                curState = PlayerMovementState.Idle;
+            }
+        }
 
 
         
@@ -110,7 +112,6 @@ namespace _001_Scripts.Controller
         public void Construct(IPublisher<InvMessage> invMessagePublisher,
             IPublisher<CraftReqMessage> craftMessagePublisher,
             IPublisher<PlayerStatMessage> playerStatMessagePublisher,
-            ISubscriber<StateMessage> StateSubscriber,
             ISubscriber<PlayerMovementMessage> movementSubscriber)
         {
             var builder = DisposableBag.CreateBuilder();
@@ -118,8 +119,8 @@ namespace _001_Scripts.Controller
             _invMessagePublisher = invMessagePublisher;
             _craftMessagePublisher = craftMessagePublisher;
             _playerStatMessagePublisher = playerStatMessagePublisher;
+            builder.Add(movementSubscriber.Subscribe(OnMove));
 
-            builder.Add(StateSubscriber.Subscribe(OnStateChange));
             bag = builder.Build();
         }
 
