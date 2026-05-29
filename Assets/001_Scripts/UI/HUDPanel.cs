@@ -16,6 +16,8 @@ namespace _001_Scripts.UI
         [SerializeField] private Image hp;
         [SerializeField] private Image hungry;
         [SerializeField] private Image water;
+        [SerializeField] private Image oxygen;
+        [SerializeField] private Image stamina;
 
         private IDisposable _bag;
 

@@ -60,7 +60,8 @@ namespace _001_Scripts.Controller
                 stat.GetStamina(),
                 stat.GetHungry(),
                 stat.GetWater(),
-                stat.GetOxygen()
+                stat.GetOxygen(),
+                stat.GetTemp()
             );
 
             // if (HasSignificantChange(newMsg, postMsg))

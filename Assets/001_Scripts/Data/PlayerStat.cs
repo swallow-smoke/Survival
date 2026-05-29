@@ -12,6 +12,7 @@ namespace _001_Scripts.Data
         [SerializeField, Range(0, 100)] private float hungry = 100f;
         [SerializeField, Range(0, 100)] private float water = 100f;
         [SerializeField, Range(0, 100)] private float oxygen = 100f;
+        [SerializeField, Range(0, 100)] private float temp = 35f;
 
         [Header("Player Stats Usage")] 
         [SerializeField, Range(0, 100)] private float staminaUsage = 100f;
@@ -24,6 +25,7 @@ namespace _001_Scripts.Data
         public void ModifyHungry(float value) => hungry = Mathf.Clamp(hungry + value, 0, 100);
         public void ModifyWater(float value) => water = Mathf.Clamp(water + value, 0, 100);
         public void ModifyOxygen(float value) => oxygen = Mathf.Clamp(oxygen + value, 0, 100);
+        public void ModifyTemp(float value) => temp = Mathf.Clamp(temp + value, 0, 100);
         public void ModifyStaminaUsage(float value) => staminaUsage = Mathf.Clamp(staminaUsage + value, 0, 100);
         public void ModifyStaminaCure(float value) =>  staminaCure = Mathf.Clamp(staminaCure + value, 0, 100);
         public void ModifyHungryUsage(float value) =>  hungryUsage = Mathf.Clamp(hungryUsage + value, 0, 100);
@@ -34,6 +36,7 @@ namespace _001_Scripts.Data
         public float GetHungry() => hungry;
         public float GetWater() => water;
         public float GetOxygen() => oxygen;
+        public float GetTemp() => temp;
         public float GetStaminaUsage() => staminaUsage;
         public float GetStaminaCure() => staminaCure;
         public float GetHungryUsage() => hungryUsage;
@@ -45,6 +48,7 @@ namespace _001_Scripts.Data
             float hungry, 
             float water, 
             float oxygen, 
+            float temp,
             float staminaUsage, 
             float  staminaCure, 
             float hungryUsage, 
@@ -55,6 +59,7 @@ namespace _001_Scripts.Data
             this.hungry = hungry;
             this.water = water;
             this.oxygen = oxygen;
+            this.temp = temp;
             this.staminaUsage = staminaUsage;
             this.staminaCure = staminaCure;
             this.hungryUsage = hungryUsage;
