@@ -38,7 +38,7 @@ namespace _001_Scripts.UI
             water.fillAmount = msg.water / 100;
             oxygen.fillAmount = msg.oxygen / 100;
             stamina.fillAmount = msg.stamina / 100;
-            temp.color = Color.Lerp(Color.blue, Color.red, msg.temp);
+            temp.color = Color.Lerp(Color.blue, Color.red, msg.temp / 100);
         }
 
         private void OnDestroy()
