@@ -18,6 +18,7 @@ namespace _001_Scripts.UI
         [SerializeField] private Image water;
         [SerializeField] private Image oxygen;
         [SerializeField] private Image stamina;
+        [SerializeField] private Image temp;
 
         private IDisposable _bag;
 
@@ -35,6 +36,9 @@ namespace _001_Scripts.UI
             hp.fillAmount = (float)msg.hp / 100;
             hungry.fillAmount = msg.hungry / 100;
             water.fillAmount = msg.water / 100;
+            oxygen.fillAmount = msg.oxygen / 100;
+            stamina.fillAmount = msg.stamina / 100;
+            temp.color = Color.Lerp(Color.blue, Color.red, msg.temp);
         }
 
         private void OnDestroy()
