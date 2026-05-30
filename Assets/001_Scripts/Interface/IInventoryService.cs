@@ -1,19 +1,17 @@
-﻿using _001_Scripts.Data.Item;
+﻿using System.Collections.Generic;
+using _001_Scripts.Data.Item;
 
 namespace _001_Scripts.Interface
 {
     public interface IInventoryService
     {
-        void AddItem(int id);
-        void AddItem(string name);
-        void AddItem(Item item);
+        void AddItem(int id, int count);
 
-        void RemoveItem(int id);
-        void RemoveItem(string name);
-        void RemoveItem(Item item);
+        void RemoveItem(int id, int count);
         
-        bool HasItem(string name);
-        bool HasItem(int id);
+        bool HasItem(int id, int count);
         bool HasItem(Item item);
+
+        IReadOnlyList<InventorySlotData> GetAllItems();
     }
 }

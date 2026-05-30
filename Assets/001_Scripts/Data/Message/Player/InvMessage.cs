@@ -6,11 +6,13 @@ namespace _001_Scripts.Data.Message
     {
         public readonly InvMessageType msgType;
         public readonly Item.Item item;
+        public readonly int count;
 
-        public InvMessage(InvMessageType msgType, Item.Item items)
+        public InvMessage(InvMessageType msgType, Item.Item items, int count)
         {
             this.msgType = msgType;
             this.item = items;
+            this.count = count;
         }
     }
 

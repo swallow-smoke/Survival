@@ -93,7 +93,8 @@ namespace _001_Scripts.Controller
         {
             var invMsg = new InvMessage(
                 InvMessageType.Added,
-                item
+                item,
+                1
             );
 
             _invMessagePublisher.Publish(invMsg);

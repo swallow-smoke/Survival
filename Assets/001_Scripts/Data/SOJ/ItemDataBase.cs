@@ -7,21 +7,28 @@ namespace _001_Scripts.Data.SOJ
     public class ItemDataBase : ScriptableObject
     {
         [SerializeField] private List<Item.Item> itemList = new();
+        private int _nextIns = 0;
 
         public Item.Item GetItem(int id)
         {
             Item.Item obj = itemList.Find(item => item.itemId == id);
-            return obj.Clone();
+            var clone = obj.Clone();
+            clone.instanceId = _nextIns++;
+            return clone ;
         }
         public Item.Item GetItem(string name)
         {
             Item.Item obj = itemList.Find(item => item.itemName == name);
-            return obj.Clone();
+            var clone = obj.Clone();
+            clone.instanceId = _nextIns++;
+            return clone ;
         }
         public Item.Item GetItem(Item.Item item)
         {
             Item.Item obj = itemList.Find(i => i == item);
-            return obj.Clone();
+            var clone = obj.Clone();
+            clone.instanceId = _nextIns++;
+            return clone ;
         }
         
         /// <summary>

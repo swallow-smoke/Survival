@@ -121,10 +121,10 @@ Material:
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
     - _Float: 0
-    - _Float_1: 0.6
+    - _Float_1: 0.2
     - _Float_2: 0.7
     - _Float_3: 0
-    - _FoemThre: 1
+    - _FoemThre: 15
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
@@ -148,7 +148,7 @@ Material:
     - _TilingOne: 5
     - _TilingTwo: 15
     - _Tiling_1: 25
-    - _WaterScaleDepth: 2
+    - _WaterScaleDepth: 5
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
     - _ZTest: 4

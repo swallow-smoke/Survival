@@ -6,7 +6,7 @@ namespace _001_Scripts.Data.BluePrint
     public class BluePrint
     {
         public Item.Item resultCraft;
-        public List<Item.Item> recipe;
+        public List<RecipeEntry> recipe;
         public float craftTime;
         public int requiredLevel;
         public bool isUnlocked;

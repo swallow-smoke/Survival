@@ -43,7 +43,6 @@ namespace _001_Scripts.UI
 
         private void OnDestroy()
         {
-            base.OnDestroy();
             _bag?.Dispose();
         }
     }
