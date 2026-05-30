@@ -20,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_Materials
-  m_Shader: {fileID: -6465566751694194690, guid: 952f6a9914c6e7245892ad3b36f4740f,
+  m_Name: SG_River
+  m_Shader: {fileID: -6465566751694194690, guid: a810127861d1f6b49b4566020f35b999,
     type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -30,7 +30,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
@@ -124,7 +124,7 @@ Material:
     - _Float_1: 0.6
     - _Float_2: 0.7
     - _Float_3: 0
-    - _FoemThre: 0.02
+    - _FoemThre: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
