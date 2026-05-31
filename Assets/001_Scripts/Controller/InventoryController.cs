@@ -14,7 +14,7 @@ namespace _001_Scripts.Controller
 {
     public class InventoryController : MonoBehaviour, IInventoryService
     {
-        [Inject] private ISubscriber<InvMessage> invMessageSubScriber;
+        private IPublisher<InvChangedMessage> invChangedPublisher;
         private IDisposable _msgBag;
 
         [SerializeField] private ItemDataBase itemDB;
@@ -63,14 +63,14 @@ namespace _001_Scripts.Controller
                     {
                         if (stackableItems.Count >= maxSlots)
                             break;
-                        
+
                         int newKey = stackableItems.Count == 0 ? 0 : stackableItems.Keys.Max() + 1;
 
                         int stock = Mathf.Min(remain, maxStock);
-                        
+
                         stackableItems[newKey] = (item, stock);
                         changedKey.Add(newKey);
-                        
+
                         remain -= stock;
                     }
 
@@ -93,9 +93,9 @@ namespace _001_Scripts.Controller
                 {
                     for (int i = 0; i < count; i++)
                     {
-                        if (instanceItems.Count >= maxSlots) 
+                        if (instanceItems.Count >= maxSlots)
                             break;
-                        
+
                         instanceItems.Add(itemDB.GetItem(id));
                         remain -= 1;
                     }
@@ -113,7 +113,7 @@ namespace _001_Scripts.Controller
         {
             if (instanceItems.Count >= maxSlots)
                 return new AddItemResult(1, new List<int>());
-            
+
             instanceItems.Add(item);
             return new AddItemResult(0, new List<int>());
         }
@@ -186,6 +186,8 @@ namespace _001_Scripts.Controller
             return result;
         }
 
+        public int GetSlot(int index) => stackableItems.ContainsKey(index) ? stackableItems[index].count : 0;
+
 
         // Legacy Inv management code
         // public void AddItem(string name) => items.Add(itemDB.GetItem(name));
@@ -197,15 +199,7 @@ namespace _001_Scripts.Controller
         // public bool HasItem(int id) => items.Contains(itemDB.GetItem(id));
         // public bool HasItem(Item item) => items.Contains(item);
 
-        public void Start()
-        {
-            var bag = DisposableBag.CreateBuilder();
-            invMessageSubScriber.Subscribe(OnMessageReceived).AddTo(bag);
-
-            _msgBag = bag.Build();
-        }
-
-        private void OnMessageReceived(InvMessage msg)
+        private void OnMessageReceived(InvReqMessage msg)
         {
             switch (msg.msgType)
             {
@@ -214,16 +208,28 @@ namespace _001_Scripts.Controller
                     {
                         var result = AddItem(msg.item.itemId, msg.count);
 
-                        if (result.remain > 0) 
+                        if (result.remain > 0)
                             Debug.Log($"Drop: {msg.item.itemName} x{result.remain}");
+                        invChangedPublisher.Publish(
+                            new InvChangedMessage(
+                                result.changeKeys,
+                                true)
+                        );
                     }
                     else
                     {
                         var result = AddItem(msg.item);
 
-                        if (result.remain > 0) 
+                        if (result.remain > 0)
                             Debug.Log($"Drop: {msg.item.itemName} x{result.remain}");
+
+                        invChangedPublisher.Publish(
+                            new InvChangedMessage(
+                                result.changeKeys,
+                                false)
+                        );
                     }
+
                     break;
                 case InvMessageType.Removed:
                     if (msg.item.HasAttributes(ItemAttributesType.Stackable))
@@ -234,6 +240,18 @@ namespace _001_Scripts.Controller
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        [Inject]
+        public void Construct(ISubscriber<InvReqMessage> invReqSubscriber,
+            IPublisher<InvChangedMessage> invChangedPublisher)
+        {
+            var bag = DisposableBag.CreateBuilder();
+            this.invChangedPublisher = invChangedPublisher;
+
+            invReqSubscriber.Subscribe(OnMessageReceived).AddTo(bag);
+
+            _msgBag = bag.Build();
         }
 
         private void OnDestroy() => _msgBag?.Dispose();

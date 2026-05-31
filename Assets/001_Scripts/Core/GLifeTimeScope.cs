@@ -19,10 +19,11 @@ namespace _001_Scripts.Core
         {
             var options = builder.RegisterMessagePipe();
             builder.RegisterMessageBroker<GameStateMessage>(options);
-            builder.RegisterMessageBroker<InvMessage>(options);
+            builder.RegisterMessageBroker<InvReqMessage>(options);
             builder.RegisterMessageBroker<CraftReqMessage>(options);
             builder.RegisterMessageBroker<CraftResultMessage>(options);
             builder.RegisterMessageBroker<UIReqMessage>(options);
+            builder.RegisterMessageBroker<InvChangedMessage>(options);
   
 
             #region Player

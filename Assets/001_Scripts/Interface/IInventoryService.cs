@@ -14,5 +14,7 @@ namespace _001_Scripts.Interface
         bool HasItem(Item item);
 
         IReadOnlyList<InventorySlotData> GetAllItems();
+
+        int GetSlot(int index);
     }
 }

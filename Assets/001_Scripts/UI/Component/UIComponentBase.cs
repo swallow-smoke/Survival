@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading;
+using _001_Scripts.Interface;
 using DG.Tweening;
 using UnityEngine;
 
 namespace _001_Scripts.UI.Component
 {
-    public abstract class UIComponentBase : MonoBehaviour
+    public abstract class UIComponentBase : MonoBehaviour, IUIAnimator
     {
         protected Tween _tweenIn;
         protected Tween _tweenOut;

@@ -16,7 +16,7 @@ namespace _001_Scripts.Controller
     [RequireComponent(typeof(InventoryController))]
     public class PlayerController : MonoBehaviour
     {
-        private IPublisher<InvMessage> _invMessagePublisher;
+        private IPublisher<InvReqMessage> _invMessagePublisher;
         private IPublisher<CraftReqMessage> _craftMessagePublisher;
         private IPublisher<PlayerStatMessage> _playerStatMessagePublisher;
         private float _lastRun;
@@ -91,7 +91,7 @@ namespace _001_Scripts.Controller
 
         public void OnGetItem(Item item)
         {
-            var invMsg = new InvMessage(
+            var invMsg = new InvReqMessage(
                 InvMessageType.Added,
                 item,
                 1
@@ -111,7 +111,7 @@ namespace _001_Scripts.Controller
 
         
         [Inject]
-        public void Construct(IPublisher<InvMessage> invMessagePublisher,
+        public void Construct(IPublisher<InvReqMessage> invMessagePublisher,
             IPublisher<CraftReqMessage> craftMessagePublisher,
             IPublisher<PlayerStatMessage> playerStatMessagePublisher,
             ISubscriber<PlayerMovementMessage> movementSubscriber)

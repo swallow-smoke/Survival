@@ -14,48 +14,81 @@ namespace _001_Scripts.UI
     public class InventoryPanel : PanelBase
     {
         private IDisposable bag;
+        private ISubscriber<InvChangedMessage> invSubscriber;
         private IInventoryService invService;
-        [SerializeField] private int maxSlots = 40;
         private List<ItemSlot> slots;
 
-
+        [SerializeField] private int maxInvSlot;
+        [SerializeField] private GameObject invSlotPrefab;
+        [SerializeField] private Transform parentTrs;
+        
         private void Awake()
         {
-            slots.ForEach(obj =>
+            slots = new List<ItemSlot>();
+            for (int i = 0; i < maxInvSlot; i++)
             {
-                
-            });
+                var go = Instantiate(invSlotPrefab, parentTrs);
+                slots.Add(go.GetComponent<ItemSlot>());
+            }
         }
 
         private void RefreshInv()
         {
+            foreach (var slot in slots)
+                slot.Clear();
+            
+            var items = invService.GetAllItems();
+            for (int i = 0; i < items.Count && i < slots.Count; i++)
+                slots[i].Set(items[i]);
+        }
+
+        
+        // make this later 
+        // this function has architecture problem
+        private void RefreshSlots(List<int> changedKeys, bool isStack)
+        {
             
         }
 
-        private void OnInvMsg(InvMessage msg)
+        private void OnInvMsg(InvReqMessage msg)
         {
             RefreshInv();
         }
 
-        public void Open()
+        public override void Open()
+        {
+            RefreshInv();
+        }
+
+        public override void Close()
         {
             
         }
 
-        public void Close()
+        private void OnInvChanged(InvChangedMessage msg)
         {
-            
+            RefreshInv();
+        }
+
+        private void Subscribe()
+        {
+            var builder = DisposableBag.CreateBuilder();
+            builder.Add(invSubscriber.Subscribe(OnInvChanged));
+            bag = builder.Build();
         }
 
         [Inject]
-        private void Construct(IInventoryService invService, ISubscriber<InvMessage> invSubscriber)
+        private void Construct(IInventoryService invService, ISubscriber<InvChangedMessage> invSubscriber)
         {
-            var builder = DisposableBag.CreateBuilder();
             this.invService = invService;
+            this.invSubscriber = invSubscriber;
             
-            builder.Add(invSubscriber.Subscribe(OnInvMsg));
-            
-            bag = builder.Build();
+            Subscribe();
+        }
+
+        private void OnDestroy()
+        {
+            bag?.Dispose();
         }
     }
 }

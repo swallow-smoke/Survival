@@ -18,7 +18,7 @@ namespace _001_Scripts.Controller
         
         private IDisposable msgBag;
         
-        private IPublisher<InvMessage> _invMessagePublisher;
+        private IPublisher<InvReqMessage> _invMessagePublisher;
         private IPublisher<CraftResultMessage> _craftResultMessagePublisher;
         
         private IInventoryService _invServ;
@@ -55,7 +55,7 @@ namespace _001_Scripts.Controller
             
             ingredient.ForEach(e =>
             {
-                InvMessage resultMsg = new InvMessage(
+                InvReqMessage resultMsg = new InvReqMessage(
                     InvMessageType.Removed,
                     e.item,
                     e.count);
@@ -65,7 +65,7 @@ namespace _001_Scripts.Controller
             
 
 
-            InvMessage msg = new InvMessage(
+            InvReqMessage msg = new InvReqMessage(
                 InvMessageType.Added,
                 item, 
                 1);
@@ -89,7 +89,7 @@ namespace _001_Scripts.Controller
         private void OnDestroy() => msgBag?.Dispose();
 
         [Inject]
-        public void Constructor(IPublisher<InvMessage> invPublisher, IPublisher<CraftResultMessage> craftResultPublisher, IInventoryService invService)
+        public void Constructor(IPublisher<InvReqMessage> invPublisher, IPublisher<CraftResultMessage> craftResultPublisher, IInventoryService invService)
         {
             _invMessagePublisher = invPublisher;
             _craftResultMessagePublisher = craftResultPublisher;

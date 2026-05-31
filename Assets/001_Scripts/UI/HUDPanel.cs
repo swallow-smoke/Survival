@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using _001_Scripts.Base;
 using _001_Scripts.Data.Message;
+using _001_Scripts.Interface;
 using _001_Scripts.UI.Component;
 using MessagePipe;
 using UnityEngine;

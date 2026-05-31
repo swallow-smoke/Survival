@@ -14,7 +14,7 @@ namespace _001_Scripts.UI.Component
                 _tweenOut.Kill();
 
             _tweenOut = DOTween.Sequence()
-                .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 0, 1)
+                .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 1, 1)
                     .OnComplete(() =>
                     {
                         canvasGroup.interactable = false;
@@ -33,7 +33,7 @@ namespace _001_Scripts.UI.Component
                 _tweenIn.Kill();
 
             _tweenIn = DOTween.Sequence()
-                .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 1, 1)
+                .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 0, 1)
                     .SetEase(transition).OnComplete(() =>
                     {
                         canvasGroup.interactable = true;

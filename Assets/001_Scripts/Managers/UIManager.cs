@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using _001_Scripts.Base;
 using _001_Scripts.Core;
 using _001_Scripts.Data.Message;
@@ -15,7 +16,15 @@ namespace _001_Scripts.Managers
     {
         private IDisposable _bag;
         private Dictionary<System.Type, PanelBase> uiPanels = new();
-        
+
+        private void Awake()
+        {
+            GetComponentsInChildren<PanelBase>().ToList().ForEach(p =>
+            {
+                uiPanels[p.GetType()] = p;
+            });
+        }
+
         public void Initialize()
         {
             Debug.Log("UIManager Initialize");
