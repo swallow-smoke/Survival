@@ -14,77 +14,109 @@ namespace _001_Scripts.Controller
 {
     public class InventoryController : MonoBehaviour, IInventoryService
     {
-        [Inject]
-        private ISubscriber<InvMessage> invMessageSubScriber;
+        [Inject] private ISubscriber<InvMessage> invMessageSubScriber;
         private IDisposable _msgBag;
-        
+
         [SerializeField] private ItemDataBase itemDB;
 
         private Dictionary<int, (Item template, int count)> stackableItems = new();
         [SerializeField] private List<Item> instanceItems = new();
 
-        public void AddItem(int id, int count)
+        [SerializeField] private int maxSlots = 40;
+
+        public AddItemResult AddItem(int id, int count)
         {
             var item = itemDB.GetItem(id);
-            if (item.HasAttributes(ItemAttributesType.Stackable))
-            {
-                int maxStock = (int)item.GetAttributeValue(ItemAttributesType.Stackable);
+            int remain = count;
+            List<int> changedKey = new();
 
-                var exisitingSlots = stackableItems.FirstOrDefault(e =>
+            while (remain > 0)
+            {
+                if (item.HasAttributes(ItemAttributesType.Stackable))
+                {
+                    int maxStock = (int)item.GetAttributeValue(ItemAttributesType.Stackable);
+
+                    var exisitingSlots = stackableItems.FirstOrDefault(e =>
                         e.Value.template.itemId == id && e.Value.count < maxStock);
 
 
-                if (exisitingSlots.Value.template != null)
-                {
-                    int totalCount = exisitingSlots.Value.count + count;
-
-                    if (totalCount <= maxStock)
+                    if (exisitingSlots.Value.template != null)
                     {
-                        stackableItems[exisitingSlots.Key] = (item, totalCount);
+                        int totalCount = exisitingSlots.Value.count + remain;
+
+                        if (totalCount <= maxStock)
+                        {
+                            stackableItems[exisitingSlots.Key] = (item, totalCount);
+                            changedKey.Add(exisitingSlots.Key);
+                            remain = 0;
+                        }
+                        else
+                        {
+                            stackableItems[exisitingSlots.Key] = (item, maxStock);
+                            changedKey.Add(exisitingSlots.Key);
+                            int leftCount = totalCount - maxStock;
+
+                            remain = leftCount;
+                        }
                     }
                     else
                     {
-                        stackableItems[exisitingSlots.Key] = (item, maxStock);
-                        int leftCount = totalCount - maxStock;
+                        if (stackableItems.Count >= maxSlots)
+                            break;
                         
-                        AddItem(id, leftCount);
+                        int newKey = stackableItems.Count == 0 ? 0 : stackableItems.Keys.Max() + 1;
+
+                        int stock = Mathf.Min(remain, maxStock);
+                        
+                        stackableItems[newKey] = (item, stock);
+                        changedKey.Add(newKey);
+                        
+                        remain -= stock;
                     }
+
+                    // if (stackableItems.ContainsKey(item.itemId))
+                    // {
+                    //     var existing = stackableItems[item.itemId];
+                    //     if (existing.count > item.GetAttributes(ItemAttributesType.Stackable).value)
+                    //     {
+                    //         stackableItems.Add(stackableItems.Count + 1, (existing.template, count));
+                    //     }
+                    //     else 
+                    //         stackableItems[item.itemId] = (existing.template, existing.count + count);
+                    // }
+                    // else
+                    // {
+                    //     stackableItems.Add(stackableItems.Count + 1, (item, count));
+                    // }
                 }
                 else
                 {
-                    int newKey = stackableItems.Count == 0? 0 : stackableItems.Keys.Max() + 1;
-                    stackableItems[newKey] = (item, count);
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (instanceItems.Count >= maxSlots) 
+                            break;
+                        
+                        instanceItems.Add(itemDB.GetItem(id));
+                        remain -= 1;
+                    }
                 }
+            }
 
-                // if (stackableItems.ContainsKey(item.itemId))
-                // {
-                //     var existing = stackableItems[item.itemId];
-                //     if (existing.count > item.GetAttributes(ItemAttributesType.Stackable).value)
-                //     {
-                //         stackableItems.Add(stackableItems.Count + 1, (existing.template, count));
-                //     }
-                //     else 
-                //         stackableItems[item.itemId] = (existing.template, existing.count + count);
-                // }
-                // else
-                // {
-                //     stackableItems.Add(stackableItems.Count + 1, (item, count));
-                // }
-            }
-            else
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    instanceItems.Add(itemDB.GetItem(id));
-                }
-            }
+            return new AddItemResult(remain, changedKey);
         }
 
         /// <summary>
         /// only for instanced item
         /// </summary>
         /// <param name="item"></param>
-        public void AddItem(Item item) => instanceItems.Add(item);
+        public AddItemResult AddItem(Item item)
+        {
+            if (instanceItems.Count >= maxSlots)
+                return new AddItemResult(1, new List<int>());
+            
+            instanceItems.Add(item);
+            return new AddItemResult(0, new List<int>());
+        }
 
         public void RemoveItem(int id, int count)
         {
@@ -130,7 +162,7 @@ namespace _001_Scripts.Controller
                 int totalCount = stackableItems
                     .Where(e => e.Value.template.itemId == id)
                     .Sum(e => e.Value.count);
-        
+
                 return totalCount >= count;
             }
             else
@@ -143,19 +175,18 @@ namespace _001_Scripts.Controller
 
         public IReadOnlyList<InventorySlotData> GetAllItems()
         {
-             List<InventorySlotData> result = new List<InventorySlotData>();
+            List<InventorySlotData> result = new List<InventorySlotData>();
 
-             foreach (var slot in stackableItems.Values) 
-                 result.Add(new InventorySlotData(slot.template, slot.count));
+            foreach (var slot in stackableItems.Values)
+                result.Add(new InventorySlotData(slot.template, slot.count));
 
-             foreach (var item in instanceItems)
-                 result.Add(new InventorySlotData(item, 1));
+            foreach (var item in instanceItems)
+                result.Add(new InventorySlotData(item, 1));
 
-             return result;
+            return result;
         }
-        
-        
-        
+
+
         // Legacy Inv management code
         // public void AddItem(string name) => items.Add(itemDB.GetItem(name));
         // public void AddItem(Item item) => items.Add(item);
@@ -180,13 +211,24 @@ namespace _001_Scripts.Controller
             {
                 case InvMessageType.Added:
                     if (msg.item.HasAttributes(ItemAttributesType.Stackable))
-                        AddItem(msg.item.itemId, msg.count);
-                    else AddItem(msg.item);
+                    {
+                        var result = AddItem(msg.item.itemId, msg.count);
+
+                        if (result.remain > 0) 
+                            Debug.Log($"Drop: {msg.item.itemName} x{result.remain}");
+                    }
+                    else
+                    {
+                        var result = AddItem(msg.item);
+
+                        if (result.remain > 0) 
+                            Debug.Log($"Drop: {msg.item.itemName} x{result.remain}");
+                    }
                     break;
                 case InvMessageType.Removed:
                     if (msg.item.HasAttributes(ItemAttributesType.Stackable))
                         RemoveItem(msg.item.itemId, msg.count);
-                    else 
+                    else
                         RemoveItem(msg.item);
                     break;
                 default:
@@ -197,4 +239,3 @@ namespace _001_Scripts.Controller
         private void OnDestroy() => _msgBag?.Dispose();
     }
 }
-

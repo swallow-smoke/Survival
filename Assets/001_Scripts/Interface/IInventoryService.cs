@@ -5,7 +5,8 @@ namespace _001_Scripts.Interface
 {
     public interface IInventoryService
     {
-        void AddItem(int id, int count);
+        AddItemResult AddItem(int id, int count);
+        AddItemResult AddItem(Item item);
 
         void RemoveItem(int id, int count);
         
