@@ -10,9 +10,9 @@ namespace _001_Scripts.UI.Component
     public class ItemSlot : MonoBehaviour //, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         [SerializeField] private Image itemImage;
-        [SerializeField] private TextMeshProUGUI itemName;
-        [SerializeField] private TextMeshProUGUI itemDesc;
-        [SerializeField] private TextMeshProUGUI itemType;
+        [SerializeField] private string itemName;
+        [SerializeField] private string itemDesc;
+        [SerializeField] private string itemType;
         [SerializeField] private TextMeshProUGUI stock;
         [SerializeField] private Image durability;
 
@@ -21,9 +21,9 @@ namespace _001_Scripts.UI.Component
         
         public void Set(InventorySlotData data)
         {
-            itemName.text = data.item.itemName;
-            itemDesc.text = data.item.itemDesc;
-            itemType.text = data.item.itemType.ToString();
+            itemName = data.item.itemName;
+            itemDesc = data.item.itemDesc;
+            itemType = data.item.itemType.ToString();
             stock.text = data.count.ToString();
 
             if (data.item.HasAttributes(ItemAttributesType.Stackable))
