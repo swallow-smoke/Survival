@@ -1,17 +1,18 @@
 ﻿using System.Collections.Generic;
+using _001_Scripts.Data.Item;
 
 namespace _001_Scripts.Data.Message
 {
     public readonly struct InvReqMessage
     {
         public readonly InvMessageType msgType;
-        public readonly Item.Item item;
+        public readonly int item;
         public readonly int count;
 
-        public InvReqMessage(InvMessageType msgType, Item.Item items, int count)
+        public InvReqMessage(InvMessageType msgType, int item, int count)
         {
             this.msgType = msgType;
-            this.item = items;
+            this.item = item;
             this.count = count;
         }
     }

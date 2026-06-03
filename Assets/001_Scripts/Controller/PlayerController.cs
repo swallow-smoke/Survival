@@ -89,7 +89,7 @@ namespace _001_Scripts.Controller
             }
         }
 
-        public void OnGetItem(Item item)
+        public void OnGetItem(int item)
         {
             var invMsg = new InvReqMessage(
                 InvMessageType.Added,

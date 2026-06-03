@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using _001_Scripts.Base;
 using _001_Scripts.Data.Item;
 using _001_Scripts.Data.Message;
+using _001_Scripts.Data.SOJ;
 using _001_Scripts.Interface;
 using _001_Scripts.UI.Component;
 using MessagePipe;
@@ -21,6 +22,7 @@ namespace _001_Scripts.UI
         [SerializeField] private int maxInvSlot;
         [SerializeField] private GameObject invSlotPrefab;
         [SerializeField] private Transform parentTrs;
+        [SerializeField] private ItemDataBase itemDB;
         
         private void Awake()
         {
@@ -39,7 +41,7 @@ namespace _001_Scripts.UI
             
             var items = invService.GetAllItems();
             for (int i = 0; i < items.Count && i < slots.Count; i++)
-                slots[i].Set(items[i]);
+                slots[i].Set(invService.GetSlot(i), itemDB.GetItem(invService.GetSlot(i).ins.itemId));
         }
 
         

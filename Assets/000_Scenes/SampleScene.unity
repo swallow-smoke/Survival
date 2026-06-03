@@ -1699,6 +1699,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemDB: {fileID: 0}
   instanceItems: []
+  items:
+    _serializedList: []
   maxSlots: 40
 --- !u!114 &841331834
 MonoBehaviour:

@@ -40,7 +40,8 @@ namespace _001_Scripts.Controller
             if (isRunning)
                 _rb.linearVelocity =
                     new Vector3(moveDir.x * runningSpeed, _rb.linearVelocity.y, moveDir.z * runningSpeed);
-            else _rb.linearVelocity = new Vector3(moveDir.x * speed, _rb.linearVelocity.y, moveDir.z * speed);
+            else _rb.linearVelocity = 
+                new Vector3(moveDir.x * speed, _rb.linearVelocity.y, moveDir.z * speed);
 
             if (_rb.linearVelocity.magnitude > 0)
             {
@@ -57,7 +58,7 @@ namespace _001_Scripts.Controller
                 publs));
             // Debug.Log($"{_rb.linearVelocity} \n {publs}");
         }
-
+        
         public void OnMove(InputAction.CallbackContext context)
         {
             inputValue = context.ReadValue<Vector2>();

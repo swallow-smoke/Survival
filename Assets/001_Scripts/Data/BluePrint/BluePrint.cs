@@ -5,7 +5,7 @@ namespace _001_Scripts.Data.BluePrint
     [System.Serializable]
     public class BluePrint
     {
-        public Item.Item resultCraft;
+        public int resultCraft;
         public List<RecipeEntry> recipe;
         public float craftTime;
         public int requiredLevel;
@@ -17,7 +17,6 @@ namespace _001_Scripts.Data.BluePrint
         {
             BluePrint cloned = (BluePrint)this.MemberwiseClone();
             cloned.recipe = new();
-            cloned.resultCraft = resultCraft.Clone();
             recipe.ForEach(item =>
             {
                 cloned.recipe.Add(item.Clone());

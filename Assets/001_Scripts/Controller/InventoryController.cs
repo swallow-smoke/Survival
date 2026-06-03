@@ -19,174 +19,138 @@ namespace _001_Scripts.Controller
 
         [SerializeField] private ItemDataBase itemDB;
 
-        private Dictionary<int, (Item template, int count)> stackableItems = new();
-        [SerializeField] private List<Item> instanceItems = new();
+        [Header("Inventory")] [SerializeField] private List<Instance> Hotbar;
+        [SerializeField] private List<InventorySlot> items;
 
         [SerializeField] private int maxSlots = 40;
 
         public AddItemResult AddItem(int id, int count)
         {
-            var item = itemDB.GetItem(id);
+            var template = itemDB.GetItem(id);
             int remain = count;
             List<int> changedKey = new();
 
-            while (remain > 0)
+            if (items.Count >= maxSlots)
+                return new AddItemResult(remain, changedKey);
+
+            if (template.HasAttribute(AttributesType.Stackable))
             {
-                if (item.HasAttributes(ItemAttributesType.Stackable))
+                float maxStack = template.GetModifierValue(AttributesType.Stackable, ModifierType.MaxStack);
+                var list = items.FindAll(e => !e.IsEmpty && e.ins.itemId == id);
                 {
-                    int maxStock = (int)item.GetAttributeValue(ItemAttributesType.Stackable);
-
-                    var exisitingSlots = stackableItems.FirstOrDefault(e =>
-                        e.Value.template.itemId == id && e.Value.count < maxStock);
-
-
-                    if (exisitingSlots.Value.template != null)
+                    list.ForEach(slot =>
                     {
-                        int totalCount = exisitingSlots.Value.count + remain;
-
-                        if (totalCount <= maxStock)
-                        {
-                            stackableItems[exisitingSlots.Key] = (item, totalCount);
-                            changedKey.Add(exisitingSlots.Key);
-                            remain = 0;
-                        }
+                        if (slot.stack >= maxStack)
+                            return;
                         else
                         {
-                            stackableItems[exisitingSlots.Key] = (item, maxStock);
-                            changedKey.Add(exisitingSlots.Key);
-                            int leftCount = totalCount - maxStock;
-
-                            remain = leftCount;
+                            int oldStack = slot.stack;
+                            slot.stack = Math.Min(slot.stack + remain, (int)maxStack);
+                            remain = oldStack + remain > maxStack ? (int)(oldStack + remain - maxStack) : 0;
+                            changedKey.Add(items.IndexOf(slot));
                         }
-                    }
-                    else
+                    });
+
+                    while (remain > 0 && items.Count < maxSlots)
                     {
-                        if (stackableItems.Count >= maxSlots)
-                            break;
+                        var _itemIns = itemDB.CreateInstance(id);
 
-                        int newKey = stackableItems.Count == 0 ? 0 : stackableItems.Keys.Max() + 1;
-
-                        int stock = Mathf.Min(remain, maxStock);
-
-                        stackableItems[newKey] = (item, stock);
-                        changedKey.Add(newKey);
-
-                        remain -= stock;
-                    }
-
-                    // if (stackableItems.ContainsKey(item.itemId))
-                    // {
-                    //     var existing = stackableItems[item.itemId];
-                    //     if (existing.count > item.GetAttributes(ItemAttributesType.Stackable).value)
-                    //     {
-                    //         stackableItems.Add(stackableItems.Count + 1, (existing.template, count));
-                    //     }
-                    //     else 
-                    //         stackableItems[item.itemId] = (existing.template, existing.count + count);
-                    // }
-                    // else
-                    // {
-                    //     stackableItems.Add(stackableItems.Count + 1, (item, count));
-                    // }
-                }
-                else
-                {
-                    for (int i = 0; i < count; i++)
-                    {
-                        if (instanceItems.Count >= maxSlots)
-                            break;
-
-                        instanceItems.Add(itemDB.GetItem(id));
-                        remain -= 1;
+                        int toAdd = Math.Min(remain, (int)maxStack);
+                        items.Add(new InventorySlot(_itemIns, toAdd));
+                        changedKey.Add(items.Count - 1);
+                        remain -= toAdd;
                     }
                 }
+            }
+            else
+            {
+                items.Add(new InventorySlot(itemDB.CreateInstance(id), 1));
+                changedKey.Add(items.Count - 1);
+                remain -= 1;
             }
 
             return new AddItemResult(remain, changedKey);
         }
 
-        /// <summary>
-        /// only for instanced item
-        /// </summary>
-        /// <param name="item"></param>
-        public AddItemResult AddItem(Item item)
-        {
-            if (instanceItems.Count >= maxSlots)
-                return new AddItemResult(1, new List<int>());
-
-            instanceItems.Add(item);
-            return new AddItemResult(0, new List<int>());
-        }
-
         public void RemoveItem(int id, int count)
         {
-            var targetItem = itemDB.GetItem(id);
+            var template = itemDB.GetItem(id);
+            int remain = count;
 
-            if (targetItem.HasAttributes(ItemAttributesType.Stackable))
+            if (template.HasAttribute(AttributesType.Stackable))
             {
-                var exisitingSlots = stackableItems.FirstOrDefault(e =>
-                    e.Value.template.itemId == id);
-
-                if (exisitingSlots.Value.template == null) return;
-
-                if (exisitingSlots.Value.count >= count)
+                for (int i = items.Count - 1; i >= 0; i--)
                 {
-                    int remain = exisitingSlots.Value.count - count;
+                    var e = items[i];
 
-                    if (remain == 0)
+                    if (e.ins.itemId == id)
                     {
-                        stackableItems.Remove(exisitingSlots.Key);
-                    }
-                    else
-                    {
-                        stackableItems[exisitingSlots.Key] = (targetItem, remain);
+                        int removable = Mathf.Min(remain, e.stack);
+                        e.stack -= removable;
+                        remain -= removable;
+                        if (e.stack <= 0)
+                            items.RemoveAt(i);
+                        if (remain == 0)
+                            break;
                     }
                 }
-                else
-                {
-                    int leftCount = count - exisitingSlots.Value.count;
-                    stackableItems.Remove(exisitingSlots.Key);
-                    RemoveItem(id, leftCount);
-                }
-            }
-        }
-
-        public void RemoveItem(Item item) => instanceItems.RemoveAll(e => e.instanceId == item.instanceId);
-
-        public bool HasItem(int id, int count)
-        {
-            var targetItem = itemDB.GetItem(id);
-
-            if (targetItem.HasAttributes(ItemAttributesType.Stackable))
-            {
-                int totalCount = stackableItems
-                    .Where(e => e.Value.template.itemId == id)
-                    .Sum(e => e.Value.count);
-
-                return totalCount >= count;
             }
             else
             {
-                return instanceItems.Any(e => e.itemId == id);
+                items.Remove(items.Find(e => e.ins.itemId == id));
             }
         }
 
-        public bool HasItem(Item item) => instanceItems.Exists(e => e.instanceId == item.instanceId);
-
-        public IReadOnlyList<InventorySlotData> GetAllItems()
+        /// <summary>
+        /// delete every items that same variant
+        /// </summary>
+        /// <param name="item"></param>
+        public void RemoveItem(Template item)
         {
-            List<InventorySlotData> result = new List<InventorySlotData>();
-
-            foreach (var slot in stackableItems.Values)
-                result.Add(new InventorySlotData(slot.template, slot.count));
-
-            foreach (var item in instanceItems)
-                result.Add(new InventorySlotData(item, 1));
-
-            return result;
+            items.RemoveAll(e => e.ins.itemId == item.itemId);
         }
 
-        public int GetSlot(int index) => stackableItems.ContainsKey(index) ? stackableItems[index].count : 0;
+        /// <summary>
+        /// delete instance item
+        /// </summary>
+        /// <param name="ins"></param>
+        public void RemoveItem(Instance ins)
+        {
+            items.RemoveAll(e => e.ins.instanceId == ins.instanceId);
+        }
+
+        public bool HasItem(int id, int count = 1)
+        {
+            var list = items.FindAll(e => !e.IsEmpty && e.ins.itemId == id);
+
+            int total = list.Sum(e => e.stack);
+
+            return total >= count;
+        }
+
+        public bool HasItem(Template template, int count = 1)
+        {
+            var list = items.FindAll(e => !e.IsEmpty && e.ins.itemId == template.itemId);
+
+            int total = list.Sum(e => e.stack);
+
+            return total >= count;
+        }
+
+        public bool HasItem(Instance ins)
+        {
+            return items.Exists(e => !e.IsEmpty && e.ins.instanceId == ins.instanceId);
+        }
+
+        public IReadOnlyList<InventorySlot> GetAllItems() => items.AsReadOnly();
+
+        public InventorySlot GetSlot(int index)
+        {
+            if (index < 0 || index >= items.Count)
+                throw new IndexOutOfRangeException($"Index {index} is out of range for inventory slots.");
+
+            return items[index];
+        }
 
 
         // Legacy Inv management code
@@ -203,39 +167,12 @@ namespace _001_Scripts.Controller
         {
             switch (msg.msgType)
             {
-                case InvMessageType.Added:
-                    if (msg.item.HasAttributes(ItemAttributesType.Stackable))
-                    {
-                        var result = AddItem(msg.item.itemId, msg.count);
-
-                        if (result.remain > 0)
-                            Debug.Log($"Drop: {msg.item.itemName} x{result.remain}");
-                        invChangedPublisher.Publish(
-                            new InvChangedMessage(
-                                result.changeKeys,
-                                true)
-                        );
-                    }
-                    else
-                    {
-                        var result = AddItem(msg.item);
-
-                        if (result.remain > 0)
-                            Debug.Log($"Drop: {msg.item.itemName} x{result.remain}");
-
-                        invChangedPublisher.Publish(
-                            new InvChangedMessage(
-                                result.changeKeys,
-                                false)
-                        );
-                    }
-
+                case InvMessageType.Added: 
+                    var result = AddItem(msg.item, msg.count);
+                    invChangedPublisher.Publish(new InvChangedMessage(result.changeKeys));
                     break;
-                case InvMessageType.Removed:
-                    if (msg.item.HasAttributes(ItemAttributesType.Stackable))
-                        RemoveItem(msg.item.itemId, msg.count);
-                    else
-                        RemoveItem(msg.item);
+                case InvMessageType.Removed: 
+                    RemoveItem(msg.item, msg.count);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

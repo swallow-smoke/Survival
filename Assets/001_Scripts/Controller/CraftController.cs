@@ -28,7 +28,7 @@ namespace _001_Scripts.Controller
         {
             BluePrint result = bpDB.GetBluePrint(itemName);
             List<RecipeEntry> ingredient = result.recipe;
-            Item item = result.resultCraft;
+            int item = result.resultCraft;
             bool isUnlocked = result.isUnlocked;
             List<RecipeEntry> missingItems = new();
             
@@ -36,7 +36,7 @@ namespace _001_Scripts.Controller
             
             ingredient.ForEach(e =>
             {
-                if (!_invServ.HasItem(e.item.itemId, e.count))
+                if (!_invServ.HasItem(e.item, e.count))
                 {
                     missingItems.Add(e);
                 }
@@ -46,7 +46,7 @@ namespace _001_Scripts.Controller
             {
                 CraftResultMessage resultMsg = new CraftResultMessage(
                     CraftMessageType.Failed,
-                    item.itemName,
+                    item,
                     missingItems);
                 
                 _craftResultMessagePublisher.Publish(resultMsg);
@@ -70,7 +70,7 @@ namespace _001_Scripts.Controller
                 item, 
                 1);
             _invMessagePublisher.Publish(msg);
-            _craftResultMessagePublisher.Publish(new CraftResultMessage(CraftMessageType.Success, item.itemName));
+            _craftResultMessagePublisher.Publish(new CraftResultMessage(CraftMessageType.Success, item));
         }
 
         private void Start()

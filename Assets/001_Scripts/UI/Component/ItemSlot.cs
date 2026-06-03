@@ -18,22 +18,25 @@ namespace _001_Scripts.UI.Component
 
         private Vector2 originPos;
         
-        
-        public void Set(InventorySlotData data)
+        public void Set(InventorySlot slot, Template template)
         {
-            itemName = data.item.itemName;
-            itemDesc = data.item.itemDesc;
-            itemType = data.item.itemType.ToString();
-            stock.text = data.count.ToString();
+            itemName = template.itemName;
+            itemDesc = template.itemDesc;
+            itemType = template.itemType.ToString();
 
-            if (data.item.HasAttributes(ItemAttributesType.Stackable))
+            if (template.HasAttribute(AttributesType.Equippable))
             {
-                durability.fillAmount = data.item.durability;
+                durability.fillAmount =
+                    slot.ins.durability /
+                    template.GetModifierValue(AttributesType.Equippable, ModifierType.DurabilityMax);
+                stock.gameObject.SetActive(false);
                 durability.gameObject.SetActive(true);
             }
             else
             {
+                stock.text = slot.stack.ToString();
                 durability.gameObject.SetActive(false);
+                stock.gameObject.SetActive(true);
             }
         }
 

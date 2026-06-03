@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using _001_Scripts.Data.Item;
+using _001_Scripts.Type.Item;
+using AYellowpaper.SerializedCollections;
 using UnityEngine;
 
 namespace _001_Scripts.Data.SOJ
@@ -6,38 +9,31 @@ namespace _001_Scripts.Data.SOJ
     [CreateAssetMenu(fileName = "ItemDataBase", menuName = "Data/Create ItemDB", order = 0)]
     public class ItemDataBase : ScriptableObject
     {
-        [SerializeField] private List<Item.Item> itemList = new();
+        [SerializedDictionary("index", "template")]
+        public UnityEngine.Rendering.SerializedDictionary<int, Template> itemList = new();
         private int _nextIns = 0;
 
-        public Item.Item GetItem(int id)
+        /// <param name="id">index</param>
+        /// <returns></returns>
+        public Template GetItem(int id)
         {
-            Item.Item obj = itemList.Find(item => item.itemId == id);
-            var clone = obj.Clone();
-            clone.instanceId = _nextIns++;
-            return clone ;
-        }
-        public Item.Item GetItem(string name)
-        {
-            Item.Item obj = itemList.Find(item => item.itemName == name);
-            var clone = obj.Clone();
-            clone.instanceId = _nextIns++;
-            return clone ;
-        }
-        public Item.Item GetItem(Item.Item item)
-        {
-            Item.Item obj = itemList.Find(i => i == item);
-            var clone = obj.Clone();
-            clone.instanceId = _nextIns++;
-            return clone ;
+            Template obj = itemList[id];
+            return obj;
         }
         
-        /// <summary>
-        /// Made Only For Read
-        /// Don't do change the item desc or info.
-        /// It's can broken the Item DB System.
-        /// </summary>
-        /// <returns></returns>
-        public IReadOnlyList<Item.Item> GetAllItems() => itemList;
-        public bool Exist(int id) => itemList.Exists(item => item.itemId == id);
+        public IReadOnlyDictionary<int, Template> GetAllItems() => itemList;
+
+        public Instance CreateInstance(int id)
+        {
+            var template = itemList[id];
+
+            return new Instance(
+                template.itemId,
+                _nextIns++,
+                template.GetModifierValue(
+                    AttributesType.Equippable, 
+                    ModifierType.DurabilityMax, 
+                    -1f));
+        }
     }
 }

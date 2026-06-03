@@ -5,14 +5,14 @@ namespace _001_Scripts.Data.Message
 {
     public readonly struct CraftResultMessage
     {
-        public readonly string itemName;
+        public readonly int itemId;
         public readonly CraftMessageType msgType;
         public readonly List<RecipeEntry> missingItems;
         
-        public CraftResultMessage(CraftMessageType type, string name, List<RecipeEntry> missing = null)
+        public CraftResultMessage(CraftMessageType type, int id, List<RecipeEntry> missing = null)
         {
             msgType = type;
-            itemName = name;
+            itemId = id;
             missingItems = missing;
         }
     }
