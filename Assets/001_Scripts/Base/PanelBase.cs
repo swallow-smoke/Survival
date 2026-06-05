@@ -11,11 +11,12 @@ namespace _001_Scripts.Base
     public abstract class PanelBase : MonoBehaviour
     {
         private List<IUIAnimator> _animator;
-        private bool isOpen;
+        public bool isViz;
 
-        private void Awake()
+        protected void Awake()
         {
             _animator = GetComponentsInChildren<IUIAnimator>().ToList();
+            // Debug.Log(_animator.Count);
         }
 
         public virtual void Open()
@@ -24,6 +25,7 @@ namespace _001_Scripts.Base
             {
                 panel.FadeIn();
             });
+            isViz = true;
         }
 
         public virtual void Close()
@@ -32,6 +34,7 @@ namespace _001_Scripts.Base
             {
                 panel.FadeOut();
             });
+            isViz = false;
         }
     }
 }

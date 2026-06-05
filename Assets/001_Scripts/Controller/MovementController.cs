@@ -43,7 +43,7 @@ namespace _001_Scripts.Controller
             else _rb.linearVelocity = 
                 new Vector3(moveDir.x * speed, _rb.linearVelocity.y, moveDir.z * speed);
 
-            if (_rb.linearVelocity.magnitude > 0)
+            if (_rb.linearVelocity.magnitude > 0.1f)
             {
                 Quaternion targetRot = Quaternion.Euler(0, trs.rotation.eulerAngles.y, 0);
 

@@ -18,13 +18,19 @@ namespace _001_Scripts.Core
         protected override void Configure(IContainerBuilder builder)
         {
             var options = builder.RegisterMessagePipe();
+
+  
+            #region System
             builder.RegisterMessageBroker<GameStateMessage>(options);
+            
             builder.RegisterMessageBroker<InvReqMessage>(options);
+            builder.RegisterMessageBroker<InvChangedMessage>(options);
+            
             builder.RegisterMessageBroker<CraftReqMessage>(options);
             builder.RegisterMessageBroker<CraftResultMessage>(options);
+            
             builder.RegisterMessageBroker<UIReqMessage>(options);
-            builder.RegisterMessageBroker<InvChangedMessage>(options);
-  
+            #endregion
 
             #region Player
             
@@ -36,11 +42,17 @@ namespace _001_Scripts.Core
             builder.RegisterMessageBroker<PlayerStatMessage>(options);
 
             #endregion
-                
+
+            #region Services
+
             builder.RegisterComponentInHierarchy<InventoryController>().As<IInventoryService>();
             builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>().As<IInitializable>();
             builder.RegisterComponentInHierarchy<UIManager>().As<IUIService>().As<IInitializable>();
             // builder.RegisterComponentInHierarchy<CraftController>().As<ICraftService>();
+            
+            #endregion
+     
+
         }
     }
 }   

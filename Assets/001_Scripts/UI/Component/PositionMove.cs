@@ -1,4 +1,5 @@
-﻿using DG.Tweening;
+﻿using _001_Scripts.Interface;
+using DG.Tweening;
 using UnityEngine;
 
 namespace _001_Scripts.UI.Component
@@ -20,7 +21,6 @@ namespace _001_Scripts.UI.Component
                 {
                     canvasGroup.interactable = false;
                     canvasGroup.blocksRaycasts = false;
-                    isViz = false;
                 });
         }
 
@@ -28,7 +28,6 @@ namespace _001_Scripts.UI.Component
         {
             _rectTrs.anchoredPosition = originPos + moveVector * offset;
 
-            canvasGroup.alpha = 0;
             canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;
 
@@ -41,7 +40,6 @@ namespace _001_Scripts.UI.Component
                 {
                     canvasGroup.interactable = true;
                     canvasGroup.blocksRaycasts = true;
-                    isViz = true;
                 });
         }
     }

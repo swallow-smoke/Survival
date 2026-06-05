@@ -19,7 +19,8 @@ namespace _001_Scripts.Controller
 
         [SerializeField] private ItemDataBase itemDB;
 
-        [Header("Inventory")] [SerializeField] private List<Instance> Hotbar;
+        [Header("Inventory")] 
+        [SerializeField] private List<Instance> Hotbar;
         [SerializeField] private List<InventorySlot> items;
 
         [SerializeField] private int maxSlots = 40;

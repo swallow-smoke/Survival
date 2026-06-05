@@ -63,7 +63,8 @@ namespace _001_Scripts.Controller
 
             thirdCamera.CameraDistance =
                 Mathf.SmoothDamp(thirdCamera.CameraDistance, targetDistance, ref currentVelocity, 0.3f);
-
+            
+            
             if (Mathf.Approximately(thirdCamera.CameraDistance, targetDistance))
             {
                 thirdCamera.CameraDistance = targetDistance;

@@ -338,6 +338,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2301df4fdae4ee1b7183bb48d7d5e35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiPanels:
+    _serializedList:
+    - Key: HUD
+      Value: {fileID: 821212481}
+    - Key: Inventory
+      Value: {fileID: 1557585896}
 --- !u!1 &245051017
 GameObject:
   m_ObjectHideFlags: 0
@@ -394,6 +400,7 @@ MonoBehaviour:
   autoInjectGameObjects:
   - {fileID: 841331830}
   - {fileID: 821212476}
+  - {fileID: 1557585893}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -482,7 +489,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -165.86, y: 139.60707, z: 81.89023}
+  m_LocalPosition: {x: -165.86, y: 68.90707, z: -48.909775}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -781,13 +788,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: -0.042708218, y: 0.90166813, z: -0.4204547, w: -0.09158808}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 50, y: 191.6, z: 0}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1061,7 +1068,7 @@ Transform:
   m_GameObject: {fileID: 622368662}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -165.86, y: 139.60707, z: 81.89023}
+  m_LocalPosition: {x: -165.86, y: 68.90707, z: -48.909775}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1462,6 +1469,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 002927982d05435c9de2d8f965b1a541, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.UI.HUDPanel
+  isViz: 0
   hp: {fileID: 1104738414}
   hungry: {fileID: 876963524}
   water: {fileID: 93608413}
@@ -1537,12 +1545,12 @@ PrefabInstance:
     - target: {fileID: 4311652260893728935, guid: 9bd72731ebe2248478ba4849c274a43b,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 138
+      value: 67.3
       objectReference: {fileID: 0}
     - target: {fileID: 4311652260893728935, guid: 9bd72731ebe2248478ba4849c274a43b,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 85.8
+      value: -45
       objectReference: {fileID: 0}
     - target: {fileID: 4311652260893728935, guid: 9bd72731ebe2248478ba4849c274a43b,
         type: 3}
@@ -1698,9 +1706,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemDB: {fileID: 0}
-  instanceItems: []
+  Hotbar: []
   items:
-    _serializedList: []
+  - ins:
+      itemId: 0
+      instanceId: 0
+      durability: 0
+    stack: 0
   maxSlots: 40
 --- !u!114 &841331834
 MonoBehaviour:
@@ -1848,6 +1860,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: a3b4e581-3dd4-4bff-8639-18067dab281c
     m_ActionName: 'Player/Cam[/Mouse/scroll/y]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 205720149}
+        m_TargetAssemblyTypeName: _001_Scripts.Managers.UIManager, Assembly-CSharp
+        m_MethodName: OnInvToggle
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: b38420cd-c2ad-49d4-8c5e-a8235118750f
+    m_ActionName: 'Player/UI[/Keyboard/e]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -2119,8 +2147,8 @@ MonoBehaviour:
   m_StartAxis: 0
   m_CellSize: {x: 100, y: 100}
   m_Spacing: {x: 0, y: 0}
-  m_Constraint: 0
-  m_ConstraintCount: 2
+  m_Constraint: 1
+  m_ConstraintCount: 5
 --- !u!1 &1104738412
 GameObject:
   m_ObjectHideFlags: 0
@@ -2358,6 +2386,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1557585894}
   - component: {fileID: 1557585896}
+  - component: {fileID: 1557585898}
+  - component: {fileID: 1557585897}
   m_Layer: 0
   m_Name: InventoryPanel
   m_TagString: Untagged
@@ -2397,9 +2427,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c97f4b789dac4ff28946d8f2d1ad50a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.UI.InventoryPanel
-  maxInvSlot: 0
-  invSlotPrefab: {fileID: 0}
-  parentTrs: {fileID: 0}
+  isViz: 0
+  maxInvSlot: 40
+  invSlotPrefab: {fileID: 2994825111425484399, guid: eda4d3381e1cb9c4f903eb2415da57f1,
+    type: 3}
+  parentTrs: {fileID: 990743218}
+  itemDB: {fileID: 11400000, guid: 7fa084f3764e86f48819a7a50991b79d, type: 2}
+--- !u!114 &1557585897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1557585893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 758bcd759a0148e58b1df105d7b16b66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.UI.Component.FadeInOut
+  isViz: 0
+  hideTime: 1000
+  transition: 6
+--- !u!225 &1557585898
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1557585893}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1765716360
 GameObject:
   m_ObjectHideFlags: 0

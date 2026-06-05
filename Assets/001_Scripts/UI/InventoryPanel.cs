@@ -26,6 +26,8 @@ namespace _001_Scripts.UI
         
         private void Awake()
         {
+            base.Awake();
+            
             slots = new List<ItemSlot>();
             for (int i = 0; i < maxInvSlot; i++)
             {
@@ -43,10 +45,7 @@ namespace _001_Scripts.UI
             for (int i = 0; i < items.Count && i < slots.Count; i++)
                 slots[i].Set(invService.GetSlot(i), itemDB.GetItem(invService.GetSlot(i).ins.itemId));
         }
-
         
-        // make this later 
-        // this function has architecture problem
         private void RefreshSlots(List<int> changedKeys, bool isStack)
         {
             
@@ -58,25 +57,18 @@ namespace _001_Scripts.UI
         }
 
         public override void Open()
-        {
-            RefreshInv();
+        {   
+            base.Open();
         }
 
         public override void Close()
         {
-            
+            base.Close();
         }
 
         private void OnInvChanged(InvChangedMessage msg)
         {
             RefreshInv();
-        }
-
-        private void Subscribe()
-        {
-            var builder = DisposableBag.CreateBuilder();
-            builder.Add(invSubscriber.Subscribe(OnInvChanged));
-            bag = builder.Build();
         }
 
         [Inject]
@@ -85,7 +77,9 @@ namespace _001_Scripts.UI
             this.invService = invService;
             this.invSubscriber = invSubscriber;
             
-            Subscribe();
+            var builder = DisposableBag.CreateBuilder();
+            builder.Add(invSubscriber.Subscribe(OnInvChanged));
+            bag = builder.Build();
         }
 
         private void OnDestroy()

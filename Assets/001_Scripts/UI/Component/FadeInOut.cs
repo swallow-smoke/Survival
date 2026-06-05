@@ -1,4 +1,5 @@
-﻿using DG.Tweening;
+﻿using _001_Scripts.Interface;
+using DG.Tweening;
 using UnityEngine;
 
 namespace _001_Scripts.UI.Component
@@ -17,15 +18,14 @@ namespace _001_Scripts.UI.Component
                 .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 1, 1)
                     .OnComplete(() =>
                     {
-                        canvasGroup.interactable = false;
-                        canvasGroup.blocksRaycasts = false;
-                        isViz = false;
+                        canvasGroup.interactable = true;
+                        canvasGroup.blocksRaycasts = true;
                     }));
         }
         
         public override void FadeOut()
         {
-            canvasGroup.alpha = 0;
+            canvasGroup.alpha = 1;
             canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;
 
@@ -36,9 +36,8 @@ namespace _001_Scripts.UI.Component
                 .Append(DOTween.To(() => canvasGroup.alpha, x => canvasGroup.alpha = x, 0, 1)
                     .SetEase(transition).OnComplete(() =>
                     {
-                        canvasGroup.interactable = true;
-                        canvasGroup.blocksRaycasts = true;
-                        isViz = true;
+                        canvasGroup.interactable = false;
+                        canvasGroup.blocksRaycasts = false;
                     }));
         }
     }

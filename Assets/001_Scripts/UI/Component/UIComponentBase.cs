@@ -6,16 +6,15 @@ using UnityEngine;
 
 namespace _001_Scripts.UI.Component
 {
+    [RequireComponent(typeof(CanvasGroup))]
     public abstract class UIComponentBase : MonoBehaviour, IUIAnimator
     {
         protected Tween _tweenIn;
         protected Tween _tweenOut;
-        protected bool isViz = false;
         protected Vector2 originPos;
         protected CanvasGroup canvasGroup;
-        
-        
         protected RectTransform _rectTrs;
+
 
         protected virtual void Awake()
         {
