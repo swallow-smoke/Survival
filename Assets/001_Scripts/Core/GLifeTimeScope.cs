@@ -25,6 +25,7 @@ namespace _001_Scripts.Core
             
             builder.RegisterMessageBroker<InvReqMessage>(options);
             builder.RegisterMessageBroker<InvChangedMessage>(options);
+            builder.RegisterMessageBroker<InvSwapMessage>(options);
             
             builder.RegisterMessageBroker<CraftReqMessage>(options);
             builder.RegisterMessageBroker<CraftResultMessage>(options);

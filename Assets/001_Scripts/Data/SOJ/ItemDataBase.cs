@@ -10,7 +10,7 @@ namespace _001_Scripts.Data.SOJ
     public class ItemDataBase : ScriptableObject
     {
         [SerializedDictionary("index", "template")]
-        public UnityEngine.Rendering.SerializedDictionary<int, Template> itemList = new();
+        public SerializedDictionary<int, Template> itemList = new();
         private int _nextIns = 0;
 
         /// <param name="id">index</param>

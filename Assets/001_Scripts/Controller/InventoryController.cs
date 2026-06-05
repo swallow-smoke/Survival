@@ -25,6 +25,15 @@ namespace _001_Scripts.Controller
 
         [SerializeField] private int maxSlots = 40;
 
+        private void SwapItem(InvSwapMessage msg)
+        {
+            if (msg.fromIndex > items.Count || msg.toIndex > items.Count)
+                return;
+            
+            (items[msg.fromIndex], items[msg.toIndex]) = (items[msg.toIndex], items[msg.fromIndex]);
+            invChangedPublisher.Publish(new InvChangedMessage(new List<int> { msg.fromIndex, msg.toIndex }));
+        }
+
         public AddItemResult AddItem(int id, int count)
         {
             var template = itemDB.GetItem(id);
@@ -182,12 +191,14 @@ namespace _001_Scripts.Controller
 
         [Inject]
         public void Construct(ISubscriber<InvReqMessage> invReqSubscriber,
+            ISubscriber<InvSwapMessage> invSwapSubscriber,
             IPublisher<InvChangedMessage> invChangedPublisher)
         {
             var bag = DisposableBag.CreateBuilder();
             this.invChangedPublisher = invChangedPublisher;
 
             invReqSubscriber.Subscribe(OnMessageReceived).AddTo(bag);
+            invSwapSubscriber.Subscribe(SwapItem).AddTo(bag);
 
             _msgBag = bag.Build();
         }

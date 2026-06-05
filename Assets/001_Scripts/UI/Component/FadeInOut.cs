@@ -7,7 +7,7 @@ namespace _001_Scripts.UI.Component
     public class FadeInOut : UIComponentBase
     {
         [SerializeField] private float hideTime = 1000f;
-        [SerializeField] private Ease transition = Ease.OutQuad;
+        [SerializeField] private Ease transition = Ease.OutQuad;    
         
         public override void FadeIn()
         {

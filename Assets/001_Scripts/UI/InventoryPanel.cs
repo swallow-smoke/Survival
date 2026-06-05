@@ -17,17 +17,25 @@ namespace _001_Scripts.UI
         private IDisposable bag;
         private ISubscriber<InvChangedMessage> invSubscriber;
         private IInventoryService invService;
+        private IPublisher<InvSwapMessage> invSwapPublisher;
         private List<ItemSlot> slots;
 
         [SerializeField] private int maxInvSlot;
         [SerializeField] private GameObject invSlotPrefab;
         [SerializeField] private Transform parentTrs;
         [SerializeField] private ItemDataBase itemDB;
-        
-        private void Awake()
+
+        public override void Open()
+        {
+            base.Open();
+            
+            RefreshInv();
+        }
+
+        protected void Awake()
         {
             base.Awake();
-            
+
             slots = new List<ItemSlot>();
             for (int i = 0; i < maxInvSlot; i++)
             {
@@ -40,45 +48,43 @@ namespace _001_Scripts.UI
         {
             foreach (var slot in slots)
                 slot.Clear();
-            
+
             var items = invService.GetAllItems();
             for (int i = 0; i < items.Count && i < slots.Count; i++)
-                slots[i].Set(invService.GetSlot(i), itemDB.GetItem(invService.GetSlot(i).ins.itemId));
-        }
-        
-        private void RefreshSlots(List<int> changedKeys, bool isStack)
-        {
-            
+                slots[i].Set(invService.GetSlot(i), itemDB.GetItem(invService.GetSlot(i).ins.itemId), i,
+                    invSwapPublisher);
         }
 
-        private void OnInvMsg(InvReqMessage msg)
+        private void RefreshSlots(List<int> changedKeys)
         {
-            RefreshInv();
+            changedKeys.ForEach(key =>
+            {
+                if (key >= slots.Count)
+                    return;
+                var slot = invService.GetSlot(key);
+                if (slot.IsEmpty)
+                    slots[key].Clear();
+                else
+                    slots[key].Set(slot, itemDB.GetItem(slot.ins.itemId), key, invSwapPublisher);
+            });
         }
 
-        public override void Open()
-        {   
-            base.Open();
-        }
-
-        public override void Close()
+        private void OnInvMsg(InvChangedMessage msg)
         {
-            base.Close();
-        }
-
-        private void OnInvChanged(InvChangedMessage msg)
-        {
-            RefreshInv();
+            RefreshSlots(msg.changedKeys);
         }
 
         [Inject]
-        private void Construct(IInventoryService invService, ISubscriber<InvChangedMessage> invSubscriber)
+        private void Construct(IInventoryService invService, 
+            ISubscriber<InvChangedMessage> invSubscriber,
+            IPublisher<InvSwapMessage> invSwapPublisher)
         {
             this.invService = invService;
             this.invSubscriber = invSubscriber;
-            
+            this.invSwapPublisher = invSwapPublisher;
+
             var builder = DisposableBag.CreateBuilder();
-            builder.Add(invSubscriber.Subscribe(OnInvChanged));
+            builder.Add(invSubscriber.Subscribe(OnInvMsg));
             bag = builder.Build();
         }
 

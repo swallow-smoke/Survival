@@ -13,5 +13,13 @@ MonoBehaviour:
   m_Name: ItemDataBase
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Data.SOJ.ItemDataBase
   itemList:
-    m_Keys: 
-    m_Values: []
+    _serializedList:
+    - Key: 0
+      Value:
+        itemId: 0
+        itemName: Woowang
+        itemDesc: 
+        itemGrade: 0
+        itemType: 0
+        weight: 0
+        ItemAttributes: []

@@ -12,7 +12,7 @@ namespace _001_Scripts.Data.Item
         public InventorySlot(Instance ins, int stack) 
         {
             this.ins = ins;
-            this.stack = 0;
+            this.stack = stack;
         }
     }
 }
