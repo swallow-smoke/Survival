@@ -35,13 +35,6 @@ namespace _001_Scripts.UI
         protected void Awake()
         {
             base.Awake();
-
-            slots = new List<ItemSlot>();
-            for (int i = 0; i < maxInvSlot; i++)
-            {
-                var go = Instantiate(invSlotPrefab, parentTrs);
-                slots.Add(go.GetComponent<ItemSlot>());
-            }
         }
 
         private void RefreshInv()
@@ -51,8 +44,7 @@ namespace _001_Scripts.UI
 
             var items = invService.GetAllItems();
             for (int i = 0; i < items.Count && i < slots.Count; i++)
-                slots[i].Set(invService.GetSlot(i), itemDB.GetItem(invService.GetSlot(i).ins.itemId), i,
-                    invSwapPublisher);
+                slots[i].Set(invService.GetSlot(i), itemDB.GetItem(invService.GetSlot(i).ins.itemId), i);
         }
 
         private void RefreshSlots(List<int> changedKeys)
@@ -65,7 +57,7 @@ namespace _001_Scripts.UI
                 if (slot.IsEmpty)
                     slots[key].Clear();
                 else
-                    slots[key].Set(slot, itemDB.GetItem(slot.ins.itemId), key, invSwapPublisher);
+                    slots[key].Set(slot, itemDB.GetItem(slot.ins.itemId), key);
             });
         }
 
@@ -79,6 +71,8 @@ namespace _001_Scripts.UI
             ISubscriber<InvChangedMessage> invSubscriber,
             IPublisher<InvSwapMessage> invSwapPublisher)
         {
+            bag?.Dispose();
+            Debug.Log(GetInstanceID());
             this.invService = invService;
             this.invSubscriber = invSubscriber;
             this.invSwapPublisher = invSwapPublisher;
@@ -86,6 +80,15 @@ namespace _001_Scripts.UI
             var builder = DisposableBag.CreateBuilder();
             builder.Add(invSubscriber.Subscribe(OnInvMsg));
             bag = builder.Build();
+            
+            slots = new List<ItemSlot>();
+            for (int i = 0; i < maxInvSlot; i++)
+            {
+                var go = Instantiate(invSlotPrefab, parentTrs);
+                var slot = go.GetComponent<ItemSlot>();
+                slot.Init(invSwapPublisher);
+                slots.Add(slot);
+            }
         }
 
         private void OnDestroy()

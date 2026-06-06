@@ -1,5 +1,7 @@
 ﻿using System;
 using _001_Scripts.Data.Message;
+using _001_Scripts.Data.Message.Player;
+using _001_Scripts.Type.States;
 using MessagePipe;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -21,6 +23,7 @@ namespace _001_Scripts.Controller
         private Vector2 inputValue;
         private bool isRunning;
         private bool isGround = true;
+        private bool isCanMove = true;
 
         private IPublisher<PlayerMovementMessage> iMovementPublisher;
         private IDisposable _bag;
@@ -33,6 +36,8 @@ namespace _001_Scripts.Controller
 
         private void FixedUpdate()
         {
+            if (!isCanMove) return;
+
             moveDir = (_camCont._trs.forward * inputValue.y) + (_camCont._trs.right * inputValue.x);
             moveDir.y = 0;
             moveDir.Normalize();
@@ -67,6 +72,7 @@ namespace _001_Scripts.Controller
 
         public void OnJump(InputAction.CallbackContext context)
         {
+            if (!isCanMove) return;
             if (context.started && isGround)
             {
                 _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
@@ -88,15 +94,30 @@ namespace _001_Scripts.Controller
             if (msg.stamina <= 0)
                 isRunning = false;
         }
+        
+        private void UIState(PlayerUIStateMsg msg)
+        {
+            switch (msg.state)
+            {
+                case PlayerUIState.Inventory:
+                    isCanMove = false;
+                    break;
+                default:
+                    isCanMove = true;
+                    break;
+            }
+        }
 
         [Inject]
         public void Constructor(IPublisher<PlayerMovementMessage> movementPublisher,
-            ISubscriber<PlayerStatMessage> playerStatSubscriber)
+            ISubscriber<PlayerStatMessage> playerStatSubscriber,
+            ISubscriber<PlayerUIStateMsg> playerUIStateSubscriber)
         {
             var builder = DisposableBag.CreateBuilder();
             iMovementPublisher = movementPublisher;
 
             builder.Add(playerStatSubscriber.Subscribe(Stamina));
+            builder.Add(playerUIStateSubscriber.Subscribe(UIState));
 
             _bag = builder.Build();
         }

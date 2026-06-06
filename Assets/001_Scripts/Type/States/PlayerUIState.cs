@@ -2,6 +2,7 @@
 {
     public enum PlayerUIState
     {
+        None,
         Inventory,
         Craft,
         Build,

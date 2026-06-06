@@ -7,6 +7,7 @@ using _001_Scripts.Data.SOJ;
 using _001_Scripts.Interface;
 using _001_Scripts.Type.Item;
 using MessagePipe;
+using NUnit.Framework;
 using UnityEngine;
 using VContainer;
 
@@ -21,7 +22,7 @@ namespace _001_Scripts.Controller
 
         [Header("Inventory")] 
         [SerializeField] private List<Instance> Hotbar;
-        [SerializeField] private List<InventorySlot> items;
+        [SerializeField] private List<InventorySlot> items = new();
 
         [SerializeField] private int maxSlots = 40;
 
@@ -32,6 +33,8 @@ namespace _001_Scripts.Controller
             
             (items[msg.fromIndex], items[msg.toIndex]) = (items[msg.toIndex], items[msg.fromIndex]);
             invChangedPublisher.Publish(new InvChangedMessage(new List<int> { msg.fromIndex, msg.toIndex }));
+            
+            Debug.Log($"Swapped Items {items[msg.fromIndex].stack} to {items[msg.toIndex].stack}");
         }
 
         public AddItemResult AddItem(int id, int count)
@@ -162,17 +165,6 @@ namespace _001_Scripts.Controller
             return items[index];
         }
 
-
-        // Legacy Inv management code
-        // public void AddItem(string name) => items.Add(itemDB.GetItem(name));
-        // public void AddItem(Item item) => items.Add(item);
-        // public void RemoveItem(int id) => items.Remove(itemDB.GetItem(id));
-        // public void RemoveItem(string name) => items.Remove(itemDB.GetItem(name));
-        // public void RemoveItem(Item item) => items.Remove(item);
-        // public bool HasItem(string name) => items.Contains(itemDB.GetItem(name));
-        // public bool HasItem(int id) => items.Contains(itemDB.GetItem(id));
-        // public bool HasItem(Item item) => items.Contains(item);
-
         private void OnMessageReceived(InvReqMessage msg)
         {
             switch (msg.msgType)
@@ -194,6 +186,7 @@ namespace _001_Scripts.Controller
             ISubscriber<InvSwapMessage> invSwapSubscriber,
             IPublisher<InvChangedMessage> invChangedPublisher)
         {
+            _msgBag?.Dispose();
             var bag = DisposableBag.CreateBuilder();
             this.invChangedPublisher = invChangedPublisher;
 

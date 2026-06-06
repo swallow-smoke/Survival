@@ -4,7 +4,9 @@ using System.Linq;
 using _001_Scripts.Base;
 using _001_Scripts.Core;
 using _001_Scripts.Data.Message;
+using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Interface;
+using _001_Scripts.Type.States;
 using AYellowpaper.SerializedCollections;
 using MessagePipe;
 using UnityEngine;
@@ -17,6 +19,7 @@ namespace _001_Scripts.Managers
     public class UIManager : MonoBehaviour, IUIService, IInitializable
     {
         private IDisposable _bag;
+        private IPublisher<PlayerUIStateMsg> iUIStatePublisher;
         [SerializedDictionary] public SerializedDictionary<string, PanelBase> uiPanels = new();
 
         public void Initialize()
@@ -31,17 +34,27 @@ namespace _001_Scripts.Managers
                 var panel = uiPanels["Inventory"];
 
                 if (panel.isViz)
+                {
+
                     panel.Close();
+                    iUIStatePublisher.Publish(new PlayerUIStateMsg(PlayerUIState.None));
+                }
                 else
+                {
                     panel.Open();
+                    iUIStatePublisher.Publish(new PlayerUIStateMsg(PlayerUIState.Inventory));
+                }
             }
         }
 
         [Inject]
         private void Constructor(ISubscriber<GameStateMessage> gameStateSubscriber,
-            ISubscriber<UIReqMessage> _uiReqSubscriber)
+            ISubscriber<UIReqMessage> _uiReqSubscriber,
+            IPublisher<PlayerUIStateMsg> iUIStatePublisher)
         {
             var builder = DisposableBag.CreateBuilder();
+
+            this.iUIStatePublisher = iUIStatePublisher;
 
             gameStateSubscriber.Subscribe(OnGameStateChanged).AddTo(builder);
             _uiReqSubscriber.Subscribe(OnUIRequest).AddTo(builder);

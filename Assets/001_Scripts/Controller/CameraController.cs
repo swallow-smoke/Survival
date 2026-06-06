@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Threading;
+using _001_Scripts.Data.Message.Player;
+using _001_Scripts.Type.States;
+using MessagePipe;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VContainer;
 
 namespace _001_Scripts.Controller
 {
@@ -26,14 +31,35 @@ namespace _001_Scripts.Controller
         private bool isThirdPerson = false;
         float currentVelocity;
 
+        private IDisposable _bag;
+        private bool curCamState = true;
 
         private void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
+            pitch = _trs.eulerAngles.x;
+            yaw = _trs.eulerAngles.y;
+        }
+
+        private void Locker(PlayerUIStateMsg msg)
+        {
+            switch (msg.state) 
+            {
+                case PlayerUIState.Inventory:
+                    Cursor.lockState = CursorLockMode.None;
+                    curCamState = false;
+                    break;
+                default:
+                    Cursor.lockState = CursorLockMode.Locked;
+                    curCamState = true;
+                    break;
+            }
         }
 
         public void OnLook(InputAction.CallbackContext context)
         {
+            if (!curCamState) return;
+            
             lookVector = context.ReadValue<Vector2>();
 
             pitch -= lookVector.y * sensitivity;
@@ -56,6 +82,8 @@ namespace _001_Scripts.Controller
 
         private void LateUpdate()
         {
+            if (!curCamState) return;
+            
             pitch = Mathf.Clamp(pitch, pitchMin, pitchMax);
             _trs.rotation = Quaternion.Euler(pitch, yaw, 0);
 
@@ -72,6 +100,17 @@ namespace _001_Scripts.Controller
             }
 
             player.enabled = thirdCamera.CameraDistance >= 0.5f;
+        }
+
+        [Inject]
+        private void Constructor(ISubscriber<PlayerUIStateMsg> iPlayerUIStateSub)
+        {
+            var builder = DisposableBag.CreateBuilder();
+
+            iPlayerUIStateSub.Subscribe(Locker).AddTo(builder);
+
+
+            _bag = builder.Build();
         }
     }
 }

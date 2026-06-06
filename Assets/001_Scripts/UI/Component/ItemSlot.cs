@@ -23,19 +23,23 @@ namespace _001_Scripts.UI.Component
 
         private CanvasGroup _canvasGroup;
         private IPublisher<InvSwapMessage> _publisher;
+        private RectTransform _rectTrs;
 
         public static ItemSlot DragSlot;
 
-        private bool isCanDrop;
         private Vector2 originPos;
         
-        public void Set(InventorySlot slot, Template template, int index, IPublisher<InvSwapMessage> publisher)
+        public void Init(IPublisher<InvSwapMessage> publisher)
+        {
+            _publisher = publisher;
+        }
+        
+        public void Set(InventorySlot slot, Template template, int index)
         {
             itemName = template.itemName;
             itemDesc = template.itemDesc;
             itemType = template.itemType.ToString();
             this.index = index;
-            _publisher = publisher;
 
             if (template.HasAttribute(AttributesType.Equippable))
             {
@@ -61,11 +65,12 @@ namespace _001_Scripts.UI.Component
         private void Awake()
         {
             _canvasGroup = GetComponent<CanvasGroup>();
+            _rectTrs = GetComponent<RectTransform>();
         }
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            originPos = eventData.position;
+            originPos = _rectTrs.anchoredPosition;
             DragSlot = this;
             _canvasGroup.blocksRaycasts = false;
         }
@@ -80,20 +85,15 @@ namespace _001_Scripts.UI.Component
             DragSlot = null;
             _canvasGroup.blocksRaycasts = true;
 
-            if (!isCanDrop)
-            {
-                this.transform.position = originPos;
-            }
-            
-            isCanDrop = false;
+                _rectTrs.anchoredPosition = originPos;
         }
 
         public void OnDrop(PointerEventData eventData)
         {
+            Debug.Log(eventData.pointerDrag.name);
             var slot = eventData.pointerDrag.GetComponent<ItemSlot>();
-            isCanDrop = true;
             
-            _publisher.Publish(new InvSwapMessage(slot.index, index));
+            slot._publisher.Publish(new InvSwapMessage(slot.index, index));
         }
     }
 }

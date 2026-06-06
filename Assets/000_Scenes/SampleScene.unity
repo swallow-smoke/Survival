@@ -401,6 +401,7 @@ MonoBehaviour:
   - {fileID: 841331830}
   - {fileID: 821212476}
   - {fileID: 1557585893}
+  - {fileID: 622368662}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -1794,14 +1795,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48e4fc5ae2724cfab6d8f81d2151aa89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemDB: {fileID: 0}
+  itemDB: {fileID: 11400000, guid: 7fa084f3764e86f48819a7a50991b79d, type: 2}
   Hotbar: []
   items:
   - ins:
       itemId: 0
       instanceId: 0
       durability: 0
-    stack: 0
+    stack: 5
   - ins:
       itemId: 0
       instanceId: 0
@@ -2407,7 +2408,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!114 &990743222
 MonoBehaviour:
@@ -2795,8 +2796,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 990743218}
   - {fileID: 1104793274}
+  - {fileID: 990743218}
   m_Father: {fileID: 205720148}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -2835,7 +2836,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.UI.Component.FadeInOut
   hideTime: 1000
-  transition: 21
+  transition: 27
 --- !u!225 &1557585898
 CanvasGroup:
   m_ObjectHideFlags: 0
