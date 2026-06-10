@@ -23,6 +23,7 @@ namespace _001_Scripts.Controller
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private LayerMask layer;
         [SerializeField] private Transform footTrs;
+        [SerializeField] private Transform _trs;
         private Vector3 moveDir;
         private Vector2 inputValue;
         private bool isRunning;
@@ -73,6 +74,12 @@ namespace _001_Scripts.Controller
             {
                 float currentSpeed = isCrouching ? crouchSpeed : (isRunning ? runningSpeed : speed);
                 _rb.linearVelocity = new Vector3(moveDir.x * currentSpeed, _rb.linearVelocity.y, moveDir.z * currentSpeed);
+            }
+            
+            if (_rb.linearVelocity.magnitude > 0.1f)
+            {
+                Quaternion targetRot = Quaternion.Euler(0, _trs.rotation.eulerAngles.y, 0);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, 360f * Time.fixedDeltaTime);
             }
 
             Vector3 publs = transform.InverseTransformDirection(_rb.linearVelocity) / runningSpeed;
