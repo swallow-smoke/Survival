@@ -23,3 +23,21 @@ MonoBehaviour:
         itemType: 0
         weight: 0
         ItemAttributes: []
+    - Key: 1
+      Value:
+        itemId: 0
+        itemName: Woowang
+        itemDesc: 
+        itemGrade: 0
+        itemType: 0
+        weight: 0
+        ItemAttributes: []
+    - Key: 2
+      Value:
+        itemId: 0
+        itemName: Woowang
+        itemDesc: 
+        itemGrade: 0
+        itemType: 0
+        weight: 0
+        ItemAttributes: []

@@ -16,6 +16,10 @@ namespace _001_Scripts.Controller
         [SerializeField] private float speed = 15.0f;
         [SerializeField] private float runningSpeed = 35.0f;
         [SerializeField] private float jumpForce = 5.0f;
+        [SerializeField] private float crouchSpeed = 7.5f;
+        [SerializeField] private float swimSpeed = 10.0f;
+        [SerializeField] private float swimVerticalSpeed = 5.0f;
+        [SerializeField] private LayerMask waterLayer;
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private LayerMask layer;
         [SerializeField] private Transform footTrs;
@@ -24,6 +28,10 @@ namespace _001_Scripts.Controller
         private bool isRunning;
         private bool isGround = true;
         private bool isCanMove = true;
+        private bool isSwimming;
+        private bool isSwimUp;
+        private bool isSwimDown;
+        private bool isCrouching;
 
         private IPublisher<PlayerMovementMessage> iMovementPublisher;
         private IDisposable _bag;
@@ -32,7 +40,17 @@ namespace _001_Scripts.Controller
 
         [SerializeField] CameraController _camCont;
 
-        [SerializeField] private Transform trs;
+        private void OnTriggerEnter(Collider other)
+        {
+            if ((waterLayer.value & (1 << other.gameObject.layer)) != 0)
+                SetSwimming(true);
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            if ((waterLayer.value & (1 << other.gameObject.layer)) != 0)
+                SetSwimming(false);
+        }
 
         private void FixedUpdate()
         {
@@ -41,27 +59,27 @@ namespace _001_Scripts.Controller
             moveDir = (_camCont._trs.forward * inputValue.y) + (_camCont._trs.right * inputValue.x);
             moveDir.y = 0;
             moveDir.Normalize();
-            
-            if (isRunning)
-                _rb.linearVelocity =
-                    new Vector3(moveDir.x * runningSpeed, _rb.linearVelocity.y, moveDir.z * runningSpeed);
-            else _rb.linearVelocity = 
-                new Vector3(moveDir.x * speed, _rb.linearVelocity.y, moveDir.z * speed);
+            // Debug.Log(moveDir);
 
-            if (_rb.linearVelocity.magnitude > 0.1f)
+            if (isSwimming)
             {
-                Quaternion targetRot = Quaternion.Euler(0, trs.rotation.eulerAngles.y, 0);
+                float verticalVelocity = 0f;
+                if (isSwimUp) verticalVelocity = swimVerticalSpeed;
+                else if (isSwimDown) verticalVelocity = -swimVerticalSpeed;
 
-                transform.rotation =
-                    Quaternion.RotateTowards(transform.rotation, targetRot, 360f * Time.fixedDeltaTime);
+                _rb.linearVelocity = new Vector3(moveDir.x * swimSpeed, verticalVelocity, moveDir.z * swimSpeed);
+            }
+            else
+            {
+                float currentSpeed = isCrouching ? crouchSpeed : (isRunning ? runningSpeed : speed);
+                _rb.linearVelocity = new Vector3(moveDir.x * currentSpeed, _rb.linearVelocity.y, moveDir.z * currentSpeed);
             }
 
             Vector3 publs = transform.InverseTransformDirection(_rb.linearVelocity) / runningSpeed;
 
-            isGround = Physics.Raycast(footTrs.position, Vector3.down, maxDistance, layer);
+            isGround = !isSwimming && Physics.Raycast(footTrs.position, Vector3.down, maxDistance, layer);
             iMovementPublisher.Publish(new PlayerMovementMessage(_rb.linearVelocity.magnitude / runningSpeed, isGround,
-                publs));
-            // Debug.Log($"{_rb.linearVelocity} \n {publs}");
+                publs, isSwimming));
         }
         
         public void OnMove(InputAction.CallbackContext context)
@@ -73,7 +91,13 @@ namespace _001_Scripts.Controller
         public void OnJump(InputAction.CallbackContext context)
         {
             if (!isCanMove) return;
-            if (context.started && isGround)
+
+            if (isSwimming)
+            {
+                if (context.started) isSwimUp = true;
+                else if (context.canceled) isSwimUp = false;
+            }
+            else if (context.started && isGround)
             {
                 _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             }
@@ -81,12 +105,35 @@ namespace _001_Scripts.Controller
 
         public void OnRunning(InputAction.CallbackContext context)
         {
-            if (context.performed)
+            if (context.performed) isRunning = true;
+            else if (context.canceled) isRunning = false;
+        }
+
+        public void OnShift(InputAction.CallbackContext context)
+        {
+            if (isSwimming)
             {
-                isRunning = true;
+                if (context.started) isSwimDown = true;
+                else if (context.canceled) isSwimDown = false;
             }
-            else if (context.canceled)
+            else
+            {
+                if (context.started) isCrouching = true;
+                else if (context.canceled) isCrouching = false;
+            }
+        }
+
+        private void SetSwimming(bool value)
+        {
+            isSwimming = value;
+            _rb.useGravity = !value;
+            if (!value)
+            {
+                isSwimUp = false;
+                isSwimDown = false;
                 isRunning = false;
+                isCrouching = false;
+            }
         }
 
         public void Stamina(PlayerStatMessage msg)

@@ -23,6 +23,7 @@ namespace _001_Scripts.Controller
 
         private PlayerStatMessage postMsg;
         private PlayerMovementState curState = PlayerMovementState.Idle;
+        private bool isSwimming;
 
         private IDisposable bag;
 
@@ -73,6 +74,7 @@ namespace _001_Scripts.Controller
 
         public void OnRun(InputAction.CallbackContext ctx)
         {
+            if (isSwimming) return;
             if (ctx.performed) curState = PlayerMovementState.Running;
             else curState = PlayerMovementState.Walking;
         }
@@ -102,6 +104,14 @@ namespace _001_Scripts.Controller
 
         private void OnMove(PlayerMovementMessage msg)
         {
+            isSwimming = msg.isSwimming;
+
+            if (msg.isSwimming)
+            {
+                curState = PlayerMovementState.Swimming;
+                return;
+            }
+
             if (msg.velocity < 0)
             {
                 curState = PlayerMovementState.Idle;
