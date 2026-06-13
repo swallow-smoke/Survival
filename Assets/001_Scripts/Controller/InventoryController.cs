@@ -28,7 +28,7 @@ namespace _001_Scripts.Controller
 
         private void SwapItem(InvSwapMessage msg)
         {
-            if (msg.fromIndex > items.Count || msg.toIndex > items.Count)
+            if (msg.fromIndex >= items.Count || msg.toIndex >= items.Count)
                 return;
             
             (items[msg.fromIndex], items[msg.toIndex]) = (items[msg.toIndex], items[msg.fromIndex]);

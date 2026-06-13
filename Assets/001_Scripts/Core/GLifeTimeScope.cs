@@ -31,6 +31,7 @@ namespace _001_Scripts.Core
             builder.RegisterMessageBroker<CraftResultMessage>(options);
             
             builder.RegisterMessageBroker<UIReqMessage>(options);
+            builder.RegisterMessageBroker<InteractionUIMessage>(options);
             #endregion
 
             #region Player

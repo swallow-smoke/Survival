@@ -52,7 +52,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "UI",
+                    "name": "Inventory",
                     "type": "Button",
                     "id": "b38420cd-c2ad-49d4-8c5e-a8235118750f",
                     "expectedControlType": "",
@@ -64,6 +64,15 @@
                     "name": "Crouch",
                     "type": "Button",
                     "id": "f2a1c3d4-5e6f-7890-abcd-ef1234567890",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Interaction",
+                    "type": "Button",
+                    "id": "e14fcbe9-2aca-4703-af68-c0293708a825",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -177,7 +186,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "UI",
+                    "action": "Inventory",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -189,6 +198,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "93c28dff-b035-4cfa-8be6-5cf6275ffe70",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Interaction",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
