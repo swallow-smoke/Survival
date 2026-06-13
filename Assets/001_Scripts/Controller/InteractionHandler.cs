@@ -1,6 +1,9 @@
+using System;
 using System.Linq;
 using _001_Scripts.Data.Message;
+using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Data.Structure.Interface;
+using _001_Scripts.Type.States;
 using MessagePipe;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -19,11 +22,33 @@ namespace _001_Scripts.Controller
         private IInteractable _current;
         private Transform _lastHitTrs;
         private bool _canInteract;
+        private PlayerUIState _uiState;
+        private IDisposable _bag;
 
         [Inject]
-        public void Construct(IPublisher<InteractionUIMessage> uiPublisher)
+        public void Construct(IPublisher<InteractionUIMessage> uiPublisher,
+            ISubscriber<PlayerUIStateMsg> uiStateSubscriber)
         {
             _uiPublisher = uiPublisher;
+            var builder = DisposableBag.CreateBuilder();
+            builder.Add(uiStateSubscriber.Subscribe(OnUIStateChanged));
+            _bag = builder.Build();
+        }
+
+        private void OnUIStateChanged(PlayerUIStateMsg msg)
+        {
+            _uiState = msg.state;
+            if (_uiState != PlayerUIState.None && _lastHitTrs != null)
+                ClearTarget();
+        }
+
+        private void ClearTarget()
+        {
+            SetHighlight(_lastHitTrs.gameObject, false);
+            _lastHitTrs = null;
+            _current = null;
+            _canInteract = false;
+            _uiPublisher.Publish(new InteractionUIMessage(false, "", "F"));
         }
 
         private void SetHighlight(GameObject go, bool on)
@@ -48,6 +73,8 @@ namespace _001_Scripts.Controller
 
         private void Update()
         {
+            if (_uiState != PlayerUIState.None) return;
+
             RaycastHit hit;
             if (Physics.Raycast(_trs.position, _trs.forward, out hit, maxDistance, interactLayer))
             {
@@ -82,20 +109,18 @@ namespace _001_Scripts.Controller
             }
             else if (_lastHitTrs != null)
             {
-                SetHighlight(_lastHitTrs.gameObject, false);
-
-                _lastHitTrs = null;
-                _current = null;
-                _canInteract = false;
-                _uiPublisher.Publish(new InteractionUIMessage(false, "", "F"));
+                ClearTarget();
             }
         }
 
         public void OnInteract(InputAction.CallbackContext context)
         {
             if (!context.started) return;
+            if (_uiState != PlayerUIState.None) return;
             if (_current is IConditionalInteractable && !_canInteract) return;
             _current?.Interact();
         }
+
+        private void OnDestroy() => _bag?.Dispose();
     }
 }

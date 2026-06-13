@@ -26,6 +26,13 @@ namespace _001_Scripts.Structure
             Destroy(gameObject);
         }
 
+        public void Setup(int itemId, int count, string displayName = null)
+        {
+            this.itemId = itemId;
+            this.count = count;
+            if (displayName != null) this.displayName = displayName;
+        }
+
         public string GetLabel() => $"Pick up {displayName}";
     }
 }

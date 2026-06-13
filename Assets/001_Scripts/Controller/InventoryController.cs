@@ -169,8 +169,11 @@ namespace _001_Scripts.Controller
         {
             switch (msg.msgType)
             {
-                case InvMessageType.Added: 
+                case InvMessageType.Added:
                     var result = AddItem(msg.item, msg.count);
+                    int added = msg.count - result.remain;
+                    Debug.Log($"[Inventory] {itemDB.GetItem(msg.item).itemName} +{added}" +
+                              (result.remain > 0 ? $" ({result.remain} did not fit)" : ""));
                     invChangedPublisher.Publish(new InvChangedMessage(result.changeKeys));
                     break;
                 case InvMessageType.Removed: 

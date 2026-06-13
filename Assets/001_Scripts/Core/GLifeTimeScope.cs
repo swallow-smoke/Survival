@@ -47,6 +47,7 @@ namespace _001_Scripts.Core
 
             #region Services
 
+            builder.RegisterComponentInHierarchy<ItemSpawner>();
             builder.RegisterComponentInHierarchy<InventoryController>().As<IInventoryService>();
             builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>().As<IInitializable>();
             builder.RegisterComponentInHierarchy<UIManager>().As<IUIService>().As<IInitializable>();

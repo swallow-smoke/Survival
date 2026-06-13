@@ -1,7 +1,6 @@
-using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Structure.Interface;
 using _001_Scripts.Interface;
-using MessagePipe;
+using _001_Scripts.Managers;
 using UnityEngine;
 using VContainer;
 
@@ -17,13 +16,13 @@ namespace _001_Scripts.Structure
 
         private float currentHP;
         private IInventoryService _invService;
-        private IPublisher<InvReqMessage> _invPublisher;
+        private ItemSpawner _itemSpawner;
 
         [Inject]
-        public void Construct(IInventoryService invService, IPublisher<InvReqMessage> invPublisher)
+        public void Construct(IInventoryService invService, ItemSpawner itemSpawner)
         {
             _invService = invService;
-            _invPublisher = invPublisher;
+            _itemSpawner = itemSpawner;
         }
 
         private void Awake()
@@ -41,7 +40,7 @@ namespace _001_Scripts.Structure
             currentHP -= 10f;
             if (currentHP <= 0)
             {
-                _invPublisher.Publish(new InvReqMessage(InvMessageType.Added, dropItemId, dropCount));
+                _itemSpawner.SpawnPickup(transform.position, dropItemId, dropCount);
                 Destroy();
             }
         }

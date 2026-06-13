@@ -22,10 +22,16 @@ MonoBehaviour:
         itemGrade: 0
         itemType: 0
         weight: 0
-        ItemAttributes: []
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 5
+            duration: 0
+            cooldown: 0
     - Key: 1
       Value:
-        itemId: 0
+        itemId: 1
         itemName: Woowang
         itemDesc: 
         itemGrade: 0
@@ -34,7 +40,7 @@ MonoBehaviour:
         ItemAttributes: []
     - Key: 2
       Value:
-        itemId: 0
+        itemId: 2
         itemName: Woowang
         itemDesc: 
         itemGrade: 0
