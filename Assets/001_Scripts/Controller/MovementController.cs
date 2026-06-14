@@ -1,11 +1,12 @@
-﻿using System;
+using System;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
+using _001_Scripts.Data.Structure.Interface;
+using _001_Scripts.Structure;
 using _001_Scripts.Type.States;
 using MessagePipe;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using _001_Scripts.UI.Component;
 using VContainer;
 
 namespace _001_Scripts.Controller
@@ -37,9 +38,17 @@ namespace _001_Scripts.Controller
         private IPublisher<PlayerMovementMessage> iMovementPublisher;
         private IDisposable _bag;
 
-        [SerializeField] private float maxDistance = 1f;
+        private IVehicleControllable _activeVehicle;
+        private SeatComponent _activeSeat;
+        private PlayerVehicleState _vehicleState;
 
+        [SerializeField] private float maxDistance = 1f;
         [SerializeField] CameraController _camCont;
+
+        private void Awake()
+        {
+            _rb.interpolation = RigidbodyInterpolation.Interpolate;
+        }
 
         private void OnTriggerEnter(Collider other)
         {
@@ -57,12 +66,18 @@ namespace _001_Scripts.Controller
         {
             if (!isCanMove) return;
 
-            moveDir = (_camCont._trs.forward * inputValue.y) + (_camCont._trs.right * inputValue.x);
+            if (_vehicleState == PlayerVehicleState.Seated) return;
+
+            moveDir = (_camCont.transform.forward * inputValue.y) + (_camCont.transform.right * inputValue.x);
             moveDir.y = 0;
             moveDir.Normalize();
-            // Debug.Log(moveDir);
 
-            if (isSwimming)
+            if (_vehicleState == PlayerVehicleState.InsideLarge)
+            {
+                float currentSpeed = isCrouching ? crouchSpeed : (isRunning ? runningSpeed : speed);
+                _rb.MovePosition(_rb.position + moveDir * (currentSpeed * Time.fixedDeltaTime));
+            }
+            else if (isSwimming)
             {
                 float verticalVelocity = 0f;
                 if (isSwimUp) verticalVelocity = swimVerticalSpeed;
@@ -75,7 +90,7 @@ namespace _001_Scripts.Controller
                 float currentSpeed = isCrouching ? crouchSpeed : (isRunning ? runningSpeed : speed);
                 _rb.linearVelocity = new Vector3(moveDir.x * currentSpeed, _rb.linearVelocity.y, moveDir.z * currentSpeed);
             }
-            
+
             if (_rb.linearVelocity.magnitude > 0.1f)
             {
                 Quaternion targetRot = Quaternion.Euler(0, _trs.rotation.eulerAngles.y, 0);
@@ -83,21 +98,39 @@ namespace _001_Scripts.Controller
             }
 
             Vector3 publs = transform.InverseTransformDirection(_rb.linearVelocity) / runningSpeed;
-
             isGround = !isSwimming && Physics.Raycast(footTrs.position, Vector3.down, maxDistance, layer);
-            iMovementPublisher.Publish(new PlayerMovementMessage(_rb.linearVelocity.magnitude / runningSpeed, isGround,
-                publs, isSwimming));
+            iMovementPublisher.Publish(new PlayerMovementMessage(_rb.linearVelocity.magnitude / runningSpeed, isGround, publs, isSwimming));
         }
-        
+
         public void OnMove(InputAction.CallbackContext context)
         {
             inputValue = context.ReadValue<Vector2>();
+
+            if (_activeVehicle != null)
+            {
+                _activeVehicle.HandleMove(inputValue);
+                return;
+            }
+
             moveDir.y = 0;
+        }
+
+        public void OnLook(InputAction.CallbackContext context)
+        {
+            if (_activeVehicle is SmallSubVehicle small)
+                small.HandleLook(context.ReadValue<Vector2>());
         }
 
         public void OnJump(InputAction.CallbackContext context)
         {
             if (!isCanMove) return;
+
+            if (_activeVehicle != null)
+            {
+                if (context.started) _activeVehicle.HandleVertical(1f);
+                else if (context.canceled) _activeVehicle.HandleVertical(0f);
+                return;
+            }
 
             if (isSwimming)
             {
@@ -118,6 +151,13 @@ namespace _001_Scripts.Controller
 
         public void OnShift(InputAction.CallbackContext context)
         {
+            if (_activeVehicle != null)
+            {
+                if (context.started) _activeVehicle.HandleVertical(-1f);
+                else if (context.canceled) _activeVehicle.HandleVertical(0f);
+                return;
+            }
+
             if (isSwimming)
             {
                 if (context.started) isSwimDown = true;
@@ -148,7 +188,7 @@ namespace _001_Scripts.Controller
             if (msg.stamina <= 0)
                 isRunning = false;
         }
-        
+
         private void UIState(PlayerUIStateMsg msg)
         {
             switch (msg.state)
@@ -162,16 +202,41 @@ namespace _001_Scripts.Controller
             }
         }
 
+        private void OnVehicleControlAssigned(VehicleControlAssignedMsg msg)
+        {
+            _activeVehicle = msg.Controller;
+            _activeSeat = msg.Seat as SeatComponent;
+        }
+
+        public void OnExitVehicle(InputAction.CallbackContext context)
+        {
+            if (!context.started) return;
+            if (_vehicleState != PlayerVehicleState.Seated) return;
+            _activeSeat?.StandWithDefaults();
+        }
+
+        private void OnVehicleStateChanged(PlayerVehicleStateMsg msg)
+        {
+            _vehicleState = msg.state;
+            _rb.isKinematic = (msg.state != PlayerVehicleState.None);
+            if (msg.state == PlayerVehicleState.None)
+                _rb.useGravity = !isSwimming;
+        }
+
         [Inject]
         public void Constructor(IPublisher<PlayerMovementMessage> movementPublisher,
             ISubscriber<PlayerStatMessage> playerStatSubscriber,
-            ISubscriber<PlayerUIStateMsg> playerUIStateSubscriber)
+            ISubscriber<PlayerUIStateMsg> playerUIStateSubscriber,
+            ISubscriber<PlayerVehicleStateMsg> vehicleStateSubscriber,
+            ISubscriber<VehicleControlAssignedMsg> vehicleControlSubscriber)
         {
             var builder = DisposableBag.CreateBuilder();
             iMovementPublisher = movementPublisher;
 
             builder.Add(playerStatSubscriber.Subscribe(Stamina));
             builder.Add(playerUIStateSubscriber.Subscribe(UIState));
+            builder.Add(vehicleStateSubscriber.Subscribe(OnVehicleStateChanged));
+            builder.Add(vehicleControlSubscriber.Subscribe(OnVehicleControlAssigned));
 
             _bag = builder.Build();
         }

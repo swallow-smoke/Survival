@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Threading;
 using _001_Scripts.Data.Message.Player;
+using _001_Scripts.Data.Structure.Interface;
 using _001_Scripts.Type.States;
 using MessagePipe;
 using Unity.Cinemachine;
@@ -33,6 +34,8 @@ namespace _001_Scripts.Controller
 
         private IDisposable _bag;
         private bool curCamState = true;
+        private bool _vehicleMode;
+        private Transform _originalParent;
 
         private void Start()
         {
@@ -43,7 +46,7 @@ namespace _001_Scripts.Controller
 
         private void Locker(PlayerUIStateMsg msg)
         {
-            switch (msg.state) 
+            switch (msg.state)
             {
                 case PlayerUIState.Inventory:
                     Cursor.lockState = CursorLockMode.None;
@@ -58,12 +61,31 @@ namespace _001_Scripts.Controller
 
         public void OnLook(InputAction.CallbackContext context)
         {
-            if (!curCamState) return;
-            
+            if (!curCamState || _vehicleMode) return;
+
             lookVector = context.ReadValue<Vector2>();
 
             pitch -= lookVector.y * sensitivity;
             yaw += lookVector.x * sensitivity;
+        }
+
+        private void OnVehicleControlAssigned(VehicleControlAssignedMsg msg)
+        {
+            if (msg.Controller != null)
+            {
+                _originalParent = _trs.parent;
+                _trs.SetParent(msg.Controller.CameraAnchor);
+                _trs.localPosition = Vector3.zero;
+                _trs.localRotation = Quaternion.identity;
+                _vehicleMode = true;
+            }
+            else
+            {
+                _trs.SetParent(_originalParent);
+                pitch = _trs.eulerAngles.x;
+                yaw = _trs.eulerAngles.y;
+                _vehicleMode = false;
+            }
         }
 
         public void OnPeronChange(InputAction.CallbackContext context)
@@ -83,16 +105,19 @@ namespace _001_Scripts.Controller
         private void LateUpdate()
         {
             if (!curCamState) return;
-            
-            pitch = Mathf.Clamp(pitch, pitchMin, pitchMax);
-            _trs.rotation = Quaternion.Euler(pitch, yaw, 0);
+
+            if (!_vehicleMode)
+            {
+                pitch = Mathf.Clamp(pitch, pitchMin, pitchMax);
+                _trs.rotation = Quaternion.Euler(pitch, yaw, 0);
+            }
 
             float targetDistance = isThirdPerson ? camDistance : 0;
 
             thirdCamera.CameraDistance =
                 Mathf.SmoothDamp(thirdCamera.CameraDistance, targetDistance, ref currentVelocity, 0.3f);
-            
-            
+
+
             if (Mathf.Approximately(thirdCamera.CameraDistance, targetDistance))
             {
                 thirdCamera.CameraDistance = targetDistance;
@@ -103,14 +128,18 @@ namespace _001_Scripts.Controller
         }
 
         [Inject]
-        private void Constructor(ISubscriber<PlayerUIStateMsg> iPlayerUIStateSub)
+        private void Constructor(
+            ISubscriber<PlayerUIStateMsg> iPlayerUIStateSub,
+            ISubscriber<VehicleControlAssignedMsg> vehicleControlSub)
         {
             var builder = DisposableBag.CreateBuilder();
 
             iPlayerUIStateSub.Subscribe(Locker).AddTo(builder);
-
+            vehicleControlSub.Subscribe(OnVehicleControlAssigned).AddTo(builder);
 
             _bag = builder.Build();
         }
+
+        private void OnDestroy() => _bag?.Dispose();
     }
 }

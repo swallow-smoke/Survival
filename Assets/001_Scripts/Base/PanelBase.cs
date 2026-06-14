@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using _001_Scripts.Interface;
-using _001_Scripts.UI.Component;
-using DG.Tweening;
 using UnityEngine;
 
 namespace _001_Scripts.Base

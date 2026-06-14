@@ -25,18 +25,13 @@ namespace _001_Scripts.Structure
             _itemSpawner = itemSpawner;
         }
 
-        private void Awake()
-        {
-            currentHP = maxHP;
-        }
+        private void Awake() => currentHP = maxHP;
 
         public bool CanInteract() => _invService.HasItem(requiredToolId);
-
         public string RequirementLabel() => "Tool required";
 
         public void Interact()
         {
-            // TODO: tool damage value from ItemDataBase
             currentHP -= 10f;
             if (currentHP <= 0)
             {
@@ -46,7 +41,6 @@ namespace _001_Scripts.Structure
         }
 
         public void Destroy() => UnityEngine.Object.Destroy(gameObject);
-
         public string GetLabel() => $"Harvest {displayName}";
     }
 }

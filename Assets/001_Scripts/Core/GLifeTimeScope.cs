@@ -3,6 +3,7 @@ using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Interface;
 using _001_Scripts.Managers;
+using _001_Scripts.Structure;
 using MessagePipe;
 using VContainer;
 using VContainer.Unity;
@@ -39,7 +40,8 @@ namespace _001_Scripts.Core
             builder.RegisterMessageBroker<PlayerMovementStateMsg>(options);
             builder.RegisterMessageBroker<PlayerUIStateMsg>(options);
             builder.RegisterMessageBroker<PlayerVehicleStateMsg>(options);
-            
+            builder.RegisterMessageBroker<VehicleControlAssignedMsg>(options);
+
             builder.RegisterMessageBroker<PlayerMovementMessage>(options);
             builder.RegisterMessageBroker<PlayerStatMessage>(options);
 
@@ -51,10 +53,13 @@ namespace _001_Scripts.Core
             builder.RegisterComponentInHierarchy<InventoryController>().As<IInventoryService>();
             builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>().As<IInitializable>();
             builder.RegisterComponentInHierarchy<UIManager>().As<IUIService>().As<IInitializable>();
+            builder.RegisterComponentInHierarchy<PlayerContext>().As<IPlayerContext>();
+            builder.RegisterComponentInHierarchy<VehicleInjector>();
+            builder.RegisterComponentInHierarchy<VehicleSpawner>();
             // builder.RegisterComponentInHierarchy<CraftController>().As<ICraftService>();
-            
+
             #endregion
-     
+
 
         }
     }
