@@ -19,6 +19,11 @@ namespace _001_Scripts.Structure
         [SerializeField] private float waterLinearDrag = 3f;
         [SerializeField] private float waterAngularDrag = 3f;
         [SerializeField] private float gravityNeutralizeSpeed = 2f;
+        
+        [Header("회전 댐핑")]
+        [SerializeField] private float rotationDamping = 5f;
+
+        private Quaternion _targetRotation;
 
         private float _airLinearDrag;
         private float _airAngularDrag;
@@ -40,18 +45,20 @@ namespace _001_Scripts.Structure
         {
             pitch = transform.eulerAngles.x;
             yaw = transform.eulerAngles.y;
+            _targetRotation = transform.rotation;
             moveInput = Vector2.zero;
             isControlled = true;
         }
-
+        
         public void ExitControl() => isControlled = false;
-
+        
         public void HandleLook(Vector2 mouseDelta)
         {
             yaw += mouseDelta.x * turnSensitivity;
             pitch -= mouseDelta.y * turnSensitivity;
             pitch = Mathf.Clamp(pitch, pitchMin, pitchMax);
-            transform.rotation = Quaternion.Euler(pitch, yaw, 0);
+            // transform.rotation = Quaternion.Euler(pitch, yaw, 0);
+            _targetRotation = Quaternion.Euler(pitch, yaw, 0); // transform.rotation 직접 적용 제거
         }
 
         public void HandleMove(Vector2 wasd) => moveInput = wasd;
@@ -67,16 +74,6 @@ namespace _001_Scripts.Structure
             }
         }
 
-        private void OnTriggerExit(Collider other)
-        {
-            if ((waterLayer.value & (1 << other.gameObject.layer)) != 0)
-            {
-                isInWater = false;
-                _rb.linearDamping = _airLinearDrag;
-                _rb.angularDamping = _airAngularDrag;
-            }
-        }
-
         private void FixedUpdate()
         {
             _gravityScale = isInWater
@@ -87,6 +84,8 @@ namespace _001_Scripts.Structure
             _rb.AddForce(Physics.gravity * _rb.mass * _gravityScale, ForceMode.Force);
 
             if (!isControlled) return;
+
+            transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, rotationDamping * Time.fixedDeltaTime);
 
             Vector3 forwardMove = transform.forward * moveInput.y;
             Vector3 strafe = transform.right * moveInput.x;

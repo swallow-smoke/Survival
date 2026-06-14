@@ -1106,7 +1106,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -166.26, y: 10.307064, z: 174.29022}
+  m_LocalPosition: {x: -202.5, y: 10.307064, z: 142.09023}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1909,7 +1909,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0008c683b7092da458ce7f082347afea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Managers.VehicleSpawner
-  smallSubPrefab: {fileID: 5332611111309986305, guid: ae381a2325e311f48aa74c9edebad2e2,
+  smallSubPrefab: {fileID: 7526104794218090267, guid: a57c6806750a16a44b6ce9fbeab4f985,
     type: 3}
   largeSubPrefab: {fileID: 0}
   _trs: {fileID: 526601688}
@@ -2035,7 +2035,7 @@ Transform:
   m_GameObject: {fileID: 622368662}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -166.26, y: 10.307064, z: 174.29022}
+  m_LocalPosition: {x: -202.5, y: 10.307064, z: 142.09023}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2597,7 +2597,7 @@ PrefabInstance:
     - target: {fileID: 4311652260893728935, guid: 9bd72731ebe2248478ba4849c274a43b,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -166.26
+      value: -202.5
       objectReference: {fileID: 0}
     - target: {fileID: 4311652260893728935, guid: 9bd72731ebe2248478ba4849c274a43b,
         type: 3}
@@ -2607,7 +2607,7 @@ PrefabInstance:
     - target: {fileID: 4311652260893728935, guid: 9bd72731ebe2248478ba4849c274a43b,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 178.2
+      value: 146
       objectReference: {fileID: 0}
     - target: {fileID: 4311652260893728935, guid: 9bd72731ebe2248478ba4849c274a43b,
         type: 3}
