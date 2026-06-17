@@ -1,4 +1,5 @@
 using _001_Scripts.Data.Structure.Interface;
+using _001_Scripts.Vehicle.Core;
 using UnityEngine;
 
 namespace _001_Scripts.Structure
@@ -57,8 +58,9 @@ namespace _001_Scripts.Structure
             yaw += mouseDelta.x * turnSensitivity;
             pitch -= mouseDelta.y * turnSensitivity;
             pitch = Mathf.Clamp(pitch, pitchMin, pitchMax);
+            // legacy
             // transform.rotation = Quaternion.Euler(pitch, yaw, 0);
-            _targetRotation = Quaternion.Euler(pitch, yaw, 0); // transform.rotation 직접 적용 제거
+            _targetRotation = Quaternion.Euler(pitch, yaw, 0);
         }
 
         public void HandleMove(Vector2 wasd) => moveInput = wasd;

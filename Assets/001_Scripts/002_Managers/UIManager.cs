@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using _001_Scripts.Base;
+using _001_Scripts.Controller.Handler;
 using _001_Scripts.Core;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
@@ -20,6 +21,7 @@ namespace _001_Scripts.Managers
     {
         private IDisposable _bag;
         private IPublisher<PlayerUIStateMsg> iUIStatePublisher;
+        private IInputService _inputServ;
         [SerializedDictionary] public SerializedDictionary<string, PanelBase> uiPanels = new();
 
         public void Initialize()
@@ -27,34 +29,39 @@ namespace _001_Scripts.Managers
             Debug.Log("UIManager Initialize");
         }
 
-        public void OnInvToggle(InputAction.CallbackContext context)
+        public void OnInvToggle()
         {
-            if (context.started)
+            var panel = uiPanels["Inventory"];
+
+            if (panel.isViz)
             {
-                var panel = uiPanels["Inventory"];
-
-                if (panel.isViz)
-                {
-
-                    panel.Close();
-                    iUIStatePublisher.Publish(new PlayerUIStateMsg(PlayerUIState.None));
-                }
-                else
-                {
-                    panel.Open();
-                    iUIStatePublisher.Publish(new PlayerUIStateMsg(PlayerUIState.Inventory));
-                }
+                panel.Close();
+                iUIStatePublisher.Publish(new PlayerUIStateMsg(PlayerUIState.None));
             }
+            else
+            {
+                panel.Open();
+                iUIStatePublisher.Publish(new PlayerUIStateMsg(PlayerUIState.Inventory));
+            }
+        }
+        
+        private void Start()
+        {
+            if (_inputServ == null) return;
+
+            _inputServ.OnInventoryToggle += OnInvToggle;
         }
 
         [Inject]
         private void Constructor(ISubscriber<GameStateMessage> gameStateSubscriber,
             ISubscriber<UIReqMessage> _uiReqSubscriber,
-            IPublisher<PlayerUIStateMsg> iUIStatePublisher)
+            IPublisher<PlayerUIStateMsg> iUIStatePublisher,
+            IInputService inputService)
         {
             var builder = DisposableBag.CreateBuilder();
 
             this.iUIStatePublisher = iUIStatePublisher;
+            _inputServ = inputService;
 
             gameStateSubscriber.Subscribe(OnGameStateChanged).AddTo(builder);
             _uiReqSubscriber.Subscribe(OnUIRequest).AddTo(builder);
@@ -63,6 +70,9 @@ namespace _001_Scripts.Managers
 
         private void OnDestroy()
         {
+            if (_inputServ != null)
+                _inputServ.OnInventoryToggle -= OnInvToggle;
+
             _bag?.Dispose();
         }
 

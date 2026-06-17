@@ -22,13 +22,7 @@ MonoBehaviour:
         itemGrade: 0
         itemType: 0
         weight: 0
-        ItemAttributes:
-        - attrType: 0
-          modifiers:
-          - modifierType: 1
-            value: 5
-            duration: 0
-            cooldown: 0
+        ItemAttributes: []
     - Key: 1
       Value:
         itemId: 1

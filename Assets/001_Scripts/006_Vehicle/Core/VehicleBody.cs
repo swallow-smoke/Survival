@@ -2,7 +2,7 @@ using _001_Scripts.Data.Structure.Interface;
 using _001_Scripts.Type.States;
 using UnityEngine;
 
-namespace _001_Scripts.Structure
+namespace _001_Scripts.Vehicle.Core
 {
     public abstract class VehicleBody : MonoBehaviour, IVehicle
     {

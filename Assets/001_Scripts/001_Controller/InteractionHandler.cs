@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
+using _001_Scripts.Controller.Handler;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Data.Structure.Interface;
 using _001_Scripts.Type.States;
 using MessagePipe;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using VContainer;
 
 namespace _001_Scripts.Controller
@@ -23,16 +23,26 @@ namespace _001_Scripts.Controller
         private Transform _lastHitTrs;
         private bool _canInteract;
         private PlayerUIState _uiState;
+        private IInputService _input;
         private IDisposable _bag;
 
         [Inject]
         public void Construct(IPublisher<InteractionUIMessage> uiPublisher,
-            ISubscriber<PlayerUIStateMsg> uiStateSubscriber)
+            ISubscriber<PlayerUIStateMsg> uiStateSubscriber,
+            IInputService inputService)
         {
             _uiPublisher = uiPublisher;
+            _input = inputService;
             var builder = DisposableBag.CreateBuilder();
             builder.Add(uiStateSubscriber.Subscribe(OnUIStateChanged));
             _bag = builder.Build();
+        }
+
+        private void Start()
+        {
+            if (_input == null) return;
+
+            _input.OnInteract += HandleInteract;
         }
 
         private void OnUIStateChanged(PlayerUIStateMsg msg)
@@ -113,14 +123,19 @@ namespace _001_Scripts.Controller
             }
         }
 
-        public void OnInteract(InputAction.CallbackContext context)
+        private void HandleInteract()
         {
-            if (!context.started) return;
             if (_uiState != PlayerUIState.None) return;
             if (_current is IConditionalInteractable && !_canInteract) return;
             _current?.Interact();
         }
 
-        private void OnDestroy() => _bag?.Dispose();
+        private void OnDestroy()
+        {
+            if (_input != null)
+                _input.OnInteract -= HandleInteract;
+
+            _bag?.Dispose();
+        }
     }
 }

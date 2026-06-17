@@ -2,12 +2,12 @@
 using System.Collections;
 using _001_Scripts.Data;
 using _001_Scripts.Data.Item;
+using _001_Scripts.Controller.Handler;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Type;
 using _001_Scripts.Type.States;
 using MessagePipe;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using VContainer;
 using static _001_Scripts.Util;
 
@@ -19,6 +19,7 @@ namespace _001_Scripts.Controller
         private IPublisher<InvReqMessage> _invMessagePublisher;
         private IPublisher<CraftReqMessage> _craftMessagePublisher;
         private IPublisher<PlayerStatMessage> _playerStatMessagePublisher;
+        private IInputService _input;
         private float _lastRun;
 
         private PlayerStatMessage postMsg;
@@ -72,22 +73,18 @@ namespace _001_Scripts.Controller
             // }
         }
 
-        public void OnRun(InputAction.CallbackContext ctx)
+        private void HandleRun(bool value)
         {
             if (isSwimming) return;
-            if (ctx.performed) curState = PlayerMovementState.Running;
-            else curState = PlayerMovementState.Walking;
+            curState = value ? PlayerMovementState.Running : PlayerMovementState.Walking;
         }
 
-        public void OnInteract(InputAction.CallbackContext context)
+        private void HandleInteract()
         {
-            if (context.started)
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, transform.forward, out hit, 2.0f))
             {
-                RaycastHit hit;
-                if (Physics.Raycast(transform.position, transform.forward, out hit, 2.0f))
-                {
-                    Debug.Log("Interacted with: " + hit.collider.name);
-                }
+                Debug.Log("Interacted with: " + hit.collider.name);
             }
         }
 
@@ -120,17 +117,27 @@ namespace _001_Scripts.Controller
 
 
         
+        private void Start()
+        {
+            if (_input == null) return;
+
+            _input.OnRun += HandleRun;
+            _input.OnInteract += HandleInteract;
+        }
+
         [Inject]
         public void Construct(IPublisher<InvReqMessage> invMessagePublisher,
             IPublisher<CraftReqMessage> craftMessagePublisher,
             IPublisher<PlayerStatMessage> playerStatMessagePublisher,
-            ISubscriber<PlayerMovementMessage> movementSubscriber)
+            ISubscriber<PlayerMovementMessage> movementSubscriber,
+            IInputService inputService)
         {
             var builder = DisposableBag.CreateBuilder();
 
             _invMessagePublisher = invMessagePublisher;
             _craftMessagePublisher = craftMessagePublisher;
             _playerStatMessagePublisher = playerStatMessagePublisher;
+            _input = inputService;
             builder.Add(movementSubscriber.Subscribe(OnMove));
 
             bag = builder.Build();
@@ -138,6 +145,12 @@ namespace _001_Scripts.Controller
 
         private void OnDestroy()
         {
+            if (_input != null)
+            {
+                _input.OnRun -= HandleRun;
+                _input.OnInteract -= HandleInteract;
+            }
+
             bag?.Dispose();
         }
     }

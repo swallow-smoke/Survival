@@ -2,7 +2,7 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-namespace _001_Scripts.Structure
+namespace _001_Scripts.Vehicle.Core
 {
     public class VehicleInjector : MonoBehaviour
     {

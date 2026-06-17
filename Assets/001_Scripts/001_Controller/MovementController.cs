@@ -1,12 +1,13 @@
 using System;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
+using _001_Scripts.Controller.Handler;
 using _001_Scripts.Data.Structure.Interface;
 using _001_Scripts.Structure;
 using _001_Scripts.Type.States;
+using _001_Scripts.Vehicle.Component;
 using MessagePipe;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using VContainer;
 
 namespace _001_Scripts.Controller
@@ -36,6 +37,7 @@ namespace _001_Scripts.Controller
         private bool isCrouching;
 
         private IPublisher<PlayerMovementMessage> iMovementPublisher;
+        private IInputService _input;
         private IDisposable _bag;
 
         private IVehicleControllable _activeVehicle;
@@ -48,6 +50,19 @@ namespace _001_Scripts.Controller
         private void Awake()
         {
             _rb.interpolation = RigidbodyInterpolation.Interpolate;
+        }
+
+        private void Start()
+        {
+            if (_input == null) return;
+
+            _input.OnMove += HandleMove;
+            _input.OnLook += HandleLook;
+            _input.OnVerticalUp += HandleVerticalUp;
+            _input.OnJump += HandleJump;
+            _input.OnRun += HandleRun;
+            _input.OnVerticalDown += HandleVerticalDown;
+            _input.OnExitVehicle += HandleExitVehicle;
         }
 
         private void OnTriggerEnter(Collider other)
@@ -102,9 +117,9 @@ namespace _001_Scripts.Controller
             iMovementPublisher.Publish(new PlayerMovementMessage(_rb.linearVelocity.magnitude / runningSpeed, isGround, publs, isSwimming));
         }
 
-        public void OnMove(InputAction.CallbackContext context)
+        private void HandleMove(Vector2 value)
         {
-            inputValue = context.ReadValue<Vector2>();
+            inputValue = value;
 
             if (_activeVehicle != null)
             {
@@ -115,59 +130,53 @@ namespace _001_Scripts.Controller
             moveDir.y = 0;
         }
 
-        public void OnLook(InputAction.CallbackContext context)
+        private void HandleLook(Vector2 value)
         {
             if (_activeVehicle is SmallSubVehicle small)
-                small.HandleLook(context.ReadValue<Vector2>());
+                small.HandleLook(value);
         }
 
-        public void OnJump(InputAction.CallbackContext context)
+        private void HandleVerticalUp(float value)
         {
             if (!isCanMove) return;
 
             if (_activeVehicle != null)
             {
-                if (context.started) _activeVehicle.HandleVertical(1f);
-                else if (context.canceled) _activeVehicle.HandleVertical(0f);
+                _activeVehicle.HandleVertical(value);
                 return;
             }
 
             if (isSwimming)
-            {
-                if (context.started) isSwimUp = true;
-                else if (context.canceled) isSwimUp = false;
-            }
-            else if (context.started && isGround)
-            {
-                _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            }
+                isSwimUp = value > 0f;
         }
 
-        public void OnRunning(InputAction.CallbackContext context)
+        private void HandleJump()
         {
-            if (context.performed) isRunning = true;
-            else if (context.canceled) isRunning = false;
+            if (!isCanMove) return;
+            if (_activeVehicle != null) return;
+            if (isSwimming) return;
+
+            if (isGround)
+                _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
 
-        public void OnShift(InputAction.CallbackContext context)
+        private void HandleRun(bool value)
+        {
+            isRunning = value;
+        }
+
+        private void HandleVerticalDown(float value)
         {
             if (_activeVehicle != null)
             {
-                if (context.started) _activeVehicle.HandleVertical(-1f);
-                else if (context.canceled) _activeVehicle.HandleVertical(0f);
+                _activeVehicle.HandleVertical(value);
                 return;
             }
 
             if (isSwimming)
-            {
-                if (context.started) isSwimDown = true;
-                else if (context.canceled) isSwimDown = false;
-            }
+                isSwimDown = value < 0f;
             else
-            {
-                if (context.started) isCrouching = true;
-                else if (context.canceled) isCrouching = false;
-            }
+                isCrouching = value < 0f;
         }
 
         private void SetSwimming(bool value)
@@ -208,9 +217,8 @@ namespace _001_Scripts.Controller
             _activeSeat = msg.Seat as SeatComponent;
         }
 
-        public void OnExitVehicle(InputAction.CallbackContext context)
+        private void HandleExitVehicle()
         {
-            if (!context.started) return;
             if (_vehicleState != PlayerVehicleState.Seated) return;
             _activeSeat?.StandWithDefaults();
         }
@@ -228,10 +236,12 @@ namespace _001_Scripts.Controller
             ISubscriber<PlayerStatMessage> playerStatSubscriber,
             ISubscriber<PlayerUIStateMsg> playerUIStateSubscriber,
             ISubscriber<PlayerVehicleStateMsg> vehicleStateSubscriber,
-            ISubscriber<VehicleControlAssignedMsg> vehicleControlSubscriber)
+            ISubscriber<VehicleControlAssignedMsg> vehicleControlSubscriber,
+            IInputService inputService)
         {
             var builder = DisposableBag.CreateBuilder();
             iMovementPublisher = movementPublisher;
+            _input = inputService;
 
             builder.Add(playerStatSubscriber.Subscribe(Stamina));
             builder.Add(playerUIStateSubscriber.Subscribe(UIState));
@@ -241,6 +251,20 @@ namespace _001_Scripts.Controller
             _bag = builder.Build();
         }
 
-        private void OnDestroy() => _bag?.Dispose();
+        private void OnDestroy()
+        {
+            if (_input != null)
+            {
+                _input.OnMove -= HandleMove;
+                _input.OnLook -= HandleLook;
+                _input.OnVerticalUp -= HandleVerticalUp;
+                _input.OnJump -= HandleJump;
+                _input.OnRun -= HandleRun;
+                _input.OnVerticalDown -= HandleVerticalDown;
+                _input.OnExitVehicle -= HandleExitVehicle;
+            }
+
+            _bag?.Dispose();
+        }
     }
 }

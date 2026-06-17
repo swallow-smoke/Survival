@@ -7,7 +7,7 @@ using MessagePipe;
 using UnityEngine;
 using VContainer;
 
-namespace _001_Scripts.Structure
+namespace _001_Scripts.Vehicle.Component
 {
     public class SeatComponent : MonoBehaviour, ISeat
     {

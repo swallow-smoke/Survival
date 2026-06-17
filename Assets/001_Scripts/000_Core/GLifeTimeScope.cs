@@ -1,10 +1,13 @@
 ﻿using _001_Scripts.Controller;
+using _001_Scripts.Controller.Handler;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Interface;
 using _001_Scripts.Managers;
 using _001_Scripts.Structure;
+using _001_Scripts.Vehicle.Core;
 using MessagePipe;
+using UnityEngine.InputSystem.LowLevel;
 using VContainer;
 using VContainer.Unity;
 
@@ -56,6 +59,7 @@ namespace _001_Scripts.Core
             builder.RegisterComponentInHierarchy<PlayerContext>().As<IPlayerContext>();
             builder.RegisterComponentInHierarchy<VehicleInjector>();
             builder.RegisterComponentInHierarchy<VehicleSpawner>();
+            builder.RegisterComponentInHierarchy<InputHandler>().As<IInputService>();
             // builder.RegisterComponentInHierarchy<CraftController>().As<ICraftService>();
 
             #endregion

@@ -286,7 +286,7 @@ MonoBehaviour:
   maxFuel: 50
   condition: 0
   moveSpeed: 50
-  turnSensitivity: 0.5
+  turnSensitivity: 0.1
   pitchMin: -80
   pitchMax: 80
   accelForce: 10
@@ -298,6 +298,7 @@ MonoBehaviour:
   waterLinearDrag: 3
   waterAngularDrag: 3
   gravityNeutralizeSpeed: 2
+  rotationDamping: 3
 --- !u!65 &9174159964476136944
 BoxCollider:
   m_ObjectHideFlags: 0

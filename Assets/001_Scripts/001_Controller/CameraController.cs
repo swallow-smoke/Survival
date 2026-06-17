@@ -1,12 +1,12 @@
 using System;
 using System.Threading;
+using _001_Scripts.Controller.Handler;
 using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Data.Structure.Interface;
 using _001_Scripts.Type.States;
 using MessagePipe;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using VContainer;
 
 namespace _001_Scripts.Controller
@@ -33,6 +33,7 @@ namespace _001_Scripts.Controller
         float currentVelocity;
 
         private IDisposable _bag;
+        private IInputService _input;
         private bool curCamState = true;
         private bool _vehicleMode;
         private Transform _originalParent;
@@ -42,6 +43,11 @@ namespace _001_Scripts.Controller
             Cursor.lockState = CursorLockMode.Locked;
             pitch = _trs.eulerAngles.x;
             yaw = _trs.eulerAngles.y;
+
+            if (_input == null) return;
+
+            _input.OnLook += HandleLook;
+            _input.OnPersonChange += HandlePersonChange;
         }
 
         private void Locker(PlayerUIStateMsg msg)
@@ -59,11 +65,11 @@ namespace _001_Scripts.Controller
             }
         }
 
-        public void OnLook(InputAction.CallbackContext context)
+        private void HandleLook(Vector2 value)
         {
             if (!curCamState || _vehicleMode) return;
 
-            lookVector = context.ReadValue<Vector2>();
+            lookVector = value;
 
             pitch -= lookVector.y * sensitivity;
             yaw += lookVector.x * sensitivity;
@@ -88,10 +94,8 @@ namespace _001_Scripts.Controller
             }
         }
 
-        public void OnPeronChange(InputAction.CallbackContext context)
+        private void HandlePersonChange(float value)
         {
-            var value = context.ReadValue<float>();
-
             if (value > 0.1f)
             {
                 isThirdPerson = true;
@@ -130,8 +134,11 @@ namespace _001_Scripts.Controller
         [Inject]
         private void Constructor(
             ISubscriber<PlayerUIStateMsg> iPlayerUIStateSub,
-            ISubscriber<VehicleControlAssignedMsg> vehicleControlSub)
+            ISubscriber<VehicleControlAssignedMsg> vehicleControlSub,
+            IInputService inputService)
         {
+            _input = inputService;
+
             var builder = DisposableBag.CreateBuilder();
 
             iPlayerUIStateSub.Subscribe(Locker).AddTo(builder);
@@ -140,6 +147,15 @@ namespace _001_Scripts.Controller
             _bag = builder.Build();
         }
 
-        private void OnDestroy() => _bag?.Dispose();
+        private void OnDestroy()
+        {
+            if (_input != null)
+            {
+                _input.OnLook -= HandleLook;
+                _input.OnPersonChange -= HandlePersonChange;
+            }
+
+            _bag?.Dispose();
+        }
     }
 }
