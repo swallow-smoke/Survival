@@ -2825,8 +2825,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed177eb585854dc5a4bab2996ab52045, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Controller.MovementController
-  speed: 2
-  runningSpeed: 15
+  speed: 10
+  runningSpeed: 20
   jumpForce: 5
   crouchSpeed: 7.5
   swimSpeed: 10
@@ -3557,9 +3557,9 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 841331837}
-        m_TargetAssemblyTypeName: _001_Scripts.Controller.MovementController, Assembly-CSharp
-        m_MethodName: OnMove
+      - m_Target: {fileID: 1532911490}
+        m_TargetAssemblyTypeName: _001_Scripts.Controller.Handler.InputHandler, Assembly-CSharp
+        m_MethodName: HandleMove
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3573,21 +3573,9 @@ MonoBehaviour:
     m_ActionName: 'Player/Movement[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 622368668}
-        m_TargetAssemblyTypeName: _001_Scripts.Controller.CameraController, Assembly-CSharp
-        m_MethodName: OnLook
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 841331837}
-        m_TargetAssemblyTypeName: _001_Scripts.Controller.MovementController, Assembly-CSharp
-        m_MethodName: OnLook
+      - m_Target: {fileID: 1532911490}
+        m_TargetAssemblyTypeName: _001_Scripts.Controller.Handler.InputHandler, Assembly-CSharp
+        m_MethodName: HandleLook
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3601,9 +3589,9 @@ MonoBehaviour:
     m_ActionName: 'Player/Cam[/Mouse/delta]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 841331837}
-        m_TargetAssemblyTypeName: _001_Scripts.Controller.MovementController, Assembly-CSharp
-        m_MethodName: OnJump
+      - m_Target: {fileID: 1532911490}
+        m_TargetAssemblyTypeName: _001_Scripts.Controller.Handler.InputHandler, Assembly-CSharp
+        m_MethodName: HandleJump
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3617,21 +3605,9 @@ MonoBehaviour:
     m_ActionName: 'Player/Jump[/Keyboard/space]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 841331834}
-        m_TargetAssemblyTypeName: _001_Scripts.Controller.PlayerController, Assembly-CSharp
-        m_MethodName: OnRun
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 841331837}
-        m_TargetAssemblyTypeName: _001_Scripts.Controller.MovementController, Assembly-CSharp
-        m_MethodName: OnRunning
+      - m_Target: {fileID: 1532911490}
+        m_TargetAssemblyTypeName: _001_Scripts.Controller.Handler.InputHandler, Assembly-CSharp
+        m_MethodName: HandleRun
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3645,9 +3621,9 @@ MonoBehaviour:
     m_ActionName: 'Player/Shift[/Keyboard/leftShift]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 622368668}
-        m_TargetAssemblyTypeName: _001_Scripts.Controller.CameraController, Assembly-CSharp
-        m_MethodName: OnPeronChange
+      - m_Target: {fileID: 1532911490}
+        m_TargetAssemblyTypeName: _001_Scripts.Controller.Handler.InputHandler, Assembly-CSharp
+        m_MethodName: HandlePersonChange
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3661,9 +3637,9 @@ MonoBehaviour:
     m_ActionName: 'Player/Cam[/Mouse/scroll/y]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 205720149}
-        m_TargetAssemblyTypeName: _001_Scripts.Managers.UIManager, Assembly-CSharp
-        m_MethodName: OnInvToggle
+      - m_Target: {fileID: 1532911490}
+        m_TargetAssemblyTypeName: _001_Scripts.Controller.Handler.InputHandler, Assembly-CSharp
+        m_MethodName: HandleInventoryToggle
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3677,9 +3653,9 @@ MonoBehaviour:
     m_ActionName: 'Player/UI[/Keyboard/e]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 841331837}
-        m_TargetAssemblyTypeName: _001_Scripts.Controller.MovementController, Assembly-CSharp
-        m_MethodName: OnShift
+      - m_Target: {fileID: 1532911490}
+        m_TargetAssemblyTypeName: _001_Scripts.Controller.Handler.InputHandler, Assembly-CSharp
+        m_MethodName: HandleShift
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3693,9 +3669,9 @@ MonoBehaviour:
     m_ActionName: 'Player/Crouch[/Keyboard/c]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 841331842}
-        m_TargetAssemblyTypeName: _001_Scripts.Controller.InteractionHandler, Assembly-CSharp
-        m_MethodName: OnInteract
+      - m_Target: {fileID: 1532911490}
+        m_TargetAssemblyTypeName: _001_Scripts.Controller.Handler.InputHandler, Assembly-CSharp
+        m_MethodName: HandleInteract
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3707,6 +3683,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: e14fcbe9-2aca-4703-af68-c0293708a825
     m_ActionName: 'Player/Interaction[/Keyboard/f]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1532911490}
+        m_TargetAssemblyTypeName: _001_Scripts.Controller.Handler.InputHandler, Assembly-CSharp
+        m_MethodName: HandleExitVehicle
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: bd2b23d0-635f-44c2-80b1-bd91803a8511
+    m_ActionName: 'Player/VehicleExit[/Keyboard/e]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
