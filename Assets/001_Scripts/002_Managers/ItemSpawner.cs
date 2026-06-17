@@ -82,7 +82,7 @@ namespace _001_Scripts.Managers
             var go = Instantiate(pickupPrefab, position, rotation);
             _resolver.InjectGameObject(go);
 
-            var pickup = go.GetComponent<PickupInteractable>();
+            var pickup = go.GetComponent<PickupObject>();
             pickup.Setup(itemId, count, displayName);
 
             return go;

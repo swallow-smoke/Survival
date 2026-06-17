@@ -37,6 +37,7 @@ namespace _001_Scripts.Controller
         private bool curCamState = true;
         private bool _vehicleMode;
         private Transform _originalParent;
+        private Vector3 _originalLocalPos;
 
         private void Start()
         {
@@ -80,6 +81,7 @@ namespace _001_Scripts.Controller
             if (msg.Controller != null)
             {
                 _originalParent = _trs.parent;
+                _originalLocalPos = _trs.localPosition;
                 _trs.SetParent(msg.Controller.CameraAnchor);
                 _trs.localPosition = Vector3.zero;
                 _trs.localRotation = Quaternion.identity;
@@ -88,7 +90,9 @@ namespace _001_Scripts.Controller
             else
             {
                 _trs.SetParent(_originalParent);
-                pitch = _trs.eulerAngles.x;
+                _trs.localPosition = _originalLocalPos;
+                float rawPitch = _trs.eulerAngles.x;
+                pitch = rawPitch > 180f ? rawPitch - 360f : rawPitch;
                 yaw = _trs.eulerAngles.y;
                 _vehicleMode = false;
             }

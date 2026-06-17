@@ -6,7 +6,7 @@ using VContainer;
 
 namespace _001_Scripts.Structure
 {
-    public class PickupInteractable : MonoBehaviour, IInteractable, IInteractableInfo
+    public class PickupObject : MonoBehaviour, IInteractable, IInteractableInfo
     {
         [SerializeField] private int itemId;
         [SerializeField] private int count = 1;
