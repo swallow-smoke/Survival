@@ -1,5 +1,6 @@
 using _001_Scripts.Data.Structure.Interface;
 using _001_Scripts.Interface;
+using _001_Scripts.Object.Vehicle;
 using _001_Scripts.Vehicle.Core;
 using UnityEngine;
 

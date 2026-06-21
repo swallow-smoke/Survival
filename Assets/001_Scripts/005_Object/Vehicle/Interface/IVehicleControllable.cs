@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace _001_Scripts.Data.Structure.Interface
+namespace _001_Scripts.Object.Vehicle
 {
     public interface IVehicleControllable
     {

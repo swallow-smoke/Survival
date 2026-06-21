@@ -3,6 +3,7 @@ using _001_Scripts.Controller.Handler;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Data.Structure.Interface;
+using _001_Scripts.Object.Vehicle;
 using _001_Scripts.Structure;
 using _001_Scripts.Type.States;
 using _001_Scripts.Vehicle.Component;

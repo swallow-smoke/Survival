@@ -1,6 +1,6 @@
 using _001_Scripts.Type.States;
 
-namespace _001_Scripts.Data.Structure.Interface
+namespace _001_Scripts.Object.Vehicle
 {
     public interface IVehicle
     {

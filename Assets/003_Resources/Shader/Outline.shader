@@ -32,8 +32,9 @@ Shader "Astra-Nope/Outline"
 
             struct Attributes
             {
-                float4 positionOS : POSITION;
-                float3 normalOS   : NORMAL;
+                float4 positionOS     : POSITION;
+                float3 normalOS       : NORMAL;
+                float3 smoothNormalOS : TEXCOORD1;
             };
 
             struct Varyings
@@ -45,7 +46,8 @@ Shader "Astra-Nope/Outline"
             {
                 Varyings OUT;
 
-                float3 positionOS = IN.positionOS.xyz + IN.normalOS * _OutlineWidth;
+                float3 extrudeDir = normalize(IN.smoothNormalOS);
+                float3 positionOS = IN.positionOS.xyz + extrudeDir * _OutlineWidth;
                 OUT.positionCS = TransformObjectToHClip(positionOS);
 
                 return OUT;

@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using _001_Scripts.Controller.Handler;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
@@ -66,19 +65,27 @@ namespace _001_Scripts.Controller
             var renderer = go.GetComponent<Renderer>();
             if (renderer == null) return;
 
-            var mats = renderer.materials.ToList();
+            var current = renderer.sharedMaterials;
 
             if (on)
             {
-                if (!mats.Any(m => m.shader == _outlineMat.shader))
-                    mats.Add(_outlineMat);
+                if (current.Length > 0 && current[current.Length - 1] == _outlineMat)
+                    return; // already highlighted
+
+                var withOutline = new Material[current.Length + 1];
+                current.CopyTo(withOutline, 0);
+                withOutline[current.Length] = _outlineMat;
+                renderer.sharedMaterials = withOutline;
             }
             else
             {
-                mats.RemoveAll(m => m.shader == _outlineMat.shader);
-            }
+                if (current.Length == 0 || current[current.Length - 1] != _outlineMat)
+                    return; // not highlighted
 
-            renderer.materials = mats.ToArray();
+                var withoutOutline = new Material[current.Length - 1];
+                Array.Copy(current, withoutOutline, current.Length - 1);
+                renderer.sharedMaterials = withoutOutline;
+            }
         }
 
         private void Update()

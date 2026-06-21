@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7847429438331518040}
   - component: {fileID: 6579560682481522731}
   - component: {fileID: 8655322728169079502}
-  - component: {fileID: 8489531785167245308}
+  - component: {fileID: 2648896391472476048}
   m_Layer: 12
   m_Name: Test
   m_TagString: Untagged
@@ -113,7 +113,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8489531785167245308
+--- !u!114 &2648896391472476048
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -122,9 +122,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 6759891727103965164}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b2e8c8d253ba72c4ab13d1f6f4258c97, type: 3}
+  m_Script: {fileID: 11500000, guid: 683ab852fad9d0e4e81966713497dc7c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Structure.PickupInteractable
+  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Structure.PickupObject
   itemId: 0
-  count: 35
-  displayName: asdf
+  count: 1
+  displayName: Woowang

@@ -1,4 +1,5 @@
 using _001_Scripts.Data.Structure.Interface;
+using _001_Scripts.Object.Vehicle;
 
 namespace _001_Scripts.Data.Message.Player
 {
