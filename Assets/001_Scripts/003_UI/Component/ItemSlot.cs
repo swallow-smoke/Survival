@@ -59,7 +59,12 @@ namespace _001_Scripts.UI.Component
 
         public void Clear()
         {
-            
+            itemName = "";
+            itemDesc = "";
+            itemType = "";
+            stock.text = "";
+            stock.gameObject.SetActive(false);
+            durability.gameObject.SetActive(false);
         }
 
         private void Awake()

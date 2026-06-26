@@ -20,8 +20,8 @@ namespace _001_Scripts.Managers
     public class UIManager : MonoBehaviour, IUIService, IInitializable
     {
         private IDisposable _bag;
-        private IPublisher<PlayerUIStateMsg> iUIStatePublisher;
         private IInputService _inputServ;
+        private UIPanelPresenter _panelPresenter;
         [SerializedDictionary] public SerializedDictionary<string, PanelBase> uiPanels = new();
 
         public void Initialize()
@@ -30,21 +30,8 @@ namespace _001_Scripts.Managers
         }
 
         public void OnInvToggle()
-        {
-            var panel = uiPanels["Inventory"];
+            => _panelPresenter.Toggle("Inventory", PlayerUIState.Inventory);
 
-            if (panel.isViz)
-            {
-                panel.Close();
-                iUIStatePublisher.Publish(new PlayerUIStateMsg(PlayerUIState.None));
-            }
-            else
-            {
-                panel.Open();
-                iUIStatePublisher.Publish(new PlayerUIStateMsg(PlayerUIState.Inventory));
-            }
-        }
-        
         private void Start()
         {
             if (_inputServ == null) return;
@@ -60,8 +47,8 @@ namespace _001_Scripts.Managers
         {
             var builder = DisposableBag.CreateBuilder();
 
-            this.iUIStatePublisher = iUIStatePublisher;
             _inputServ = inputService;
+            _panelPresenter = new UIPanelPresenter(uiPanels, iUIStatePublisher);
 
             gameStateSubscriber.Subscribe(OnGameStateChanged).AddTo(builder);
             _uiReqSubscriber.Subscribe(OnUIRequest).AddTo(builder);

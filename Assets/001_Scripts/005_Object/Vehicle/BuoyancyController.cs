@@ -48,50 +48,8 @@ namespace _001_Scripts.Structure
             _airAngularDrag = _rb.angularDamping;
             _rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-            SetupBuoyancyCollider();
+            _buoyancyCollider = BuoyancyColliderBuilder.Build(this, buoyancyBoxSize, buoyancyBoxOffset);
             CalculateVolume();
-        }
-
-        private void SetupBuoyancyCollider()
-        {
-            var child = new GameObject("BuoyancyCollider");
-            child.transform.SetParent(transform);
-            child.transform.localPosition = buoyancyBoxOffset;
-            child.transform.localRotation = Quaternion.identity;
-            child.transform.localScale = Vector3.one;
-
-            _buoyancyCollider = child.AddComponent<BoxCollider>();
-            _buoyancyCollider.isTrigger = true;
-
-            if (buoyancyBoxSize != Vector3.zero)
-            {
-                _buoyancyCollider.size = buoyancyBoxSize;
-            }
-            else
-            {
-                var renderers = GetComponentsInChildren<Renderer>();
-                if (renderers.Length > 0)
-                {
-                    var bounds = renderers[0].bounds;
-                    foreach (var r in renderers)
-                        bounds.Encapsulate(r.bounds);
-
-                    _buoyancyCollider.size = new Vector3(
-                        bounds.size.x / transform.lossyScale.x,
-                        bounds.size.y / transform.lossyScale.y,
-                        bounds.size.z / transform.lossyScale.z
-                    );
-                    _buoyancyCollider.center = transform.InverseTransformPoint(bounds.center);
-                }
-                else
-                {
-                    _buoyancyCollider.size = Vector3.one;
-                    Debug.LogWarning("[BuoyancyController] Renderer 없음. BoxCollider 크기 1x1x1로 설정.");
-                }
-            }
-
-            var proxy = child.AddComponent<BuoyancyTriggerProxy>();
-            proxy.Initialize(this);
         }
 
         private void CalculateVolume()
