@@ -1,5 +1,6 @@
 using System;
 using _001_Scripts.Controller.Handler;
+using _001_Scripts.Controller.Interaction;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Data.Structure.Interface;
@@ -10,6 +11,10 @@ using VContainer;
 
 namespace _001_Scripts.Controller
 {
+    /// <summary>
+    /// 시선 레이캐스트로 상호작용 대상을 감지하고, 라벨 UI를 발행한다.
+    /// 하이라이트(머티리얼 조작)는 <see cref="OutlineHighlighter"/>에 위임한다.
+    /// </summary>
     public class InteractionHandler : MonoBehaviour
     {
         [SerializeField] private Transform _trs;
@@ -24,6 +29,7 @@ namespace _001_Scripts.Controller
         private PlayerUIState _uiState;
         private IInputService _input;
         private IDisposable _bag;
+        private OutlineHighlighter _highlighter;
 
         [Inject]
         public void Construct(IPublisher<InteractionUIMessage> uiPublisher,
@@ -32,6 +38,7 @@ namespace _001_Scripts.Controller
         {
             _uiPublisher = uiPublisher;
             _input = inputService;
+            _highlighter = new OutlineHighlighter(_outlineMat);
             var builder = DisposableBag.CreateBuilder();
             builder.Add(uiStateSubscriber.Subscribe(OnUIStateChanged));
             _bag = builder.Build();
@@ -53,39 +60,11 @@ namespace _001_Scripts.Controller
 
         private void ClearTarget()
         {
-            SetHighlight(_lastHitTrs.gameObject, false);
+            _highlighter.SetHighlight(_lastHitTrs.gameObject, false);
             _lastHitTrs = null;
             _current = null;
             _canInteract = false;
             _uiPublisher.Publish(new InteractionUIMessage(false, "", "F"));
-        }
-
-        private void SetHighlight(GameObject go, bool on)
-        {
-            var renderer = go.GetComponent<Renderer>();
-            if (renderer == null) return;
-
-            var current = renderer.sharedMaterials;
-
-            if (on)
-            {
-                if (current.Length > 0 && current[current.Length - 1] == _outlineMat)
-                    return; // already highlighted
-
-                var withOutline = new Material[current.Length + 1];
-                current.CopyTo(withOutline, 0);
-                withOutline[current.Length] = _outlineMat;
-                renderer.sharedMaterials = withOutline;
-            }
-            else
-            {
-                if (current.Length == 0 || current[current.Length - 1] != _outlineMat)
-                    return; // not highlighted
-
-                var withoutOutline = new Material[current.Length - 1];
-                Array.Copy(current, withoutOutline, current.Length - 1);
-                renderer.sharedMaterials = withoutOutline;
-            }
         }
 
         private void Update()
@@ -99,13 +78,13 @@ namespace _001_Scripts.Controller
                 if (!ReferenceEquals(_lastHitTrs, hitTrs))
                 {
                     if (_lastHitTrs != null)
-                        SetHighlight(_lastHitTrs.gameObject, false);
+                        _highlighter.SetHighlight(_lastHitTrs.gameObject, false);
 
                     _lastHitTrs = hitTrs;
                     _current = hitTrs.GetComponent<IInteractable>();
 
                     if (_current != null)
-                        SetHighlight(hitTrs.gameObject, true);
+                        _highlighter.SetHighlight(hitTrs.gameObject, true);
 
                     string label;
                     if (_current is IConditionalInteractable conditional)

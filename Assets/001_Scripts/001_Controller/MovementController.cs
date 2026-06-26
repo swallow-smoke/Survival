@@ -1,8 +1,8 @@
 using System;
 using _001_Scripts.Controller.Handler;
+using _001_Scripts.Controller.Movement;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
-using _001_Scripts.Data.Structure.Interface;
 using _001_Scripts.Object.Vehicle;
 using _001_Scripts.Structure;
 using _001_Scripts.Type.States;
@@ -27,7 +27,9 @@ namespace _001_Scripts.Controller
         [SerializeField] private LayerMask layer;
         [SerializeField] private Transform footTrs;
         [SerializeField] private Transform _trs;
-        private Vector3 moveDir;
+        [SerializeField] private float maxDistance = 1f;
+        [SerializeField] private CameraController _camCont;
+
         private Vector2 inputValue;
         private bool isRunning;
         private bool isGround = true;
@@ -37,6 +39,11 @@ namespace _001_Scripts.Controller
         private bool isSwimDown;
         private bool isCrouching;
 
+        private MovementContext _ctx;
+        private IMovementMode _ground;
+        private IMovementMode _swim;
+        private IMovementMode _insideLarge;
+
         private IPublisher<PlayerMovementMessage> iMovementPublisher;
         private IInputService _input;
         private IDisposable _bag;
@@ -45,12 +52,22 @@ namespace _001_Scripts.Controller
         private SeatComponent _activeSeat;
         private PlayerVehicleState _vehicleState;
 
-        [SerializeField] private float maxDistance = 1f;
-        [SerializeField] CameraController _camCont;
-
         private void Awake()
         {
             _rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+            _ctx = new MovementContext
+            {
+                Rb = _rb,
+                Speed = speed,
+                RunningSpeed = runningSpeed,
+                CrouchSpeed = crouchSpeed,
+                SwimSpeed = swimSpeed,
+                SwimVerticalSpeed = swimVerticalSpeed,
+            };
+            _ground = new GroundMovementMode();
+            _swim = new SwimMovementMode();
+            _insideLarge = new InsideLargeMovementMode();
         }
 
         private void Start()
@@ -81,41 +98,45 @@ namespace _001_Scripts.Controller
         private void FixedUpdate()
         {
             if (!isCanMove) return;
-
             if (_vehicleState == PlayerVehicleState.Seated) return;
 
-            moveDir = (_camCont.transform.forward * inputValue.y) + (_camCont.transform.right * inputValue.x);
-            moveDir.y = 0;
-            moveDir.Normalize();
+            _ctx.MoveDir = ComputeMoveDir();
+            _ctx.IsRunning = isRunning;
+            _ctx.IsCrouching = isCrouching;
+            _ctx.IsSwimUp = isSwimUp;
+            _ctx.IsSwimDown = isSwimDown;
 
-            if (_vehicleState == PlayerVehicleState.InsideLarge)
-            {
-                float currentSpeed = isCrouching ? crouchSpeed : (isRunning ? runningSpeed : speed);
-                _rb.MovePosition(_rb.position + moveDir * (currentSpeed * Time.fixedDeltaTime));
-            }
-            else if (isSwimming)
-            {
-                float verticalVelocity = 0f;
-                if (isSwimUp) verticalVelocity = swimVerticalSpeed;
-                else if (isSwimDown) verticalVelocity = -swimVerticalSpeed;
+            SelectMode().Tick(_ctx);
 
-                _rb.linearVelocity = new Vector3(moveDir.x * swimSpeed, verticalVelocity, moveDir.z * swimSpeed);
-            }
-            else
-            {
-                float currentSpeed = isCrouching ? crouchSpeed : (isRunning ? runningSpeed : speed);
-                _rb.linearVelocity = new Vector3(moveDir.x * currentSpeed, _rb.linearVelocity.y, moveDir.z * currentSpeed);
-            }
+            ApplyRotation();
 
+            isGround = !isSwimming && Physics.Raycast(footTrs.position, Vector3.down, maxDistance, layer);
+            Vector3 publs = transform.InverseTransformDirection(_rb.linearVelocity) / runningSpeed;
+            iMovementPublisher.Publish(new PlayerMovementMessage(_rb.linearVelocity.magnitude / runningSpeed, isGround, publs, isSwimming));
+        }
+
+        private IMovementMode SelectMode()
+        {
+            if (_vehicleState == PlayerVehicleState.InsideLarge) return _insideLarge;
+            if (isSwimming) return _swim;
+            return _ground;
+        }
+
+        private Vector3 ComputeMoveDir()
+        {
+            Vector3 dir = (_camCont.transform.forward * inputValue.y) + (_camCont.transform.right * inputValue.x);
+            dir.y = 0;
+            dir.Normalize();
+            return dir;
+        }
+
+        private void ApplyRotation()
+        {
             if (_rb.linearVelocity.magnitude > 0.1f)
             {
                 Quaternion targetRot = Quaternion.Euler(0, _trs.rotation.eulerAngles.y, 0);
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, 360f * Time.fixedDeltaTime);
             }
-
-            Vector3 publs = transform.InverseTransformDirection(_rb.linearVelocity) / runningSpeed;
-            isGround = !isSwimming && Physics.Raycast(footTrs.position, Vector3.down, maxDistance, layer);
-            iMovementPublisher.Publish(new PlayerMovementMessage(_rb.linearVelocity.magnitude / runningSpeed, isGround, publs, isSwimming));
         }
 
         private void HandleMove(Vector2 value)
@@ -123,12 +144,7 @@ namespace _001_Scripts.Controller
             inputValue = value;
 
             if (_activeVehicle != null)
-            {
                 _activeVehicle.HandleMove(inputValue);
-                return;
-            }
-
-            moveDir.y = 0;
         }
 
         private void HandleLook(Vector2 value)
