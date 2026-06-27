@@ -2808,11 +2808,6 @@ MonoBehaviour:
     staminaCure: 1
     hungryUsage: 1
     waterUsage: 1
-  animator: {fileID: 841331839}
-  movement: {fileID: 9100000, guid: 9dfa77720d1138646b029b131dd1829d, type: 2}
-  falling: {fileID: 9100000, guid: 9865311bdc5547246bb06972deb15326, type: 2}
-  LandClip: {fileID: 3094330708855449807, guid: c969c57136eab8b48b882fdc45e975c4,
-    type: 3}
 --- !u!114 &841331837
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2831,9 +2826,6 @@ MonoBehaviour:
   crouchSpeed: 7.5
   swimSpeed: 10
   swimVerticalSpeed: 5
-  waterLayer:
-    serializedVersion: 2
-    m_Bits: 16
   _rb: {fileID: 841331832}
   layer:
     serializedVersion: 2

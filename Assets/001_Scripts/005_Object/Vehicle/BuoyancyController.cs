@@ -1,4 +1,5 @@
 using _001_Scripts.Controller;
+using _001_Scripts.Core._000_World._001_Water.Interface;
 using UnityEngine;
 
 namespace _001_Scripts.Structure
@@ -28,7 +29,7 @@ namespace _001_Scripts.Structure
         [SerializeField] private Vector3 buoyancyBoxOffset = Vector3.zero;
 
         private BoxCollider _buoyancyCollider;
-        private WaterVolume _currentWater;
+        private IWaterbody _currentWater;
         private float _effectiveVolume;
         private float _airLinearDrag;
         private float _airAngularDrag;
@@ -85,7 +86,7 @@ namespace _001_Scripts.Structure
 
         private float CalculateSubmergedRatio()
         {
-            float surfaceY = _currentWater.GetSurfaceY();
+            float surfaceY = _currentWater.GetSurfaceY(transform.position);
             Bounds bounds = _buoyancyCollider.bounds;
             return Mathf.Clamp01((surfaceY - bounds.min.y) / bounds.size.y);
         }
@@ -103,14 +104,14 @@ namespace _001_Scripts.Structure
             _rb.angularDamping = Mathf.Lerp(_airAngularDrag, waterAngularDrag, SubmergedRatio);
         }
 
-        public void HandleEnterWater(WaterVolume water)
+        public void HandleEnterWater(IWaterbody water)
         {
             _currentWater = water;
             _rb.useGravity = false;
             OnEnterWater?.Invoke();
         }
 
-        public void HandleExitWater(WaterVolume water)
+        public void HandleExitWater(IWaterbody water)
         {
             if (_currentWater != water) return;
 

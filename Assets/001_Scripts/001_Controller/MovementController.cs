@@ -1,6 +1,7 @@
 using System;
 using _001_Scripts.Controller.Handler;
 using _001_Scripts.Controller.Movement;
+using _001_Scripts.Core._000_World._001_Water.Interface;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Object.Vehicle;
@@ -22,13 +23,13 @@ namespace _001_Scripts.Controller
         [SerializeField] private float crouchSpeed = 7.5f;
         [SerializeField] private float swimSpeed = 10.0f;
         [SerializeField] private float swimVerticalSpeed = 5.0f;
-        [SerializeField] private LayerMask waterLayer;
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private LayerMask layer;
         [SerializeField] private Transform footTrs;
         [SerializeField] private Transform _trs;
         [SerializeField] private float maxDistance = 1f;
         [SerializeField] private CameraController _camCont;
+        private IWaterQuery _waterQuery;
 
         private Vector2 inputValue;
         private bool isRunning;
@@ -83,18 +84,6 @@ namespace _001_Scripts.Controller
             _input.OnExitVehicle += HandleExitVehicle;
         }
 
-        private void OnTriggerEnter(Collider other)
-        {
-            if ((waterLayer.value & (1 << other.gameObject.layer)) != 0)
-                SetSwimming(true);
-        }
-
-        private void OnTriggerExit(Collider other)
-        {
-            if ((waterLayer.value & (1 << other.gameObject.layer)) != 0)
-                SetSwimming(false);
-        }
-
         private void FixedUpdate()
         {
             if (!isCanMove) return;
@@ -105,8 +94,11 @@ namespace _001_Scripts.Controller
             _ctx.IsCrouching = isCrouching;
             _ctx.IsSwimUp = isSwimUp;
             _ctx.IsSwimDown = isSwimDown;
-
+            
             SelectMode().Tick(_ctx);
+            
+            bool isInWater = _waterQuery.IsInWater(transform.position);
+            if (isInWater != isSwimming) SetSwimming(isInWater);
 
             ApplyRotation();
 
@@ -254,10 +246,12 @@ namespace _001_Scripts.Controller
             ISubscriber<PlayerUIStateMsg> playerUIStateSubscriber,
             ISubscriber<PlayerVehicleStateMsg> vehicleStateSubscriber,
             ISubscriber<VehicleControlAssignedMsg> vehicleControlSubscriber,
-            IInputService inputService)
+            IInputService inputService,
+            IWaterQuery waterQuery)
         {
             var builder = DisposableBag.CreateBuilder();
             iMovementPublisher = movementPublisher;
+            _waterQuery = waterQuery;
             _input = inputService;
 
             builder.Add(playerStatSubscriber.Subscribe(Stamina));

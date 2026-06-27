@@ -1,7 +1,8 @@
-using _001_Scripts.Data.Structure.Interface;
+using _001_Scripts.Core._000_World._001_Water.Interface;
 using _001_Scripts.Object.Vehicle;
 using _001_Scripts.Vehicle.Core;
 using UnityEngine;
+using VContainer;
 
 namespace _001_Scripts.Structure
 {
@@ -15,18 +16,16 @@ namespace _001_Scripts.Structure
         [SerializeField] private float accelForce = 50f;
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private Transform _cameraAnchor;
-        [SerializeField] private LayerMask waterLayer;
 
         [Header("수중 저항")]
         [SerializeField] private float waterLinearDrag = 3f;
         [SerializeField] private float waterAngularDrag = 3f;
         [SerializeField] private float gravityNeutralizeSpeed = 2f;
-        
+
         [Header("회전 댐핑")]
         [SerializeField] private float rotationDamping = 5f;
 
         private Quaternion _targetRotation;
-
         private float _airLinearDrag;
         private float _airAngularDrag;
         private float _gravityScale = 1f;
@@ -34,6 +33,7 @@ namespace _001_Scripts.Structure
         private Vector2 moveInput;
         private bool isControlled;
         private bool isInWater;
+        private IWaterQuery _waterQuery;
 
         public Transform CameraAnchor => _cameraAnchor;
 
@@ -51,34 +51,32 @@ namespace _001_Scripts.Structure
             moveInput = Vector2.zero;
             isControlled = true;
         }
-        
+
         public void ExitControl() => isControlled = false;
-        
+
         public void HandleLook(Vector2 mouseDelta)
         {
             yaw += mouseDelta.x * turnSensitivity;
             pitch -= mouseDelta.y * turnSensitivity;
             pitch = Mathf.Clamp(pitch, pitchMin, pitchMax);
-            // legacy
-            // transform.rotation = Quaternion.Euler(pitch, yaw, 0);
             _targetRotation = Quaternion.Euler(pitch, yaw, 0);
         }
 
         public void HandleMove(Vector2 wasd) => moveInput = wasd;
         public void HandleVertical(float value) { }
 
-        private void OnTriggerEnter(Collider other)
+        private void SetInWater(bool value)
         {
-            if ((waterLayer.value & (1 << other.gameObject.layer)) != 0)
-            {
-                isInWater = true;
-                _rb.linearDamping = waterLinearDrag;
-                _rb.angularDamping = waterAngularDrag;
-            }
+            isInWater = value;
+            _rb.linearDamping = value ? waterLinearDrag : _airLinearDrag;
+            _rb.angularDamping = value ? waterAngularDrag : _airAngularDrag;
         }
 
         private void FixedUpdate()
         {
+            bool inWater = _waterQuery.IsInWater(transform.position);
+            if (inWater != isInWater) SetInWater(inWater);
+
             _gravityScale = isInWater
                 ? Mathf.MoveTowards(_gravityScale, 0f, gravityNeutralizeSpeed * Time.fixedDeltaTime)
                 : Mathf.MoveTowards(_gravityScale, 1f, gravityNeutralizeSpeed * Time.fixedDeltaTime);
@@ -97,6 +95,12 @@ namespace _001_Scripts.Structure
             Vector3 targetVelocity = dir * moveSpeed;
             Vector3 velocityDiff = targetVelocity - _rb.linearVelocity;
             _rb.AddForce(velocityDiff * accelForce, ForceMode.Force);
+        }
+
+        [Inject]
+        public void Construct(IWaterQuery waterQuery)
+        {
+            _waterQuery = waterQuery;
         }
     }
 }

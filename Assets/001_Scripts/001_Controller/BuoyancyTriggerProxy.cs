@@ -1,4 +1,5 @@
-﻿using _001_Scripts.Structure;
+﻿using _001_Scripts.Core._000_World._001_Water.Interface;
+using _001_Scripts.Structure;
 using UnityEngine;
 
 namespace _001_Scripts.Controller
@@ -12,13 +13,13 @@ namespace _001_Scripts.Controller
 
         private void OnTriggerEnter(Collider other)
         {
-            var water = other.GetComponent<WaterVolume>();
+            var water = other.GetComponent<IWaterbody>();
             if (water != null) _owner.HandleEnterWater(water);
         }
 
         private void OnTriggerExit(Collider other)
         {
-            var water = other.GetComponent<WaterVolume>();
+            var water = other.GetComponent<IWaterbody>();
             if (water != null) _owner.HandleExitWater(water);
         }
     }

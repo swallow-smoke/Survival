@@ -1,5 +1,7 @@
 ﻿using _001_Scripts.Controller;
 using _001_Scripts.Controller.Handler;
+using _001_Scripts.Core._000_World._001_Water;
+using _001_Scripts.Core._000_World._001_Water.Interface;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Interface;
@@ -63,7 +65,13 @@ namespace _001_Scripts.Core
             // builder.RegisterComponentInHierarchy<CraftController>().As<ICraftService>();
 
             #endregion
+            
+            #region World
 
+            builder.RegisterComponentInHierarchy<WaterQueryService>().
+                As<IWaterQuery>().As<IWaterRegistry>();
+
+            #endregion
 
         }
     }
