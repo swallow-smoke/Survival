@@ -20,10 +20,18 @@ namespace _001_Scripts.UI
         [SerializeField] private Transform parentTrs;
         [SerializeField] private ItemDataBase itemDB;
 
+        private IPublisher<UIReqMessage> _uiReqPublisher;
+
         public override void Open()
         {
             base.Open();
             _slotList.RefreshAll();
+        }
+
+        public void OnCraftTabClicked()
+        {
+            _uiReqPublisher.Publish(new UIReqMessage(UIReqMsgType.Close, "Inventory"));
+            _uiReqPublisher.Publish(new UIReqMessage(UIReqMsgType.Open, "Craft"));
         }
 
         private void OnInvMsg(InvChangedMessage msg)
@@ -34,9 +42,12 @@ namespace _001_Scripts.UI
         [Inject]
         private void Construct(IInventoryService invService,
             ISubscriber<InvChangedMessage> invSubscriber,
-            IPublisher<InvSwapMessage> invSwapPublisher)
+            IPublisher<InvSwapMessage> invSwapPublisher,
+            IPublisher<UIReqMessage> uiReqPublisher)
         {
             bag?.Dispose();
+
+            _uiReqPublisher = uiReqPublisher;
 
             var builder = DisposableBag.CreateBuilder();
             builder.Add(invSubscriber.Subscribe(OnInvMsg));

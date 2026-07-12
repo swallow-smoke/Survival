@@ -62,7 +62,7 @@ namespace _001_Scripts.Core
             builder.RegisterComponentInHierarchy<VehicleInjector>();
             builder.RegisterComponentInHierarchy<VehicleSpawner>();
             builder.RegisterComponentInHierarchy<InputHandler>().As<IInputService>();
-            // builder.RegisterComponentInHierarchy<CraftController>().As<ICraftService>();
+            builder.RegisterComponentInHierarchy<CraftController>().As<ICraftService>();
 
             #endregion
             

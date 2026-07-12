@@ -21,7 +21,7 @@ namespace _001_Scripts.Core._000_World._001_Water
                     return true;
             }
 
-            return true;
+            return false;
         }
 
         public float GetSurfaceY(Vector3 position) =>

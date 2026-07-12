@@ -4,11 +4,6 @@ using MessagePipe;
 
 namespace _001_Scripts.Controller.Survival
 {
-    /// <summary>
-    /// 생존 스탯 시뮬레이션(달리기 중 자원 소모 / 휴식 시 스태미나 회복)과
-    /// 매 프레임 스탯 메시지 발행을 담당한다.
-    /// PlayerController가 소유하며, 발행자는 컨테이너에서 받아 생성자로 주입한다.
-    /// </summary>
     public class SurvivalStatSimulator
     {
         private readonly PlayerStat _stat;
@@ -21,8 +16,6 @@ namespace _001_Scripts.Controller.Survival
             _publisher = publisher;
         }
 
-        /// <summary>매 프레임 호출. 달리는 중이면 자원을 소모하고, 아니면 일정 시간 뒤 스태미나를 회복한 뒤 스탯을 발행한다.</summary>
-        /// <returns>스태미나 고갈로 달리기를 중단해야 하면 true.</returns>
         public bool Tick(bool running, float deltaTime, float time)
         {
             bool staminaDepleted = false;

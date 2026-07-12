@@ -73,8 +73,10 @@ namespace _001_Scripts.Managers
             switch (msg.msgType)
             {
                 case UIReqMsgType.Open:
+                    _panelPresenter.Open(msg.uiName);
                     break;
                 case UIReqMsgType.Close:
+                    _panelPresenter.Close(msg.uiName);
                     break;
                 case UIReqMsgType.Update:
                     break;
