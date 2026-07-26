@@ -1,55 +1,65 @@
 using System;
-using System.Text;
 using _001_Scripts.Data.SOJ;
 using _001_Scripts.Interface;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using BluePrint = _001_Scripts.Data.BluePrint.BluePrint;
+using BluePrintModel = _001_Scripts.Data.BluePrint.BluePrint;
 
 namespace _001_Scripts.UI.Component
 {
     public class BlueprintSlot : MonoBehaviour
     {
-        [SerializeField] private TMP_Text nameText;
-        [SerializeField] private TMP_Text ingredientText;
-        [SerializeField] private Button craftButton;
+        [SerializeField] private Image background;
+        [SerializeField] private Text iconText;
+        [SerializeField] private Text nameText;
+        [SerializeField] private Text metaText;
+        [SerializeField] private Text stateText;
+        [SerializeField] private Button selectButton;
 
-        private BluePrint _bluePrint;
+        private BluePrintModel _blueprint;
+        private IInventoryService _inventory;
 
-        public void Init(BluePrint bp, ItemDataBase itemDB, Action<string> onCraft)
+        public BluePrintModel Blueprint => _blueprint;
+
+        public void Init(BluePrintModel blueprint, ItemDataBase itemDatabase, Action<BluePrintModel> onSelected)
         {
-            _bluePrint = bp;
-
-            nameText.text = bp.bluePrintName;
-
-            var sb = new StringBuilder();
-            for (int i = 0; i < bp.recipe.Count; i++)
+            _blueprint = blueprint;
+            var result = itemDatabase.GetItem(blueprint.resultCraft);
+            if (iconText) iconText.text = InventoryPanel.GetGlyph(result.itemType);
+            if (nameText) nameText.text = blueprint.bluePrintName;
+            if (metaText) metaText.text = $"LEVEL {blueprint.requiredLevel}   •   {blueprint.craftTime:0.#} SEC";
+            if (stateText) stateText.text = "READY";
+            if (selectButton)
             {
-                var entry = bp.recipe[i];
-                if (i > 0) sb.Append('\n');
-                sb.Append(itemDB.GetItem(entry.item).itemName).Append(" x").Append(entry.count);
+                selectButton.onClick.RemoveAllListeners();
+                selectButton.onClick.AddListener(() => onSelected(blueprint));
             }
-            ingredientText.text = sb.ToString();
-
-            craftButton.onClick.RemoveAllListeners();
-            craftButton.onClick.AddListener(() => onCraft(bp.bluePrintName));
         }
 
-        public void RefreshAffordability(IInventoryService inv)
+        public void SetSelected(bool selected)
         {
-            if (_bluePrint == null) return;
-
-            var affordable = true;
-            for (int i = 0; i < _bluePrint.recipe.Count; i++)
+            if (background)
+                background.color = selected
+                    ? new Color(0.42f, 0.25f, 0.72f, 0.96f)
+                    : new Color(0.13f, 0.08f, 0.23f, 0.88f);
+            if (stateText)
             {
-                var entry = _bluePrint.recipe[i];
-                if (inv.HasItem(entry.item, entry.count)) continue;
-                affordable = false;
-                break;
+                stateText.text = selected ? "SELECTED" : "READY";
+                stateText.color = selected ? SurvivalUITheme.Cyan : SurvivalUITheme.TextMuted;
             }
+        }
 
-            craftButton.interactable = affordable;
+        public void RefreshAffordability(IInventoryService inventory)
+        {
+            if (_blueprint == null) return;
+            bool affordable = true;
+            for (int i = 0; i < _blueprint.recipe.Count; i++)
+                affordable &= inventory.HasItem(_blueprint.recipe[i].item, _blueprint.recipe[i].count);
+            if (stateText && !affordable)
+            {
+                stateText.text = "재료 부족";
+                stateText.color = SurvivalUITheme.Danger;
+            }
         }
     }
 }

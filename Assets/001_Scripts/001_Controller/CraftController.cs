@@ -27,6 +27,11 @@ namespace _001_Scripts.Controller
         public void Craft(string itemName)
         {
             BluePrint result = bpDB.GetBluePrint(itemName);
+            if (result == null)
+            {
+                Debug.LogWarning($"[Craft] Blueprint not found: {itemName}");
+                return;
+            }
             List<RecipeEntry> ingredient = result.recipe;
             int item = result.resultCraft;
             bool isUnlocked = result.isUnlocked;
@@ -73,14 +78,6 @@ namespace _001_Scripts.Controller
             _craftResultMessagePublisher.Publish(new CraftResultMessage(CraftMessageType.Success, item));
         }
 
-        private void Start()
-        {
-            var bag = DisposableBag.CreateBuilder();
-            _craftMessageSubScriber.Subscribe(msg => OnMessageReceived(msg)).AddTo(bag);
-            
-            msgBag = bag.Build();
-        }
-
         private void OnMessageReceived(CraftReqMessage msg)
         {
             Craft(msg.itemName);
@@ -89,11 +86,20 @@ namespace _001_Scripts.Controller
         private void OnDestroy() => msgBag?.Dispose();
 
         [Inject]
-        public void Constructor(IPublisher<InvReqMessage> invPublisher, IPublisher<CraftResultMessage> craftResultPublisher, IInventoryService invService)
+        public void Constructor(IPublisher<InvReqMessage> invPublisher,
+            IPublisher<CraftResultMessage> craftResultPublisher,
+            ISubscriber<CraftReqMessage> craftMessageSubscriber,
+            IInventoryService invService)
         {
+            msgBag?.Dispose();
             _invMessagePublisher = invPublisher;
             _craftResultMessagePublisher = craftResultPublisher;
             _invServ = invService;
+            _craftMessageSubScriber = craftMessageSubscriber;
+
+            var bag = DisposableBag.CreateBuilder();
+            _craftMessageSubScriber.Subscribe(OnMessageReceived).AddTo(bag);
+            msgBag = bag.Build();
         }
     }
 }

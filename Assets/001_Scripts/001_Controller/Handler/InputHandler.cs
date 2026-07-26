@@ -16,6 +16,24 @@ namespace _001_Scripts.Controller.Handler
         public event Action OnExitVehicle;
         public event Action<float> OnPersonChange;
         public event Action OnInventoryToggle;
+        public event Action OnCraftToggle;
+
+        [SerializeField, HideInInspector] private int uiBindingVersion;
+        private PlayerInput _playerInput;
+        private InputAction _inventoryAction;
+        private InputAction _craftAction;
+        private int _lastCraftToggleFrame = -1;
+
+        private void Awake()
+        {
+            _playerInput = GetComponent<PlayerInput>();
+            _inventoryAction = _playerInput?.actions?.FindAction("Inventory", false);
+            _craftAction = _playerInput?.actions?.FindAction("Craft", false);
+            if (_inventoryAction != null)
+                _inventoryAction.started += HandleInventoryToggle;
+            if (_craftAction != null)
+                _craftAction.started += HandleCraftToggle;
+        }
 
         public void HandleMove(InputAction.CallbackContext ctx)
             => OnMove?.Invoke(ctx.ReadValue<Vector2>());
@@ -60,6 +78,21 @@ namespace _001_Scripts.Controller.Handler
         public void HandleInventoryToggle(InputAction.CallbackContext ctx)
         {
             if (ctx.started) OnInventoryToggle?.Invoke();
+        }
+
+        public void HandleCraftToggle(InputAction.CallbackContext ctx)
+        {
+            if (!ctx.started || _lastCraftToggleFrame == Time.frameCount) return;
+            _lastCraftToggleFrame = Time.frameCount;
+            OnCraftToggle?.Invoke();
+        }
+
+        private void OnDestroy()
+        {
+            if (_inventoryAction != null)
+                _inventoryAction.started -= HandleInventoryToggle;
+            if (_craftAction != null)
+                _craftAction.started -= HandleCraftToggle;
         }
     }
 }

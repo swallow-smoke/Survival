@@ -61,6 +61,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Craft",
+                    "type": "Button",
+                    "id": "d5f6a7b8-c9d0-4e1f-8a2b-3c4d5e6f7081",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Crouch",
                     "type": "Button",
                     "id": "f2a1c3d4-5e6f-7890-abcd-ef1234567890",
@@ -191,11 +200,22 @@
                 {
                     "name": "",
                     "id": "0ae76767-6fcc-4caf-b1a0-c61867fccb90",
-                    "path": "<Keyboard>/e",
+                    "path": "<Keyboard>/tab",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Inventory",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e6f7a8b9-c0d1-4e2f-9a3b-4c5d6e7f8092",
+                    "path": "<Keyboard>/v",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Craft",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

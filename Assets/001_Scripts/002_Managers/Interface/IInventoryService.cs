@@ -18,5 +18,10 @@ namespace _001_Scripts.Interface
         IReadOnlyList<InventorySlot> GetAllItems();
 
         InventorySlot GetSlot(int index);
+        int SlotCount { get; }
+
+        bool UseItem(int index);
+        bool DropItem(int index, int count = 1);
+        void SortItems();
     }
 }

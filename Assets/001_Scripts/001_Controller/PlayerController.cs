@@ -2,7 +2,9 @@ using System;
 using _001_Scripts.Controller.Handler;
 using _001_Scripts.Controller.Survival;
 using _001_Scripts.Data;
+using _001_Scripts.Data.Item;
 using _001_Scripts.Data.Message;
+using _001_Scripts.Type.Item;
 using _001_Scripts.Type.States;
 using MessagePipe;
 using UnityEngine;
@@ -26,6 +28,7 @@ namespace _001_Scripts.Controller
 
         private void Update()
         {
+            if (_survival == null) return;
             bool staminaDepleted = _survival.Tick(curState == PlayerMovementState.Running, Time.deltaTime, Time.time);
             if (staminaDepleted)
                 curState = PlayerMovementState.Walking;
@@ -46,6 +49,17 @@ namespace _001_Scripts.Controller
             );
 
             _invMessagePublisher.Publish(invMsg);
+        }
+
+        public bool ApplyConsumable(Template item)
+        {
+            if (item == null || !item.HasAttribute(AttributesType.Consumable)) return false;
+
+            stat.ModifyHP(Mathf.RoundToInt(item.GetModifierValue(AttributesType.Consumable, ModifierType.HealAmount)));
+            stat.ModifyOxygen(item.GetModifierValue(AttributesType.Consumable, ModifierType.OxygenAmount));
+            stat.ModifyHungry(item.GetModifierValue(AttributesType.Consumable, ModifierType.FoodValue));
+            stat.ModifyWater(item.GetModifierValue(AttributesType.Consumable, ModifierType.WaterValue));
+            return true;
         }
 
         private void OnMove(PlayerMovementMessage msg)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using _001_Scripts.Data.Item;
@@ -7,7 +7,6 @@ using _001_Scripts.Data.SOJ;
 using _001_Scripts.Interface;
 using _001_Scripts.Type.Item;
 using MessagePipe;
-using NUnit.Framework;
 using UnityEngine;
 using VContainer;
 
@@ -15,169 +14,220 @@ namespace _001_Scripts.Controller
 {
     public class InventoryController : MonoBehaviour, IInventoryService
     {
-        private IPublisher<InvChangedMessage> invChangedPublisher;
-        private IDisposable _msgBag;
+        private IPublisher<InvChangedMessage> _invChangedPublisher;
+        private IDisposable _messageBag;
 
         [SerializeField] private ItemDataBase itemDB;
 
-        [Header("Inventory")] 
+        [Header("Inventory")]
         [SerializeField] private List<Instance> Hotbar;
         [SerializeField] private List<InventorySlot> items = new();
-
         [SerializeField] private int maxSlots = 40;
 
-        private void SwapItem(InvSwapMessage msg)
+        public int SlotCount
         {
-            if (msg.fromIndex >= items.Count || msg.toIndex >= items.Count)
-                return;
-            
-            (items[msg.fromIndex], items[msg.toIndex]) = (items[msg.toIndex], items[msg.fromIndex]);
-            invChangedPublisher.Publish(new InvChangedMessage(new List<int> { msg.fromIndex, msg.toIndex }));
-            
-            Debug.Log($"Swapped Items {items[msg.fromIndex].stack} to {items[msg.toIndex].stack}");
+            get
+            {
+                NormalizeSlots();
+                return items.Count;
+            }
+        }
+
+        private void Awake() => NormalizeSlots();
+
+        private void NormalizeSlots()
+        {
+            maxSlots = Mathf.Max(1, maxSlots);
+            items ??= new List<InventorySlot>();
+            if (items.Count > maxSlots)
+                items.RemoveRange(maxSlots, items.Count - maxSlots);
+            for (int i = 0; i < items.Count; i++)
+                items[i] ??= EmptySlot();
+            while (items.Count < maxSlots)
+                items.Add(EmptySlot());
+        }
+
+        private static InventorySlot EmptySlot() => new(null, 0);
+
+        private void SwapItem(InvSwapMessage message)
+        {
+            if (!IsValidIndex(message.fromIndex) || !IsValidIndex(message.toIndex)) return;
+            (items[message.fromIndex], items[message.toIndex]) = (items[message.toIndex], items[message.fromIndex]);
+            PublishChanges(message.fromIndex, message.toIndex);
         }
 
         public AddItemResult AddItem(int id, int count)
         {
-            var template = itemDB.GetItem(id);
-            int remain = count;
-            List<int> changedKey = new();
+            NormalizeSlots();
+            if (count <= 0) return new AddItemResult(0, new List<int>());
 
-            if (items.Count >= maxSlots)
-                return new AddItemResult(remain, changedKey);
+            var template = itemDB.GetItem(id);
+            int remaining = count;
+            var changed = new List<int>();
 
             if (template.HasAttribute(AttributesType.Stackable))
             {
-                float maxStack = template.GetModifierValue(AttributesType.Stackable, ModifierType.MaxStack);
-                var list = items.FindAll(e => !e.IsEmpty && e.ins.itemId == id);
+                int maximum = Mathf.Max(1, Mathf.RoundToInt(
+                    template.GetModifierValue(AttributesType.Stackable, ModifierType.MaxStack, 1f)));
+                for (int i = 0; i < items.Count && remaining > 0; i++)
                 {
-                    list.ForEach(slot =>
-                    {
-                        if (slot.stack >= maxStack)
-                            return;
-                        else
-                        {
-                            int oldStack = slot.stack;
-                            slot.stack = Math.Min(slot.stack + remain, (int)maxStack);
-                            remain = oldStack + remain > maxStack ? (int)(oldStack + remain - maxStack) : 0;
-                            changedKey.Add(items.IndexOf(slot));
-                        }
-                    });
+                    var slot = items[i];
+                    if (slot.IsEmpty || slot.ins.itemId != id || slot.stack >= maximum) continue;
+                    int amount = Mathf.Min(remaining, maximum - slot.stack);
+                    slot.stack += amount;
+                    remaining -= amount;
+                    changed.Add(i);
+                }
 
-                    while (remain > 0 && items.Count < maxSlots)
-                    {
-                        var _itemIns = itemDB.CreateInstance(id);
-
-                        int toAdd = Math.Min(remain, (int)maxStack);
-                        items.Add(new InventorySlot(_itemIns, toAdd));
-                        changedKey.Add(items.Count - 1);
-                        remain -= toAdd;
-                    }
+                while (remaining > 0)
+                {
+                    int emptyIndex = FindEmptySlot();
+                    if (emptyIndex < 0) break;
+                    int amount = Mathf.Min(remaining, maximum);
+                    items[emptyIndex] = new InventorySlot(itemDB.CreateInstance(id), amount);
+                    remaining -= amount;
+                    changed.Add(emptyIndex);
                 }
             }
             else
             {
-                items.Add(new InventorySlot(itemDB.CreateInstance(id), 1));
-                changedKey.Add(items.Count - 1);
-                remain -= 1;
+                while (remaining > 0)
+                {
+                    int emptyIndex = FindEmptySlot();
+                    if (emptyIndex < 0) break;
+                    items[emptyIndex] = new InventorySlot(itemDB.CreateInstance(id), 1);
+                    remaining--;
+                    changed.Add(emptyIndex);
+                }
             }
 
-            return new AddItemResult(remain, changedKey);
+            return new AddItemResult(remaining, changed);
         }
 
         public void RemoveItem(int id, int count)
         {
-            var template = itemDB.GetItem(id);
-            int remain = count;
-
-            if (template.HasAttribute(AttributesType.Stackable))
+            if (count <= 0) return;
+            int remaining = count;
+            var changed = new List<int>();
+            for (int i = items.Count - 1; i >= 0 && remaining > 0; i--)
             {
-                for (int i = items.Count - 1; i >= 0; i--)
-                {
-                    var e = items[i];
-
-                    if (e.ins.itemId == id)
-                    {
-                        int removable = Mathf.Min(remain, e.stack);
-                        e.stack -= removable;
-                        remain -= removable;
-                        if (e.stack <= 0)
-                            items.RemoveAt(i);
-                        if (remain == 0)
-                            break;
-                    }
-                }
+                var slot = items[i];
+                if (slot.IsEmpty || slot.ins.itemId != id) continue;
+                int amount = Mathf.Min(remaining, slot.stack);
+                slot.stack -= amount;
+                remaining -= amount;
+                if (slot.stack <= 0) items[i] = EmptySlot();
+                changed.Add(i);
             }
-            else
-            {
-                items.Remove(items.Find(e => e.ins.itemId == id));
-            }
+            PublishChanges(changed);
         }
 
-        /// <summary>
-        /// delete every items that same variant
-        /// </summary>
-        /// <param name="item"></param>
-        public void RemoveItem(Template item)
+        public void RemoveItem(Template item) => RemoveAll(slot => slot.ins.itemId == item.itemId);
+
+        public void RemoveItem(Instance instance) => RemoveAll(slot => slot.ins.instanceId == instance.instanceId);
+
+        public bool HasItem(int id, int count = 1) =>
+            items.Where(slot => slot != null && !slot.IsEmpty && slot.ins.itemId == id).Sum(slot => slot.stack) >= count;
+
+        public bool HasItem(Template template, int count = 1) => HasItem(template.itemId, count);
+
+        public bool HasItem(Instance instance) =>
+            items.Any(slot => slot != null && !slot.IsEmpty && slot.ins.instanceId == instance.instanceId);
+
+        public IReadOnlyList<InventorySlot> GetAllItems()
         {
-            items.RemoveAll(e => e.ins.itemId == item.itemId);
+            NormalizeSlots();
+            return items.AsReadOnly();
         }
-
-        /// <summary>
-        /// delete instance item
-        /// </summary>
-        /// <param name="ins"></param>
-        public void RemoveItem(Instance ins)
-        {
-            items.RemoveAll(e => e.ins.instanceId == ins.instanceId);
-        }
-
-        public bool HasItem(int id, int count = 1)
-        {
-            var list = items.FindAll(e => !e.IsEmpty && e.ins.itemId == id);
-
-            int total = list.Sum(e => e.stack);
-
-            return total >= count;
-        }
-
-        public bool HasItem(Template template, int count = 1)
-        {
-            var list = items.FindAll(e => !e.IsEmpty && e.ins.itemId == template.itemId);
-
-            int total = list.Sum(e => e.stack);
-
-            return total >= count;
-        }
-
-        public bool HasItem(Instance ins)
-        {
-            return items.Exists(e => !e.IsEmpty && e.ins.instanceId == ins.instanceId);
-        }
-
-        public IReadOnlyList<InventorySlot> GetAllItems() => items.AsReadOnly();
 
         public InventorySlot GetSlot(int index)
         {
-            if (index < 0 || index >= items.Count)
+            NormalizeSlots();
+            if (!IsValidIndex(index))
                 throw new IndexOutOfRangeException($"Index {index} is out of range for inventory slots.");
-
             return items[index];
         }
 
-        private void OnMessageReceived(InvReqMessage msg)
+        public bool UseItem(int index)
         {
-            switch (msg.msgType)
+            if (!IsValidIndex(index) || items[index].IsEmpty) return false;
+            var template = itemDB.GetItem(items[index].ins.itemId);
+            if (!template.HasAttribute(AttributesType.Consumable)) return false;
+
+            var player = GetComponent<PlayerController>();
+            if (player == null || !player.ApplyConsumable(template)) return false;
+            RemoveAt(index, 1);
+            return true;
+        }
+
+        public bool DropItem(int index, int count = 1)
+        {
+            if (!IsValidIndex(index) || items[index].IsEmpty || count <= 0) return false;
+            RemoveAt(index, count);
+            return true;
+        }
+
+        public void SortItems()
+        {
+            var occupied = items.Where(slot => slot != null && !slot.IsEmpty)
+                .OrderBy(slot => itemDB.GetItem(slot.ins.itemId).itemType)
+                .ThenBy(slot => itemDB.GetItem(slot.ins.itemId).itemName)
+                .ThenBy(slot => slot.ins.itemId)
+                .ToList();
+
+            for (int i = 0; i < items.Count; i++)
+                items[i] = i < occupied.Count ? occupied[i] : EmptySlot();
+            PublishChanges(Enumerable.Range(0, items.Count).ToList());
+        }
+
+        private void RemoveAt(int index, int count)
+        {
+            var slot = items[index];
+            slot.stack -= Mathf.Min(count, slot.stack);
+            if (slot.stack <= 0) items[index] = EmptySlot();
+            PublishChanges(index);
+        }
+
+        private void RemoveAll(Func<InventorySlot, bool> predicate)
+        {
+            var changed = new List<int>();
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (items[i].IsEmpty || !predicate(items[i])) continue;
+                items[i] = EmptySlot();
+                changed.Add(i);
+            }
+            PublishChanges(changed);
+        }
+
+        private int FindEmptySlot() => items.FindIndex(slot => slot == null || slot.IsEmpty);
+        private bool IsValidIndex(int index)
+        {
+            NormalizeSlots();
+            return index >= 0 && index < items.Count;
+        }
+
+        private void PublishChanges(params int[] indices) => PublishChanges(indices.ToList());
+
+        private void PublishChanges(List<int> indices)
+        {
+            if (indices.Count > 0)
+                _invChangedPublisher?.Publish(new InvChangedMessage(indices));
+        }
+
+        private void OnMessageReceived(InvReqMessage message)
+        {
+            switch (message.msgType)
             {
                 case InvMessageType.Added:
-                    var result = AddItem(msg.item, msg.count);
-                    int added = msg.count - result.remain;
-                    Debug.Log($"[Inventory] {itemDB.GetItem(msg.item).itemName} +{added}" +
+                    var result = AddItem(message.item, message.count);
+                    int added = message.count - result.remain;
+                    Debug.Log($"[Inventory] {itemDB.GetItem(message.item).itemName} +{added}" +
                               (result.remain > 0 ? $" ({result.remain} did not fit)" : ""));
-                    invChangedPublisher.Publish(new InvChangedMessage(result.changeKeys));
+                    PublishChanges(result.changeKeys);
                     break;
-                case InvMessageType.Removed: 
-                    RemoveItem(msg.item, msg.count);
+                case InvMessageType.Removed:
+                    RemoveItem(message.item, message.count);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -189,16 +239,14 @@ namespace _001_Scripts.Controller
             ISubscriber<InvSwapMessage> invSwapSubscriber,
             IPublisher<InvChangedMessage> invChangedPublisher)
         {
-            _msgBag?.Dispose();
+            _messageBag?.Dispose();
+            _invChangedPublisher = invChangedPublisher;
             var bag = DisposableBag.CreateBuilder();
-            this.invChangedPublisher = invChangedPublisher;
-
             invReqSubscriber.Subscribe(OnMessageReceived).AddTo(bag);
             invSwapSubscriber.Subscribe(SwapItem).AddTo(bag);
-
-            _msgBag = bag.Build();
+            _messageBag = bag.Build();
         }
 
-        private void OnDestroy() => _msgBag?.Dispose();
+        private void OnDestroy() => _messageBag?.Dispose();
     }
 }

@@ -55,6 +55,7 @@ namespace _001_Scripts.Controller
 
         private void Awake()
         {
+            if (!_rb) _rb = GetComponent<Rigidbody>();
             _rb.interpolation = RigidbodyInterpolation.Interpolate;
 
             _ctx = new MovementContext
@@ -86,6 +87,10 @@ namespace _001_Scripts.Controller
 
         private void FixedUpdate()
         {
+            // VContainer may inject one frame later while scripts are reloaded in the Editor.
+            // Do not let an incomplete dependency graph stop Play Mode or flood the Console.
+            if (_ctx == null || !_rb || !_camCont || !_trs || !footTrs ||
+                _waterQuery == null || iMovementPublisher == null) return;
             if (!isCanMove) return;
             if (_vehicleState == PlayerVehicleState.Seated) return;
 
@@ -212,6 +217,7 @@ namespace _001_Scripts.Controller
             switch (msg.state)
             {
                 case PlayerUIState.Inventory:
+                case PlayerUIState.Craft:
                     isCanMove = false;
                     break;
                 default:

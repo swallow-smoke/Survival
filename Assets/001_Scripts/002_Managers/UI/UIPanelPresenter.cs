@@ -36,13 +36,60 @@ namespace _001_Scripts.Managers
             }
         }
 
+        public void ToggleExclusive(string key, PlayerUIState openState)
+        {
+            if (!_panels.TryGetValue(key, out var panel))
+            {
+                Debug.LogError($"UI panel is not registered: {key}");
+                return;
+            }
+
+            if (panel.isViz)
+            {
+                panel.Close();
+                _statePublisher.Publish(new PlayerUIStateMsg(PlayerUIState.None));
+                return;
+            }
+
+            CloseOtherModalPanels(key);
+            panel.Open();
+            _statePublisher.Publish(new PlayerUIStateMsg(openState));
+        }
+
+        public void OpenExclusive(string key)
+        {
+            if (!_panels.TryGetValue(key, out var panel))
+            {
+                Debug.LogError($"UI panel is not registered: {key}");
+                return;
+            }
+            if (!Enum.TryParse<PlayerUIState>(key, out var state))
+            {
+                Debug.LogError($"UI panel key does not match PlayerUIState: {key}");
+                return;
+            }
+
+            CloseOtherModalPanels(key);
+            if (!panel.isViz) panel.Open();
+            _statePublisher.Publish(new PlayerUIStateMsg(state));
+        }
+
+        private void CloseOtherModalPanels(string exceptKey)
+        {
+            foreach (var pair in _panels)
+            {
+                if (pair.Key == exceptKey || (pair.Key != "Inventory" && pair.Key != "Craft")) continue;
+                if (pair.Value && pair.Value.isViz) pair.Value.Close();
+            }
+        }
+
         public void Open(string key)
         {
             if (!_panels.TryGetValue(key, out var panel)) return;
 
             if (!Enum.TryParse<PlayerUIState>(key, out var state))
             {
-                Debug.LogError("panelKey와 enum 이름 불일치");
+                Debug.LogError($"UI panel key does not match PlayerUIState: {key}");
                 return;
             }
 

@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: BluePrints
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Data.SOJ.BluePrintDataBase
   bluePrints:
-  - resultCraft: 0
-    recipe: []
-    craftTime: 0
+  - resultCraft: 2
+    recipe:
+    - item: 0
+      count: 2
+    craftTime: 1.5
     requiredLevel: 0
-    isUnlocked: 0
-    bluePrintName: 
+    isUnlocked: 1
+    bluePrintName: 간이 산소 필터
     bluePrintId: 0

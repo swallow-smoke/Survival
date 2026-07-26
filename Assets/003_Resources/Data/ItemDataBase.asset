@@ -17,27 +17,45 @@ MonoBehaviour:
     - Key: 0
       Value:
         itemId: 0
-        itemName: Woowang
-        itemDesc: 
+        itemName: 금속 파편
+        itemDesc: 부서진 구조물에서 회수한 금속 조각입니다. 기본 제작 재료로 사용됩니다.
         itemGrade: 0
         itemType: 0
-        weight: 0
-        ItemAttributes: []
+        weight: 0.4
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 99
+            duration: 0
+            cooldown: 0
     - Key: 1
       Value:
         itemId: 1
-        itemName: Woowang
-        itemDesc: 
+        itemName: 해조 섬유
+        itemDesc: 해조에서 추출한 질긴 섬유입니다. 필터와 생존 도구 제작에 사용됩니다.
         itemGrade: 0
         itemType: 0
-        weight: 0
-        ItemAttributes: []
+        weight: 0.2
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 99
+            duration: 0
+            cooldown: 0
     - Key: 2
       Value:
         itemId: 2
-        itemName: Woowang
-        itemDesc: 
+        itemName: 간이 산소 필터
+        itemDesc: 금속 파편을 조립해 만든 응급용 산소 정화 필터입니다.
         itemGrade: 0
         itemType: 0
-        weight: 0
-        ItemAttributes: []
+        weight: 0.8
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 10
+            duration: 0
+            cooldown: 0

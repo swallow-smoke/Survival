@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b015192c3a9f4743a68c4ecebe404e2, type: 3}
+  m_Name: PrefabBrushSettings
+  m_EditorClassIdentifier: WorldBuilder.Editor::WorldBuilder.Editor.PrefabBrush.PrefabBrushSettings
+  seed: 31796
+  brushRadius: 3
+  brushDensity: 10
+  eraseMode: 0
+  chunkSize: 16
+  alignToNormal: 1
+  randomYaw: 1
+  scaleRange: {x: 1, y: 1}
+  duplicateSharedScriptableObjects: 1
+  prefabEntries: []
+  mask:
+    useHeightMask: 0
+    minHeight: 0
+    maxHeight: 100
+    useSlopeMask: 0
+    maxSlopeAngle: 45
+    useBiomeMask: 0
+    allowedBiome: 2
+  modifierGraph: {fileID: 0}
+  strokes: []

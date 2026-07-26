@@ -42,6 +42,7 @@ namespace _001_Scripts.Controller
         private void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
             pitch = _trs.eulerAngles.x;
             yaw = _trs.eulerAngles.y;
 
@@ -56,11 +57,14 @@ namespace _001_Scripts.Controller
             switch (msg.state)
             {
                 case PlayerUIState.Inventory:
+                case PlayerUIState.Craft:
                     Cursor.lockState = CursorLockMode.None;
+                    Cursor.visible = true;
                     curCamState = false;
                     break;
                 default:
                     Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
                     curCamState = true;
                     break;
             }

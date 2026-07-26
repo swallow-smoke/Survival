@@ -16,5 +16,6 @@ namespace _001_Scripts.Controller.Handler
         event Action OnExitVehicle;
         event Action<float> OnPersonChange;
         event Action OnInventoryToggle;
+        event Action OnCraftToggle;
     }
 }
