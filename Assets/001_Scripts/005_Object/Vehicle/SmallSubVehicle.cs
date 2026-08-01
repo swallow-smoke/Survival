@@ -28,12 +28,12 @@ namespace _001_Scripts.Structure
         private Quaternion _targetRotation;
         private float _airLinearDrag;
         private float _airAngularDrag;
-        private float _gravityScale = 1f;
         private float pitch, yaw;
         private Vector2 moveInput;
+        private float verticalInput;
         private bool isControlled;
-        private bool isInWater;
-        private IWaterQuery _waterQuery;
+        private IWaterQueryService _waterQuery;
+        private BuoyancyController _buoyancy;
 
         public Transform CameraAnchor => _cameraAnchor;
 
@@ -41,6 +41,9 @@ namespace _001_Scripts.Structure
         {
             _airLinearDrag = _rb.linearDamping;
             _airAngularDrag = _rb.angularDamping;
+            _buoyancy = GetComponent<BuoyancyController>();
+            if (_buoyancy == null) _buoyancy = gameObject.AddComponent<BuoyancyController>();
+            _buoyancy.SetMode(BuoyancyMode.NeutralBuoyancy);
         }
 
         public void EnterControl()
@@ -63,27 +66,10 @@ namespace _001_Scripts.Structure
         }
 
         public void HandleMove(Vector2 wasd) => moveInput = wasd;
-        public void HandleVertical(float value) { }
-
-        private void SetInWater(bool value)
-        {
-            isInWater = value;
-            _rb.linearDamping = value ? waterLinearDrag : _airLinearDrag;
-            _rb.angularDamping = value ? waterAngularDrag : _airAngularDrag;
-        }
+        public void HandleVertical(float value) => verticalInput = value;
 
         private void FixedUpdate()
         {
-            bool inWater = _waterQuery.IsInWater(transform.position);
-            if (inWater != isInWater) SetInWater(inWater);
-
-            _gravityScale = isInWater
-                ? Mathf.MoveTowards(_gravityScale, 0f, gravityNeutralizeSpeed * Time.fixedDeltaTime)
-                : Mathf.MoveTowards(_gravityScale, 1f, gravityNeutralizeSpeed * Time.fixedDeltaTime);
-
-            _rb.useGravity = false;
-            _rb.AddForce(Physics.gravity * _rb.mass * _gravityScale, ForceMode.Force);
-
             if (!isControlled) return;
 
             transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, rotationDamping * Time.fixedDeltaTime);
@@ -92,15 +78,16 @@ namespace _001_Scripts.Structure
             Vector3 strafe = transform.right * moveInput.x;
             Vector3 dir = (forwardMove + strafe).normalized;
 
-            Vector3 targetVelocity = dir * moveSpeed;
+            Vector3 targetVelocity = dir * moveSpeed + transform.up * (verticalInput * moveSpeed);
             Vector3 velocityDiff = targetVelocity - _rb.linearVelocity;
             _rb.AddForce(velocityDiff * accelForce, ForceMode.Force);
         }
 
         [Inject]
-        public void Construct(IWaterQuery waterQuery)
+        public void Construct(IWaterQueryService waterQuery)
         {
             _waterQuery = waterQuery;
+            if (_buoyancy != null) _buoyancy.Configure(waterQuery);
         }
     }
 }

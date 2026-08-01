@@ -1,6 +1,7 @@
 using System;
 using _001_Scripts.Controller.Handler;
 using _001_Scripts.Controller.Movement;
+using _001_Scripts.Core._000_World._001_Water;
 using _001_Scripts.Core._000_World._001_Water.Interface;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
@@ -29,7 +30,9 @@ namespace _001_Scripts.Controller
         [SerializeField] private Transform _trs;
         [SerializeField] private float maxDistance = 1f;
         [SerializeField] private CameraController _camCont;
-        private IWaterQuery _waterQuery;
+        private IWaterQueryService _waterQuery;
+        private PlayerWaterSensor _waterSensor;
+        private UnderwaterVolumeController _underwaterVolume;
 
         private Vector2 inputValue;
         private bool isRunning;
@@ -48,6 +51,7 @@ namespace _001_Scripts.Controller
         private IPublisher<PlayerMovementMessage> iMovementPublisher;
         private IInputService _input;
         private IDisposable _bag;
+        private Action<PlayerWaterState> _waterStateHandler;
 
         private IVehicleControllable _activeVehicle;
         private SeatComponent _activeSeat;
@@ -57,6 +61,7 @@ namespace _001_Scripts.Controller
         {
             if (!_rb) _rb = GetComponent<Rigidbody>();
             _rb.interpolation = RigidbodyInterpolation.Interpolate;
+            EnsureWaterComponents();
 
             _ctx = new MovementContext
             {
@@ -94,6 +99,9 @@ namespace _001_Scripts.Controller
             if (!isCanMove) return;
             if (_vehicleState == PlayerVehicleState.Seated) return;
 
+            PlayerWaterState waterState = _waterSensor.SampleNow();
+            if (waterState.Swimming != isSwimming) SetSwimming(waterState.Swimming);
+
             _ctx.MoveDir = ComputeMoveDir();
             _ctx.IsRunning = isRunning;
             _ctx.IsCrouching = isCrouching;
@@ -102,9 +110,6 @@ namespace _001_Scripts.Controller
             
             SelectMode().Tick(_ctx);
             
-            bool isInWater = _waterQuery.IsInWater(transform.position);
-            if (isInWater != isSwimming) SetSwimming(isInWater);
-
             ApplyRotation();
 
             isGround = !isSwimming && Physics.Raycast(footTrs.position, Vector3.down, maxDistance, layer);
@@ -253,12 +258,19 @@ namespace _001_Scripts.Controller
             ISubscriber<PlayerVehicleStateMsg> vehicleStateSubscriber,
             ISubscriber<VehicleControlAssignedMsg> vehicleControlSubscriber,
             IInputService inputService,
-            IWaterQuery waterQuery)
+            IWaterQueryService waterQuery,
+            IPublisher<PlayerWaterStateMessage> waterStatePublisher)
         {
             var builder = DisposableBag.CreateBuilder();
             iMovementPublisher = movementPublisher;
             _waterQuery = waterQuery;
             _input = inputService;
+            EnsureWaterComponents();
+            _waterSensor.Configure(waterQuery, footTrs, transform, _camCont != null ? _camCont.transform : null,
+                _camCont != null ? _camCont.transform : null);
+            _waterStateHandler = state => waterStatePublisher.Publish(new PlayerWaterStateMessage(state));
+            _waterSensor.StateChanged += _waterStateHandler;
+            _underwaterVolume.Configure(_waterSensor);
 
             builder.Add(playerStatSubscriber.Subscribe(Stamina));
             builder.Add(playerUIStateSubscriber.Subscribe(UIState));
@@ -266,6 +278,14 @@ namespace _001_Scripts.Controller
             builder.Add(vehicleControlSubscriber.Subscribe(OnVehicleControlAssigned));
 
             _bag = builder.Build();
+        }
+
+        private void EnsureWaterComponents()
+        {
+            _waterSensor ??= GetComponent<PlayerWaterSensor>();
+            if (_waterSensor == null) _waterSensor = gameObject.AddComponent<PlayerWaterSensor>();
+            _underwaterVolume ??= GetComponent<UnderwaterVolumeController>();
+            if (_underwaterVolume == null) _underwaterVolume = gameObject.AddComponent<UnderwaterVolumeController>();
         }
 
         private void OnDestroy()
@@ -282,6 +302,8 @@ namespace _001_Scripts.Controller
             }
 
             _bag?.Dispose();
+            if (_waterSensor != null && _waterStateHandler != null)
+                _waterSensor.StateChanged -= _waterStateHandler;
         }
     }
 }

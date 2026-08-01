@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace _001_Scripts.Structure
 {
+    [System.Obsolete("BuoyancyController no longer requires a trigger proxy.")]
     public static class BuoyancyColliderBuilder
     {
         public static BoxCollider Build(BuoyancyController owner, Vector3 boxSize, Vector3 boxOffset)

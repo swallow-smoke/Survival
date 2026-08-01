@@ -28,6 +28,12 @@ namespace _001_Scripts.Structure
         public Transform CameraAnchor => _cameraAnchor;
         public Transform InteriorAnchor => _interiorAnchor;
 
+        private void Awake()
+        {
+            if (_buoyancy == null) _buoyancy = GetComponent<BuoyancyController>();
+            if (_buoyancy == null) _buoyancy = gameObject.AddComponent<BuoyancyController>();
+        }
+
         public void EnterControl()
         {
             moveInput = Vector2.zero;
@@ -35,7 +41,11 @@ namespace _001_Scripts.Structure
             isControlled = true;
         }
 
-        public void ExitControl() => isControlled = false;
+        public void ExitControl()
+        {
+            isControlled = false;
+            if (_buoyancy != null) _buoyancy.OverrideVertical = false;
+        }
 
         public void HandleLook(Vector2 mouseDelta) { }
 
@@ -51,6 +61,8 @@ namespace _001_Scripts.Structure
             }
 
             if (!isControlled) return;
+
+            if (_buoyancy != null) _buoyancy.OverrideVertical = Mathf.Abs(verticalInput) > 0.01f;
 
             Vector3 dir = transform.forward * moveInput.y + transform.right * moveInput.x;
             Vector3 horizontalTarget = dir.normalized * moveSpeed;

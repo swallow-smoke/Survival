@@ -1,26 +1,12 @@
-﻿using _001_Scripts.Core._000_World._001_Water.Interface;
-using _001_Scripts.Structure;
+using System;
 using UnityEngine;
 
 namespace _001_Scripts.Controller
 {
-    // 부력 컨트롤러가 자동 생성함. 붙이지 말것
-    public class BuoyancyTriggerProxy : MonoBehaviour
+    /// <summary>Legacy no-op component retained so old prefabs do not lose a script.</summary>
+    [Obsolete("BuoyancyController now samples IWaterQueryService directly.")]
+    public sealed class BuoyancyTriggerProxy : MonoBehaviour
     {
-        private BuoyancyController _owner;
-
-        public void Initialize(BuoyancyController owner) => _owner = owner;
-
-        private void OnTriggerEnter(Collider other)
-        {
-            var water = other.GetComponent<IWaterbody>();
-            if (water != null) _owner.HandleEnterWater(water);
-        }
-
-        private void OnTriggerExit(Collider other)
-        {
-            var water = other.GetComponent<IWaterbody>();
-            if (water != null) _owner.HandleExitWater(water);
-        }
+        public void Initialize(_001_Scripts.Structure.BuoyancyController owner) { }
     }
 }

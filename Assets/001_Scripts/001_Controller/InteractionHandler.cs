@@ -4,6 +4,7 @@ using _001_Scripts.Controller.Interaction;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Data.Structure.Interface;
+using _001_Scripts.Interface;
 using _001_Scripts.Type.States;
 using MessagePipe;
 using UnityEngine;
@@ -28,16 +29,21 @@ namespace _001_Scripts.Controller
         private bool _canInteract;
         private PlayerUIState _uiState;
         private IInputService _input;
+        private IResourceInteractionService _resourceInteraction;
         private IDisposable _bag;
         private OutlineHighlighter _highlighter;
+        private bool _hasResourceTarget;
+        private string _resourceLabel;
 
         [Inject]
         public void Construct(IPublisher<InteractionUIMessage> uiPublisher,
             ISubscriber<PlayerUIStateMsg> uiStateSubscriber,
-            IInputService inputService)
+            IInputService inputService,
+            IResourceInteractionService resourceInteraction)
         {
             _uiPublisher = uiPublisher;
             _input = inputService;
+            _resourceInteraction = resourceInteraction;
             _highlighter = new OutlineHighlighter(_outlineMat);
             var builder = DisposableBag.CreateBuilder();
             builder.Add(uiStateSubscriber.Subscribe(OnUIStateChanged));
@@ -54,16 +60,19 @@ namespace _001_Scripts.Controller
         private void OnUIStateChanged(PlayerUIStateMsg msg)
         {
             _uiState = msg.state;
-            if (_uiState != PlayerUIState.None && _lastHitTrs != null)
+            if (_uiState != PlayerUIState.None && (_lastHitTrs != null || _hasResourceTarget))
                 ClearTarget();
         }
 
         private void ClearTarget()
         {
-            _highlighter.SetHighlight(_lastHitTrs.gameObject, false);
+            if (_lastHitTrs != null) _highlighter.SetHighlight(_lastHitTrs.gameObject, false);
             _lastHitTrs = null;
             _current = null;
             _canInteract = false;
+            _hasResourceTarget = false;
+            _resourceLabel = null;
+            _resourceInteraction?.ClearFocus();
             _uiPublisher.Publish(new InteractionUIMessage(false, "", "F"));
         }
 
@@ -74,6 +83,8 @@ namespace _001_Scripts.Controller
             RaycastHit hit;
             if (Physics.Raycast(_trs.position, _trs.forward, out hit, maxDistance, interactLayer))
             {
+                _hasResourceTarget = false;
+                _resourceInteraction?.ClearFocus();
                 Transform hitTrs = hit.collider.transform;
                 if (!ReferenceEquals(_lastHitTrs, hitTrs))
                 {
@@ -103,7 +114,24 @@ namespace _001_Scripts.Controller
                     _uiPublisher.Publish(new InteractionUIMessage(_current != null, label, "F"));
                 }
             }
-            else if (_lastHitTrs != null)
+            else if (_resourceInteraction != null &&
+                     _resourceInteraction.TryFocus(_trs.position, _trs.forward, maxDistance, out var resourceFocus))
+            {
+                if (_lastHitTrs != null)
+                {
+                    _highlighter.SetHighlight(_lastHitTrs.gameObject, false);
+                    _lastHitTrs = null;
+                    _current = null;
+                }
+
+                if (!_hasResourceTarget || _resourceLabel != resourceFocus.Label)
+                {
+                    _hasResourceTarget = true;
+                    _resourceLabel = resourceFocus.Label;
+                    _uiPublisher.Publish(new InteractionUIMessage(true, resourceFocus.Label, "F"));
+                }
+            }
+            else if (_lastHitTrs != null || _hasResourceTarget)
             {
                 ClearTarget();
             }
@@ -113,7 +141,13 @@ namespace _001_Scripts.Controller
         {
             if (_uiState != PlayerUIState.None) return;
             if (_current is IConditionalInteractable && !_canInteract) return;
-            _current?.Interact();
+            if (_current != null)
+            {
+                _current.Interact();
+                return;
+            }
+
+            _resourceInteraction?.InteractFocused();
         }
 
         private void OnDestroy()

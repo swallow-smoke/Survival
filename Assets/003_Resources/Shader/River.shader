@@ -20,6 +20,12 @@ Shader "Custom/Water"
         _FoamThreshold   ("Foam Threshold",    Range(0,1))  = 0.1
         _FoamColor       ("Foam Color",        Color)       = (1,1,1,1)
         _FoamNoiseSpeed  ("Foam Noise Speed",  Float)       = 0.1
+        [Toggle] _UseWaves ("Use CPU-Synced Waves", Float) = 0
+        _Wave0 ("Wave 0 (DirX DirZ Amplitude Wavelength)", Vector) = (1,0,0,10)
+        _Wave1 ("Wave 1", Vector) = (0,1,0,10)
+        _Wave2 ("Wave 2", Vector) = (1,1,0,10)
+        _Wave3 ("Wave 3", Vector) = (-1,1,0,10)
+        _WaveSpeed ("Wave Speeds", Vector) = (0,0,0,0)
     }
 
     SubShader
@@ -77,6 +83,12 @@ Shader "Custom/Water"
                 float  _FoamThreshold;
                 float4 _FoamColor;
                 float  _FoamNoiseSpeed;
+                float  _UseWaves;
+                float4 _Wave0;
+                float4 _Wave1;
+                float4 _Wave2;
+                float4 _Wave3;
+                float4 _WaveSpeed;
             CBUFFER_END
 
             // Depth / Opaque texture — URP 정식 선언
@@ -136,6 +148,14 @@ Shader "Custom/Water"
             }
 
             // ── Vertex ──────────────────────────────────
+            float EvaluateWave(float4 wave, float speed, float3 positionWS)
+            {
+                float2 direction = normalize(wave.xy + float2(0.000001, 0));
+                float frequency = TWO_PI / max(0.01, wave.w);
+                float phase = frequency * dot(direction, positionWS.xz) + speed * _Time.y;
+                return wave.z * sin(phase);
+            }
+
             Varyings WaterVert(Attributes IN)
             {
                 Varyings OUT;
@@ -145,13 +165,22 @@ Shader "Custom/Water"
                 VertexPositionInputs vpi = GetVertexPositionInputs(IN.positionOS);
                 VertexNormalInputs   vni = GetVertexNormalInputs(IN.normalOS, IN.tangentOS);
 
-                OUT.positionCS = vpi.positionCS;
-                OUT.positionWS = vpi.positionWS;
+                float3 positionWS = vpi.positionWS;
+                if (_UseWaves > 0.5)
+                {
+                    positionWS.y += EvaluateWave(_Wave0, _WaveSpeed.x, positionWS);
+                    positionWS.y += EvaluateWave(_Wave1, _WaveSpeed.y, positionWS);
+                    positionWS.y += EvaluateWave(_Wave2, _WaveSpeed.z, positionWS);
+                    positionWS.y += EvaluateWave(_Wave3, _WaveSpeed.w, positionWS);
+                }
+
+                OUT.positionCS = TransformWorldToHClip(positionWS);
+                OUT.positionWS = positionWS;
                 OUT.normalWS   = vni.normalWS;
                 OUT.tangentWS  = float4(vni.tangentWS, IN.tangentOS.w);
                 OUT.uv         = IN.uv;
                 OUT.screenPos  = ComputeScreenPos(vpi.positionCS);
-                OUT.eyeDepth   = -vpi.positionVS.z;  // view space Z는 음수, 부호 반전해서 양수로
+                OUT.eyeDepth   = -TransformWorldToView(positionWS).z;
 
                 return OUT;
             }
@@ -286,6 +315,12 @@ Shader "Custom/Water"
                 float  _FoamThreshold;
                 float4 _FoamColor;
                 float  _FoamNoiseSpeed;
+                float  _UseWaves;
+                float4 _Wave0;
+                float4 _Wave1;
+                float4 _Wave2;
+                float4 _Wave3;
+                float4 _WaveSpeed;
             CBUFFER_END
 
             struct Attributes
@@ -355,6 +390,12 @@ Shader "Custom/Water"
                 float  _FoamThreshold;
                 float4 _FoamColor;
                 float  _FoamNoiseSpeed;
+                float  _UseWaves;
+                float4 _Wave0;
+                float4 _Wave1;
+                float4 _Wave2;
+                float4 _Wave3;
+                float4 _WaveSpeed;
             CBUFFER_END
 
             TEXTURE2D(_NormalMapA); SAMPLER(sampler_NormalMapA);

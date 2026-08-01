@@ -1,9 +1,10 @@
-﻿
 using UnityEngine;
 
 namespace _001_Scripts.Core._000_World._001_Water.Interface
 {
-    public interface IWaterQuery
+    /// <summary>Compatibility surface for the original water API.</summary>
+    [System.Obsolete("Use IWaterQueryService.TrySample instead.")]
+    public interface IWaterQuery : IWaterQueryService
     {
         bool IsInWater(Vector3 position);
         float GetSurfaceY(Vector3 position);

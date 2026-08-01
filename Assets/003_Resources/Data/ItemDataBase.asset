@@ -59,3 +59,96 @@ MonoBehaviour:
             value: 10
             duration: 0
             cooldown: 0
+    - Key: 3
+      Value:
+        itemId: 3
+        itemName: Wood
+        itemDesc: Basic material gathered from trees.
+        itemGrade: 0
+        itemType: 0
+        weight: 0.5
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 99
+            duration: 0
+            cooldown: 0
+    - Key: 4
+      Value:
+        itemId: 4
+        itemName: Copper Ore
+        itemDesc: Raw copper ore extracted from mineral nodes.
+        itemGrade: 0
+        itemType: 0
+        weight: 0.8
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 99
+            duration: 0
+            cooldown: 0
+    - Key: 5
+      Value:
+        itemId: 5
+        itemName: Stone Axe
+        itemDesc: A basic axe for harvesting trees.
+        itemGrade: 0
+        itemType: 1
+        weight: 1.2
+        ItemAttributes:
+        - attrType: 1
+          modifiers:
+          - modifierType: 4
+            value: 100
+            duration: 0
+            cooldown: 0
+        - attrType: 3
+          modifiers:
+          - modifierType: 3
+            value: 1
+            duration: 0
+            cooldown: 0
+    - Key: 6
+      Value:
+        itemId: 6
+        itemName: Stone Pickaxe
+        itemDesc: A basic pickaxe for mining mineral nodes.
+        itemGrade: 0
+        itemType: 1
+        weight: 1.4
+        ItemAttributes:
+        - attrType: 1
+          modifiers:
+          - modifierType: 4
+            value: 100
+            duration: 0
+            cooldown: 0
+        - attrType: 3
+          modifiers:
+          - modifierType: 3
+            value: 1
+            duration: 0
+            cooldown: 0
+    - Key: 7
+      Value:
+        itemId: 7
+        itemName: Portable Drill
+        itemDesc: Powered mining equipment for reinforced deposits.
+        itemGrade: 1
+        itemType: 1
+        weight: 2.5
+        ItemAttributes:
+        - attrType: 1
+          modifiers:
+          - modifierType: 4
+            value: 250
+            duration: 0
+            cooldown: 0
+        - attrType: 3
+          modifiers:
+          - modifierType: 3
+            value: 3
+            duration: 0
+            cooldown: 0
