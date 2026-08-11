@@ -1,0 +1,142 @@
+using System.Collections;
+using _001_Scripts.Data.Message;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace _001_Scripts.UI.Component
+{
+    [DisallowMultipleComponent]
+    public sealed class LeftNotificationFeed : MonoBehaviour
+    {
+        private const float Width = 340f;
+        private const float Height = 68f;
+        private const int MaxVisible = 6;
+
+        private RectTransform _root;
+
+        public void EnsureView()
+        {
+            if (_root) return;
+            var rootObject = new GameObject("LeftNotificationFeed", typeof(RectTransform), typeof(VerticalLayoutGroup));
+            _root = rootObject.GetComponent<RectTransform>();
+            _root.SetParent(transform, false);
+            _root.anchorMin = _root.anchorMax = new Vector2(0f, .5f);
+            _root.pivot = new Vector2(0f, .5f);
+            _root.anchoredPosition = Vector2.zero;
+            _root.sizeDelta = new Vector2(Width, 440f);
+            var layout = rootObject.GetComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(0, 0, 0, 0);
+            layout.spacing = 8f;
+            layout.childAlignment = TextAnchor.UpperLeft;
+            layout.childControlWidth = layout.childControlHeight = false;
+            layout.childForceExpandWidth = layout.childForceExpandHeight = false;
+            _root.SetAsLastSibling();
+        }
+
+        public void Enqueue(NotificationMessage message)
+        {
+            EnsureView();
+            while (_root.childCount >= MaxVisible)
+                Destroy(_root.GetChild(0).gameObject);
+
+            var wrapper = new GameObject("Notification", typeof(RectTransform));
+            var wrapperRect = wrapper.GetComponent<RectTransform>();
+            wrapperRect.SetParent(_root, false);
+            wrapperRect.sizeDelta = new Vector2(Width, Height);
+
+            var toast = new GameObject("Card", typeof(RectTransform), typeof(CanvasRenderer),
+                typeof(RightRoundedRectGraphic), typeof(Outline), typeof(CanvasGroup));
+            var toastRect = toast.GetComponent<RectTransform>();
+            toastRect.SetParent(wrapperRect, false);
+            toastRect.anchorMin = new Vector2(0f, 0f);
+            toastRect.anchorMax = new Vector2(0f, 1f);
+            toastRect.pivot = new Vector2(0f, .5f);
+            toastRect.sizeDelta = new Vector2(Width, 0f);
+            toastRect.anchoredPosition = new Vector2(-Width, 0f);
+
+            var background = toast.GetComponent<RightRoundedRectGraphic>();
+            background.color = Background(message.Kind);
+            background.raycastTarget = false;
+            var outline = toast.GetComponent<Outline>();
+            outline.effectColor = new Color(.7f, .82f, 1f, .28f);
+            outline.effectDistance = new Vector2(1f, -1f);
+
+            CreateText("Icon", toastRect, message.Icon, new Vector2(16f, 0f), new Vector2(48f, Height),
+                25, TextAnchor.MiddleCenter, Color.white);
+            CreateText("Title", toastRect, message.Title, new Vector2(70f, -9f), new Vector2(245f, 28f),
+                16, TextAnchor.MiddleLeft, Color.white);
+            CreateText("Body", toastRect, message.Body, new Vector2(70f, -35f), new Vector2(245f, 24f),
+                13, TextAnchor.MiddleLeft, new Color(.78f, .84f, .94f, 1f));
+
+            StartCoroutine(Animate(wrapper, toastRect, toast.GetComponent<CanvasGroup>(), message.Duration));
+        }
+
+        private IEnumerator Animate(GameObject wrapper, RectTransform card, CanvasGroup group, float duration)
+        {
+            group.alpha = 0f;
+            yield return Tween(.3f, value =>
+            {
+                if (!card || !group) return;
+                float eased = OutBack(value);
+                card.anchoredPosition = new Vector2(Mathf.LerpUnclamped(-Width, 0f, eased), 0f);
+                group.alpha = Mathf.Clamp01(value * 2f);
+            });
+
+            yield return new WaitForSecondsRealtime(Mathf.Max(.25f, duration));
+            yield return Tween(.22f, value =>
+            {
+                if (!card || !group) return;
+                float eased = value * value;
+                card.anchoredPosition = new Vector2(Mathf.Lerp(0f, -Width, eased), 0f);
+                group.alpha = 1f - value;
+            });
+            if (wrapper) Destroy(wrapper);
+        }
+
+        private static IEnumerator Tween(float duration, System.Action<float> update)
+        {
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                update(Mathf.Clamp01(elapsed / duration));
+                yield return null;
+            }
+            update(1f);
+        }
+
+        private static float OutBack(float value)
+        {
+            const float overshoot = 1.45f;
+            float shifted = value - 1f;
+            return 1f + (overshoot + 1f) * shifted * shifted * shifted + overshoot * shifted * shifted;
+        }
+
+        private static Color Background(NotificationKind kind) => kind switch
+        {
+            NotificationKind.Warning => new Color(.34f, .12f, .16f, .92f),
+            NotificationKind.ItemAdded => new Color(.08f, .18f, .24f, .9f),
+            NotificationKind.ItemRemoved => new Color(.17f, .12f, .22f, .9f),
+            _ => new Color(.08f, .1f, .16f, .9f)
+        };
+
+        private static void CreateText(string name, Transform parent, string value, Vector2 position,
+            Vector2 size, int fontSize, TextAnchor alignment, Color color)
+        {
+            var textObject = new GameObject(name, typeof(RectTransform), typeof(Text));
+            var rect = textObject.GetComponent<RectTransform>();
+            rect.SetParent(parent, false);
+            rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = position;
+            rect.sizeDelta = size;
+            var text = textObject.GetComponent<Text>();
+            text.font = SurvivalUITheme.Font;
+            text.fontSize = fontSize;
+            text.alignment = alignment;
+            text.color = color;
+            text.text = value ?? string.Empty;
+            text.raycastTarget = false;
+        }
+    }
+}

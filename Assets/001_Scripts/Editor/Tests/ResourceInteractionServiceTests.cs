@@ -51,7 +51,7 @@ namespace _001_Scripts.Editor.Tests
         }
 
         [Test]
-        public void InventorySelector_ChoosesStrongestEligibleOwnedTool()
+        public void InventorySelector_UsesSelectedHotbarTool()
         {
             HarvestToolCatalog catalog = ScriptableObject.CreateInstance<HarvestToolCatalog>();
             try
@@ -63,7 +63,7 @@ namespace _001_Scripts.Editor.Tests
                 SetTool(tools.GetArrayElementAtIndex(1), 7, HarvestMethod.Drill, 3, 4f, 50f);
                 serialized.ApplyModifiedPropertiesWithoutUndo();
                 InventoryHarvestToolSelector selector = new InventoryHarvestToolSelector(
-                    new FakeInventory(6, 7), catalog);
+                    new FakeHotbar(7), catalog);
 
                 ResourceInteractionInfo info = Resource("Deposit", HarvestMethod.Pickaxe | HarvestMethod.Drill, 1, 1f);
                 Assert.That(selector.TrySelect(info, out HarvestToolSelection selection), Is.True);
@@ -142,23 +142,13 @@ namespace _001_Scripts.Editor.Tests
             public int ProcessInventoryTransfers(Func<int, int, int> acceptItems) => 0;
         }
 
-        private sealed class FakeInventory : IInventoryService
+        private sealed class FakeHotbar : IHotbarReader
         {
-            private readonly HashSet<int> owned;
-            public FakeInventory(params int[] itemIds) => owned = new HashSet<int>(itemIds);
-            public AddItemResult AddItem(int id, int count) => default;
-            public void RemoveItem(int id, int count) { }
-            public void RemoveItem(Item item) { }
-            public void RemoveItem(Instance ins) { }
-            public bool HasItem(int id, int count = 1) => owned.Contains(id);
-            public bool HasItem(Item item, int count = 1) => HasItem(item.itemId, count);
-            public bool HasItem(Instance ins) => HasItem(ins.itemId);
-            public IReadOnlyList<InventorySlot> GetAllItems() => Array.Empty<InventorySlot>();
-            public InventorySlot GetSlot(int index) => null;
-            public int SlotCount => 0;
-            public bool UseItem(int index) => false;
-            public bool DropItem(int index, int count = 1) => false;
-            public void SortItems() { }
+            private readonly InventorySlot slot;
+            public FakeHotbar(int itemId) => slot = new InventorySlot(new Instance(itemId, 1, 100f), 1);
+            public int HotbarSlotCount => 1;
+            public int SelectedHotbarIndex => 0;
+            public InventorySlot GetHotbarSlot(int index) => slot;
         }
     }
 }

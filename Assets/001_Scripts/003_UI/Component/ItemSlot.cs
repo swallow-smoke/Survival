@@ -20,6 +20,7 @@ namespace _001_Scripts.UI.Component
         [SerializeField] private TextMeshProUGUI stock;
         [SerializeField] private Image durability;
         [SerializeField] private int index;
+        [SerializeField] private InventorySlotArea area;
 
         [Header("Serialized UGUI")]
         [SerializeField] private Image background;
@@ -59,10 +60,12 @@ namespace _001_Scripts.UI.Component
             _onSelected = onSelected;
         }
 
-        public void Init(IPublisher<InvSwapMessage> publisher, int slotIndex = -1)
+        public void Init(IPublisher<InvSwapMessage> publisher, int slotIndex = -1,
+            InventorySlotArea slotArea = InventorySlotArea.Inventory)
         {
             _publisher = publisher;
             if (slotIndex >= 0) index = slotIndex;
+            area = slotArea;
         }
 
         public void Set(InventorySlot slot, Item item, int slotIndex)
@@ -202,7 +205,7 @@ namespace _001_Scripts.UI.Component
         {
             var dragged = eventData.pointerDrag ? eventData.pointerDrag.GetComponent<ItemSlot>() : null;
             if (dragged == null || dragged == this || dragged._publisher == null) return;
-            dragged._publisher.Publish(new InvSwapMessage(dragged.index, index));
+            dragged._publisher.Publish(new InvSwapMessage(dragged.index, index, dragged.area, area));
         }
     }
 }

@@ -14,15 +14,17 @@ namespace _001_Scripts.Controller.Handler
         public event Action OnJump;
         public event Action OnInteract;
         public event Action OnExitVehicle;
-        public event Action<float> OnPersonChange;
         public event Action OnInventoryToggle;
         public event Action OnCraftToggle;
+        public event Action<int> OnHotbarSlot;
+        public event Action<float> OnHotbarScroll;
 
         [SerializeField, HideInInspector] private int uiBindingVersion;
         private PlayerInput _playerInput;
         private InputAction _inventoryAction;
         private InputAction _craftAction;
         private int _lastCraftToggleFrame = -1;
+        private float _lastScroll;
 
         private void Awake()
         {
@@ -33,6 +35,27 @@ namespace _001_Scripts.Controller.Handler
                 _inventoryAction.started += HandleInventoryToggle;
             if (_craftAction != null)
                 _craftAction.started += HandleCraftToggle;
+        }
+
+        private void Update()
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard != null)
+            {
+                if (keyboard.digit1Key.wasPressedThisFrame) OnHotbarSlot?.Invoke(0);
+                else if (keyboard.digit2Key.wasPressedThisFrame) OnHotbarSlot?.Invoke(1);
+                else if (keyboard.digit3Key.wasPressedThisFrame) OnHotbarSlot?.Invoke(2);
+                else if (keyboard.digit4Key.wasPressedThisFrame) OnHotbarSlot?.Invoke(3);
+                else if (keyboard.digit5Key.wasPressedThisFrame) OnHotbarSlot?.Invoke(4);
+                else if (keyboard.digit6Key.wasPressedThisFrame) OnHotbarSlot?.Invoke(5);
+                else if (keyboard.digit7Key.wasPressedThisFrame) OnHotbarSlot?.Invoke(6);
+                else if (keyboard.digit8Key.wasPressedThisFrame) OnHotbarSlot?.Invoke(7);
+            }
+
+            float scroll = Mouse.current?.scroll.ReadValue().y ?? 0f;
+            if (Mathf.Abs(scroll) > .01f && Mathf.Abs(_lastScroll) <= .01f)
+                OnHotbarScroll?.Invoke(Mathf.Sign(scroll));
+            _lastScroll = scroll;
         }
 
         public void HandleMove(InputAction.CallbackContext ctx)
@@ -68,11 +91,6 @@ namespace _001_Scripts.Controller.Handler
         public void HandleExitVehicle(InputAction.CallbackContext ctx)
         {
             if (ctx.started) OnExitVehicle?.Invoke();
-        }
-
-        public void HandlePersonChange(InputAction.CallbackContext ctx)
-        {
-            if (ctx.performed) OnPersonChange?.Invoke(ctx.ReadValue<float>());
         }
 
         public void HandleInventoryToggle(InputAction.CallbackContext ctx)

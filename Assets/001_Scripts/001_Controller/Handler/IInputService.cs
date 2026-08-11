@@ -22,7 +22,6 @@ namespace _001_Scripts.Controller.Handler
     public interface IVehicleInput
     {
         event Action OnExitVehicle;
-        event Action<float> OnPersonChange;
     }
 
     public interface IUIInput
@@ -31,5 +30,11 @@ namespace _001_Scripts.Controller.Handler
         event Action OnCraftToggle;
     }
 
-    public interface IInputService : IMovementInput, IInteractionInput, IVehicleInput, IUIInput { }
+    public interface IHotbarInput
+    {
+        event Action<int> OnHotbarSlot;
+        event Action<float> OnHotbarScroll;
+    }
+
+    public interface IInputService : IMovementInput, IInteractionInput, IVehicleInput, IUIInput, IHotbarInput { }
 }

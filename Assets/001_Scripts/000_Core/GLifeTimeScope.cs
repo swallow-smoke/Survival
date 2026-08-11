@@ -38,12 +38,14 @@ namespace _001_Scripts.Core
             builder.RegisterMessageBroker<InvReqMessage>(options);
             builder.RegisterMessageBroker<InvChangedMessage>(options);
             builder.RegisterMessageBroker<InvSwapMessage>(options);
+            builder.RegisterMessageBroker<HotbarSelectionMessage>(options);
             
             builder.RegisterMessageBroker<CraftReqMessage>(options);
             builder.RegisterMessageBroker<CraftResultMessage>(options);
             
             builder.RegisterMessageBroker<UIReqMessage>(options);
             builder.RegisterMessageBroker<InteractionUIMessage>(options);
+            builder.RegisterMessageBroker<NotificationMessage>(options);
             #endregion
 
             #region Player
@@ -61,6 +63,7 @@ namespace _001_Scripts.Core
 
             #region Services
 
+            builder.Register<NotificationService>(Lifetime.Singleton).As<INotificationService>();
             builder.RegisterComponentInHierarchy<ItemSpawner>()
                 .AsSelf()
                 .As<IPickupSpawner>();
@@ -68,7 +71,9 @@ namespace _001_Scripts.Core
                 .As<IInventoryService>()
                 .As<IInventoryReader>()
                 .As<IInventoryWriter>()
-                .As<IInventoryActions>();
+                .As<IInventoryActions>()
+                .As<IHotbarReader>()
+                .As<IHotbarActions>();
             builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>().As<IInitializable>();
             builder.RegisterComponentInHierarchy<UIManager>()
                 .As<IUIService>()
@@ -86,7 +91,8 @@ namespace _001_Scripts.Core
                 .As<IMovementInput>()
                 .As<IInteractionInput>()
                 .As<IVehicleInput>()
-                .As<IUIInput>();
+                .As<IUIInput>()
+                .As<IHotbarInput>();
             builder.RegisterComponentInHierarchy<CraftController>()
                 .As<ICraftService>()
                 .As<ICraftingService>();

@@ -35,6 +35,7 @@ namespace _001_Scripts.Controller
         private OutlineHighlighter _highlighter;
         private bool _hasResourceTarget;
         private string _resourceLabel;
+        private FirstPersonItemHolder _itemHolder;
 
         [Inject]
         public void Construct(IPublisher<InteractionUIMessage> uiPublisher,
@@ -53,6 +54,7 @@ namespace _001_Scripts.Controller
 
         private void Start()
         {
+            _itemHolder = GetComponent<FirstPersonItemHolder>();
             if (_input == null) return;
 
             _input.OnInteract += HandleInteract;
@@ -154,7 +156,8 @@ namespace _001_Scripts.Controller
                 return;
             }
 
-            _resourceInteraction?.InteractFocused();
+            if (_resourceInteraction?.InteractFocused() == true)
+                _itemHolder?.TryPerformPrimaryAction();
         }
 
         private void OnDestroy()

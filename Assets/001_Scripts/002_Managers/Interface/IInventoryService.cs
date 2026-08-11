@@ -28,5 +28,18 @@ namespace _001_Scripts.Interface
         void SortItems();
     }
 
+    public interface IHotbarReader
+    {
+        int HotbarSlotCount { get; }
+        int SelectedHotbarIndex { get; }
+        InventorySlot GetHotbarSlot(int index);
+    }
+
+    public interface IHotbarActions
+    {
+        bool SelectHotbar(int index);
+        void CycleHotbar(int direction);
+    }
+
     public interface IInventoryService : IInventoryReader, IInventoryWriter, IInventoryActions { }
 }

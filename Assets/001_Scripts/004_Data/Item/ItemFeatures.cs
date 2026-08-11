@@ -49,6 +49,7 @@ namespace _001_Scripts.Data.Item
     public interface IRepairableItem : IItemFeature { }
     public interface IExplosiveItem : IItemFeature { float Power { get; } }
     public interface IScannableItem : IItemFeature { float Range { get; } }
+    public interface IHoldable : IItemFeature { UnityEngine.GameObject FirstPersonPrefab { get; } }
 
     public abstract class ItemFeature : IItemFeature
     {
@@ -116,5 +117,11 @@ namespace _001_Scripts.Data.Item
         public ScannableItem(Item item) : base(item) { }
         public float Range => UnityEngine.Mathf.Max(0f,
             Item.GetModifierValue(AttributesType.Scannable, ModifierType.ScanRange));
+    }
+
+    public sealed class Holdable : ItemFeature, IHoldable
+    {
+        public Holdable(Item item) : base(item) { }
+        public UnityEngine.GameObject FirstPersonPrefab => Item.firstPersonPrefab;
     }
 }

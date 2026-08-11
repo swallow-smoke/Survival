@@ -19,6 +19,10 @@ namespace _001_Scripts.Data.Item
         public float weight;
         public List<Attributes.Attributes> ItemAttributes = new();
 
+        [Header("First Person")]
+        [Tooltip("Optional view prefab spawned by FirstPersonItemHolder.")]
+        public GameObject firstPersonPrefab;
+
         [NonSerialized] private List<IItemFeature> _features;
 
         public ItemRole Role
@@ -91,6 +95,7 @@ namespace _001_Scripts.Data.Item
             if (HasAttribute(AttributesType.Repairable)) _features.Add(new RepairableItem(this));
             if (HasAttribute(AttributesType.Explosive)) _features.Add(new ExplosiveItem(this));
             if (HasAttribute(AttributesType.Scannable)) _features.Add(new ScannableItem(this));
+            if (firstPersonPrefab) _features.Add(new Holdable(this));
         }
     }
 }

@@ -7,19 +7,19 @@ namespace _001_Scripts.Managers
 {
     public sealed class InventoryHarvestToolSelector : IHarvestToolSelector
     {
-        private readonly IInventoryReader inventory;
+        private readonly IHotbarReader hotbar;
         private readonly HarvestToolCatalog catalog;
 
-        public InventoryHarvestToolSelector(IInventoryReader inventory, HarvestToolCatalog catalog)
+        public InventoryHarvestToolSelector(IHotbarReader hotbar, HarvestToolCatalog catalog)
         {
-            this.inventory = inventory;
+            this.hotbar = hotbar;
             this.catalog = catalog;
         }
 
         public bool TrySelect(ResourceInteractionInfo resource, out HarvestToolSelection selection)
         {
             selection = default;
-            if (!resource.IsResource || inventory == null || catalog == null) return false;
+            if (!resource.IsResource || hotbar == null || catalog == null) return false;
 
             if (resource.RequiredToolItemId < 0 &&
                 (resource.AllowedMethods & HarvestMethod.Hand) != 0 &&
@@ -29,10 +29,14 @@ namespace _001_Scripts.Managers
                     catalog.HandPower, catalog.HandDamage);
             }
 
+            InventorySlot heldSlot = hotbar.HotbarSlotCount > 0
+                ? hotbar.GetHotbarSlot(hotbar.SelectedHotbarIndex)
+                : null;
+            int heldItemId = heldSlot == null || heldSlot.IsEmpty ? -1 : heldSlot.ins.itemId;
             for (int i = 0; i < catalog.ToolCount; i++)
             {
                 HarvestToolDefinition tool = catalog.GetTool(i);
-                if (!inventory.HasItem(tool.itemId)) continue;
+                if (tool.itemId != heldItemId) continue;
                 if (resource.RequiredToolItemId >= 0 && tool.itemId != resource.RequiredToolItemId) continue;
                 if ((resource.AllowedMethods & tool.method) == 0) continue;
                 int tier = Mathf.Clamp(tool.tier, 0, byte.MaxValue);

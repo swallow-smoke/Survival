@@ -10,6 +10,8 @@ namespace _001_Scripts.Data.BluePrint
         public float craftTime;
         public int requiredLevel;
         public bool isUnlocked;
+        [UnityEngine.Tooltip("Slash-separated radial category path, e.g. Materials/Metal/Iron")]
+        public string categoryPath;
         public string bluePrintName;
         public int bluePrintId;
 

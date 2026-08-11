@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using _001_Scripts.Base;
+using _001_Scripts.Controller.Handler;
 using _001_Scripts.Data.Item;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.SOJ;
@@ -48,6 +49,8 @@ namespace _001_Scripts.UI
         private InventorySlotList _slotList;
         private IInventoryService _inventory;
         private IPublisher<UIReqMessage> _uiReqPublisher;
+        private IPublisher<InvSwapMessage> _invSwapPublisher;
+        private IHotbarInput _hotbarInput;
         private int _selectedIndex = -1;
 
         private new void Awake()
@@ -135,6 +138,16 @@ namespace _001_Scripts.UI
             _selectedIndex = index;
             _slotList?.SetSelected(index);
             ShowDetails(index);
+        }
+
+        private void AssignSelectedToHotbar(int hotbarIndex)
+        {
+            if (!isViz || _inventory == null || _invSwapPublisher == null ||
+                _selectedIndex < 0 || _selectedIndex >= _inventory.SlotCount) return;
+            var selected = _inventory.GetSlot(_selectedIndex);
+            if (selected == null || selected.IsEmpty) return;
+            _invSwapPublisher.Publish(new InvSwapMessage(_selectedIndex, hotbarIndex,
+                InventorySlotArea.Inventory, InventorySlotArea.Hotbar));
         }
 
         private void ShowDetails(int index)
@@ -259,11 +272,16 @@ namespace _001_Scripts.UI
         private void Construct(IInventoryService invService,
             ISubscriber<InvChangedMessage> invSubscriber,
             IPublisher<InvSwapMessage> invSwapPublisher,
-            IPublisher<UIReqMessage> uiReqPublisher)
+            IPublisher<UIReqMessage> uiReqPublisher,
+            IHotbarInput hotbarInput)
         {
             _bag?.Dispose();
+            if (_hotbarInput != null) _hotbarInput.OnHotbarSlot -= AssignSelectedToHotbar;
             _inventory = invService;
             _uiReqPublisher = uiReqPublisher;
+            _invSwapPublisher = invSwapPublisher;
+            _hotbarInput = hotbarInput;
+            _hotbarInput.OnHotbarSlot += AssignSelectedToHotbar;
 
             var builder = DisposableBag.CreateBuilder();
             builder.Add(invSubscriber.Subscribe(OnInvMsg));
@@ -282,6 +300,7 @@ namespace _001_Scripts.UI
 
         private void OnDestroy()
         {
+            if (_hotbarInput != null) _hotbarInput.OnHotbarSlot -= AssignSelectedToHotbar;
             _bag?.Dispose();
             if (useButton) useButton.onClick.RemoveListener(UseSelected);
             if (dropButton) dropButton.onClick.RemoveListener(DropSelected);

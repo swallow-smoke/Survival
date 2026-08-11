@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
+using _001_Scripts.Controller;
 using _001_Scripts.Data.Item;
 using _001_Scripts.Type.Item;
 using NUnit.Framework;
@@ -65,6 +66,41 @@ namespace _001_Scripts.Editor.Tests
             Assert.That(item.HasFeature<IStackable>(), Is.True);
             Assert.That(item.HasFeature<ITool>(), Is.False);
             Assert.That(item.HasFeature<IUsable>(), Is.False);
+        }
+
+        [Test]
+        public void FirstPersonHolder_SpawnsViewAtMountAndDisablesPhysics()
+        {
+            var holderObject = new UnityEngine.GameObject("Holder");
+            var viewPrefab = new UnityEngine.GameObject("ToolView");
+            viewPrefab.transform.localScale = new UnityEngine.Vector3(2f, 2f, 2f);
+            viewPrefab.AddComponent<UnityEngine.BoxCollider>();
+            viewPrefab.AddComponent<UnityEngine.Rigidbody>();
+            var item = CreateItem(Attribute(AttributesType.QuickSlottable));
+            item.firstPersonPrefab = viewPrefab;
+
+            try
+            {
+                var holder = holderObject.AddComponent<FirstPersonItemHolder>();
+
+                Assert.That(item.HasFeature<IHoldable>(), Is.True);
+                Assert.That(holder.TryEquip(item), Is.True);
+                Assert.That(holder.IsHolding, Is.True);
+                Assert.That(holder.HeldItem, Is.SameAs(item));
+                Assert.That(holder.HeldObject.transform.parent, Is.SameAs(holder.transform));
+                Assert.That(holder.HeldObject.transform.localPosition, Is.EqualTo(UnityEngine.Vector3.zero));
+                Assert.That(holder.HeldObject.transform.localRotation, Is.EqualTo(UnityEngine.Quaternion.identity));
+                Assert.That(holder.HeldObject.GetComponent<UnityEngine.Collider>().enabled, Is.False);
+                Assert.That(holder.HeldObject.GetComponent<UnityEngine.Rigidbody>().isKinematic, Is.True);
+
+                holder.Unequip();
+                Assert.That(holder.IsHolding, Is.False);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(holderObject);
+                UnityEngine.Object.DestroyImmediate(viewPrefab);
+            }
         }
 
         private static Item CreateItem(params ItemAttribute[] attributes) => new()

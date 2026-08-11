@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace _001_Scripts.Data.SOJ
@@ -6,30 +7,77 @@ namespace _001_Scripts.Data.SOJ
     [CreateAssetMenu(fileName = "BluePrints", menuName = "Data/Create BluePrints", order = 0)]
     public class BluePrintDataBase : ScriptableObject
     {
-        public List<BluePrint.BluePrint> bluePrints = new();
-        public BluePrint.BluePrint GetBluePrint(int id) {
-            BluePrint.BluePrint obj = bluePrints.Find(item =>
-                item.bluePrintId == id);
-            return obj;
-        }
-        public BluePrint.BluePrint GetBluePrint(string name)
+        [Serializable]
+        private sealed class BluePrintCollection
         {
-            BluePrint.BluePrint obj = bluePrints.Find(item =>
-                item.bluePrintName == name);
-            return obj;
+            public List<BluePrint.BluePrint> blueprints = new();
         }
-        public BluePrint.BluePrint GetBluePrint(BluePrint.BluePrint bluePrint)
+
+        [SerializeField, Tooltip("JSON source of truth. Defaults to Resources/Data/Blueprints.json.")]
+        private TextAsset jsonSource;
+        [SerializeField, HideInInspector]
+        private List<BluePrint.BluePrint> bluePrints = new();
+
+        public TextAsset JsonSource => jsonSource;
+
+        private void OnEnable() => Reload();
+
+        public void Reload()
         {
-            BluePrint.BluePrint obj = bluePrints.Find(i => i == bluePrint);
-            return obj;
+            if (!jsonSource) jsonSource = Resources.Load<TextAsset>("Data/Blueprints");
+            if (!jsonSource)
+            {
+                bluePrints = new List<BluePrint.BluePrint>();
+                Debug.LogError("[Blueprints] JSON source was not found at Resources/Data/Blueprints.json.", this);
+                return;
+            }
+
+            LoadJson(jsonSource.text);
         }
-        
-        /// <summary>
-        /// Made Only For Read
-        /// Don't do change the BluePrint desc or info.
-        /// It can be broken by the BluePrint DB System.
-        /// </summary>
-        /// <returns>All of Blueprints</returns>
+
+        public void LoadJson(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+                throw new ArgumentException("Blueprint JSON cannot be empty.", nameof(json));
+
+            var collection = JsonUtility.FromJson<BluePrintCollection>(json);
+            if (collection?.blueprints == null)
+                throw new FormatException("Blueprint JSON must contain a 'blueprints' array.");
+
+            var ids = new HashSet<int>();
+            var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var blueprint in collection.blueprints)
+            {
+                if (blueprint == null) throw new FormatException("Blueprint entries cannot be null.");
+                if (!ids.Add(blueprint.bluePrintId))
+                    throw new FormatException($"Duplicate blueprint id: {blueprint.bluePrintId}.");
+                if (string.IsNullOrWhiteSpace(blueprint.bluePrintName))
+                    throw new FormatException($"Blueprint {blueprint.bluePrintId} has no name.");
+                if (!names.Add(blueprint.bluePrintName))
+                    throw new FormatException($"Duplicate blueprint name: {blueprint.bluePrintName}.");
+                blueprint.categoryPath = NormalizeCategoryPath(blueprint.categoryPath);
+                blueprint.recipe ??= new List<BluePrint.RecipeEntry>();
+                foreach (var entry in blueprint.recipe)
+                    if (entry == null || entry.count <= 0)
+                        throw new FormatException($"Blueprint {blueprint.bluePrintId} has an invalid recipe entry.");
+            }
+
+            bluePrints = collection.blueprints;
+        }
+
+        private static string NormalizeCategoryPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return "Misc";
+            var parts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < parts.Length; i++) parts[i] = parts[i].Trim();
+            return parts.Length == 0 ? "Misc" : string.Join("/", parts);
+        }
+
+        public BluePrint.BluePrint GetBluePrint(int id) => bluePrints.Find(item => item.bluePrintId == id);
+        public BluePrint.BluePrint GetBluePrint(string name) => bluePrints.Find(item =>
+            string.Equals(item.bluePrintName, name, StringComparison.OrdinalIgnoreCase));
+        public BluePrint.BluePrint GetBluePrint(BluePrint.BluePrint bluePrint) =>
+            bluePrints.Find(item => ReferenceEquals(item, bluePrint));
         public IReadOnlyList<BluePrint.BluePrint> GetAllBluePrints() => bluePrints;
         public bool Exist(int id) => bluePrints.Exists(item => item.bluePrintId == id);
     }

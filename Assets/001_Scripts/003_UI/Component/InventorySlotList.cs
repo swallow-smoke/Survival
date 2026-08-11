@@ -19,7 +19,7 @@ namespace _001_Scripts.UI.Component
             _inventory = inventory;
             _itemDatabase = itemDatabase;
             for (int i = 0; i < _slots.Count; i++)
-                _slots[i].Init(swapPublisher, i);
+                _slots[i].Init(swapPublisher, i, InventorySlotArea.Inventory);
         }
 
         public void RefreshAll()

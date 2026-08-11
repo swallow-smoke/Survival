@@ -27,7 +27,6 @@ namespace _001_Scripts.Controller
         [SerializeField] private Rigidbody _rb;
         [SerializeField] private LayerMask layer;
         [SerializeField] private Transform footTrs;
-        [SerializeField] private Transform _trs;
         [SerializeField] private float maxDistance = 1f;
         [SerializeField] private CameraController _camCont;
         private IWaterQueryService _waterQuery;
@@ -94,7 +93,7 @@ namespace _001_Scripts.Controller
         {
             // VContainer may inject one frame later while scripts are reloaded in the Editor.
             // Do not let an incomplete dependency graph stop Play Mode or flood the Console.
-            if (_ctx == null || !_rb || !_camCont || !_trs || !footTrs ||
+            if (_ctx == null || !_rb || !_camCont || !footTrs ||
                 _waterQuery == null || iMovementPublisher == null) return;
             if (!isCanMove) return;
             if (_vehicleState == PlayerVehicleState.Seated) return;
@@ -110,8 +109,6 @@ namespace _001_Scripts.Controller
             
             SelectMode().Tick(_ctx);
             
-            ApplyRotation();
-
             isGround = !isSwimming && Physics.Raycast(footTrs.position, Vector3.down, maxDistance, layer);
             Vector3 publs = transform.InverseTransformDirection(_rb.linearVelocity) / runningSpeed;
             iMovementPublisher.Publish(new PlayerMovementMessage(_rb.linearVelocity.magnitude / runningSpeed, isGround, publs, isSwimming));
@@ -126,19 +123,10 @@ namespace _001_Scripts.Controller
 
         private Vector3 ComputeMoveDir()
         {
-            Vector3 dir = (_camCont.transform.forward * inputValue.y) + (_camCont.transform.right * inputValue.x);
+            Vector3 dir = (_camCont.PlanarForward * inputValue.y) + (_camCont.PlanarRight * inputValue.x);
             dir.y = 0;
             dir.Normalize();
             return dir;
-        }
-
-        private void ApplyRotation()
-        {
-            if (_rb.linearVelocity.magnitude > 0.1f)
-            {
-                Quaternion targetRot = Quaternion.Euler(0, _trs.rotation.eulerAngles.y, 0);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, 360f * Time.fixedDeltaTime);
-            }
         }
 
         private void HandleMove(Vector2 value)
@@ -268,8 +256,8 @@ namespace _001_Scripts.Controller
             _waterQuery = waterQuery;
             _input = inputService;
             EnsureWaterComponents();
-            _waterSensor.Configure(waterQuery, footTrs, transform, _camCont != null ? _camCont.transform : null,
-                _camCont != null ? _camCont.transform : null);
+            _waterSensor.Configure(waterQuery, footTrs, transform, _camCont != null ? _camCont.ViewTransform : null,
+                _camCont != null ? _camCont.ViewTransform : null);
             _waterStateHandler = state => waterStatePublisher.Publish(new PlayerWaterStateMessage(state));
             _waterSensor.StateChanged += _waterStateHandler;
             _underwaterVolume.Configure(_waterSensor);
