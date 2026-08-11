@@ -99,7 +99,7 @@ namespace _001_Scripts.Managers
         }
 
         private static bool IsModalPanel(string key)
-            => key == "Inventory" || key == "Craft" || key == "Workbench" ||
+            => key == "Inventory" || key == "Log" || key == "Blueprint" || key == "Workbench" ||
                key == "SubmarineFabricator";
 
         public void Open(string key)

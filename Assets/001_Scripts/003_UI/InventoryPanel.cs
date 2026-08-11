@@ -43,11 +43,13 @@ namespace _001_Scripts.UI
         [SerializeField] private Button closeButton;
         [SerializeField] private Button inventoryTabButton;
         [SerializeField] private Button craftTabButton;
+        [SerializeField] private ModalNavigation modalNavigation;
 
         private readonly List<ItemSlot> _slotViews = new();
         private IDisposable _bag;
         private InventorySlotList _slotList;
         private IInventoryService _inventory;
+        private IHotbarReader _hotbar;
         private IPublisher<UIReqMessage> _uiReqPublisher;
         private IPublisher<InvSwapMessage> _invSwapPublisher;
         private IHotbarInput _hotbarInput;
@@ -73,7 +75,7 @@ namespace _001_Scripts.UI
             {
                 canvas.renderMode = RenderMode.ScreenSpaceOverlay;
                 canvas.overrideSorting = true;
-                canvas.sortingOrder = 100;
+                canvas.sortingOrder = 120;
                 canvas.enabled = true;
             }
 
@@ -106,7 +108,12 @@ namespace _001_Scripts.UI
             if (sortButton) sortButton.onClick.AddListener(SortInventory);
             if (closeButton) closeButton.onClick.AddListener(CloseFromButton);
             if (inventoryTabButton) inventoryTabButton.onClick.AddListener(OnInventoryTabClicked);
-            if (craftTabButton) craftTabButton.onClick.AddListener(OnCraftTabClicked);
+            if (craftTabButton)
+            {
+                craftTabButton.onClick.AddListener(OnLogTabClicked);
+                var label = craftTabButton.GetComponentInChildren<Text>(true);
+                if (label) label.text = "로그   [V]";
+            }
         }
 
         public override void Open()
@@ -122,10 +129,12 @@ namespace _001_Scripts.UI
             _slotList?.RefreshAll();
         }
 
-        public void OnCraftTabClicked()
+        public void OnLogTabClicked()
         {
-            _uiReqPublisher?.Publish(new UIReqMessage(UIReqMsgType.Open, "Craft"));
+            _uiReqPublisher?.Publish(new UIReqMessage(UIReqMsgType.Open, "Log"));
         }
+
+        public void OnCraftTabClicked() => OnLogTabClicked();
 
         private void OnInvMsg(InvChangedMessage msg)
         {
@@ -142,12 +151,39 @@ namespace _001_Scripts.UI
 
         private void AssignSelectedToHotbar(int hotbarIndex)
         {
-            if (!isViz || _inventory == null || _invSwapPublisher == null ||
-                _selectedIndex < 0 || _selectedIndex >= _inventory.SlotCount) return;
-            var selected = _inventory.GetSlot(_selectedIndex);
-            if (selected == null || selected.IsEmpty) return;
-            _invSwapPublisher.Publish(new InvSwapMessage(_selectedIndex, hotbarIndex,
+            if (!isViz || _inventory == null || _hotbar == null || _invSwapPublisher == null ||
+                hotbarIndex < 0 || hotbarIndex >= _hotbar.HotbarSlotCount) return;
+
+            int inventoryIndex = _selectedIndex;
+            var hotbarSlot = _hotbar.GetHotbarSlot(hotbarIndex);
+            bool hotbarOccupied = hotbarSlot != null && !hotbarSlot.IsEmpty;
+
+            if (inventoryIndex < 0 || inventoryIndex >= _inventory.SlotCount)
+            {
+                if (!hotbarOccupied) return;
+                inventoryIndex = FindFirstEmptyInventorySlot();
+                if (inventoryIndex < 0) return;
+                _selectedIndex = inventoryIndex;
+                _slotList?.SetSelected(inventoryIndex);
+            }
+
+            var inventorySlot = _inventory.GetSlot(inventoryIndex);
+            bool inventoryOccupied = inventorySlot != null && !inventorySlot.IsEmpty;
+            if (!inventoryOccupied && !hotbarOccupied) return;
+
+            _invSwapPublisher.Publish(new InvSwapMessage(inventoryIndex, hotbarIndex,
                 InventorySlotArea.Inventory, InventorySlotArea.Hotbar));
+        }
+
+        private int FindFirstEmptyInventorySlot()
+        {
+            for (int i = 0; i < _inventory.SlotCount; i++)
+            {
+                var slot = _inventory.GetSlot(i);
+                if (slot == null || slot.IsEmpty) return i;
+            }
+
+            return -1;
         }
 
         private void ShowDetails(int index)
@@ -270,6 +306,7 @@ namespace _001_Scripts.UI
 
         [Inject]
         private void Construct(IInventoryService invService,
+            IHotbarReader hotbar,
             ISubscriber<InvChangedMessage> invSubscriber,
             IPublisher<InvSwapMessage> invSwapPublisher,
             IPublisher<UIReqMessage> uiReqPublisher,
@@ -278,7 +315,9 @@ namespace _001_Scripts.UI
             _bag?.Dispose();
             if (_hotbarInput != null) _hotbarInput.OnHotbarSlot -= AssignSelectedToHotbar;
             _inventory = invService;
+            _hotbar = hotbar;
             _uiReqPublisher = uiReqPublisher;
+            modalNavigation?.Bind(uiReqPublisher);
             _invSwapPublisher = invSwapPublisher;
             _hotbarInput = hotbarInput;
             _hotbarInput.OnHotbarSlot += AssignSelectedToHotbar;
@@ -307,7 +346,7 @@ namespace _001_Scripts.UI
             if (sortButton) sortButton.onClick.RemoveListener(SortInventory);
             if (closeButton) closeButton.onClick.RemoveListener(CloseFromButton);
             if (inventoryTabButton) inventoryTabButton.onClick.RemoveListener(OnInventoryTabClicked);
-            if (craftTabButton) craftTabButton.onClick.RemoveListener(OnCraftTabClicked);
+            if (craftTabButton) craftTabButton.onClick.RemoveListener(OnLogTabClicked);
         }
     }
 }

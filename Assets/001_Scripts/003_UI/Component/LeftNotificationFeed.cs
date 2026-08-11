@@ -36,8 +36,7 @@ namespace _001_Scripts.UI.Component
         public void Enqueue(NotificationMessage message)
         {
             EnsureView();
-            while (_root.childCount >= MaxVisible)
-                Destroy(_root.GetChild(0).gameObject);
+            TrimForIncomingNotification();
 
             var wrapper = new GameObject("Notification", typeof(RectTransform));
             var wrapperRect = wrapper.GetComponent<RectTransform>();
@@ -69,6 +68,21 @@ namespace _001_Scripts.UI.Component
                 13, TextAnchor.MiddleLeft, new Color(.78f, .84f, .94f, 1f));
 
             StartCoroutine(Animate(wrapper, toastRect, toast.GetComponent<CanvasGroup>(), message.Duration));
+        }
+
+        private void TrimForIncomingNotification()
+        {
+            // Destroy is deferred until the end of the frame in Play Mode. Keeping it inside a
+            // childCount-based while loop therefore never changes childCount and allocates until OOM.
+            int removeCount = Mathf.Max(0, _root.childCount - MaxVisible + 1);
+            for (int i = 0; i < removeCount; i++)
+            {
+                Transform oldest = _root.GetChild(0);
+                oldest.gameObject.SetActive(false);
+                oldest.SetParent(null, false); // Update childCount immediately before deferred destruction.
+                if (Application.isPlaying) Destroy(oldest.gameObject);
+                else DestroyImmediate(oldest.gameObject);
+            }
         }
 
         private IEnumerator Animate(GameObject wrapper, RectTransform card, CanvasGroup group, float duration)

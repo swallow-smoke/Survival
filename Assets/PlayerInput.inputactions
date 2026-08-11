@@ -61,7 +61,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Craft",
+                    "name": "Log",
                     "type": "Button",
                     "id": "d5f6a7b8-c9d0-4e1f-8a2b-3c4d5e6f7081",
                     "expectedControlType": "",
@@ -215,7 +215,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Craft",
+                    "action": "Log",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

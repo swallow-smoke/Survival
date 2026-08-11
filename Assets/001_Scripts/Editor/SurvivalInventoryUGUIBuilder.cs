@@ -66,10 +66,10 @@ namespace _001_Scripts.Editor
             }
             ConfigureInteractionCanvas(panel.gameObject);
 
-            var root = Image(RootName, panel.transform, new Color(.012f, .006f, .035f, .24f));
+            var root = Image(RootName, panel.transform, new Color(.012f, .006f, .035f, .94f));
             Stretch(root.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
-            var card = Image("InventoryCard", root.transform, new Color(.04f, .02f, .09f, .72f));
+            var card = Image("InventoryCard", root.transform, new Color(.04f, .02f, .09f, .96f));
             Anchor(card.rectTransform, new Vector2(.5f, .5f), new Vector2(1220, 700), new Vector2(0, -24));
             AddOutline(card.gameObject, new Color(.62f, .49f, 1f, .48f), 2);
 
@@ -249,7 +249,7 @@ namespace _001_Scripts.Editor
             if (!canvas) canvas = Undo.AddComponent<Canvas>(target);
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.overrideSorting = true;
-            canvas.sortingOrder = 100;
+            canvas.sortingOrder = 120;
             canvas.enabled = true;
 
             var scaler = target.GetComponent<CanvasScaler>();

@@ -8,6 +8,7 @@ using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Interface;
 using _001_Scripts.Type.States;
+using _001_Scripts.UI;
 using AYellowpaper.SerializedCollections;
 using MessagePipe;
 using UnityEngine;
@@ -24,9 +25,11 @@ namespace _001_Scripts.Managers
         private UIPanelPresenter _panelPresenter;
         private bool _inputBound;
         private float _lastInventoryToggleTime = -10f;
-        private float _lastCraftToggleTime = -10f;
+        private float _lastLogToggleTime = -10f;
+        private float _lastBlueprintToggleTime = -10f;
         private int _lastInventoryToggleFrame = -1;
-        private int _lastCraftToggleFrame = -1;
+        private int _lastLogToggleFrame = -1;
+        private int _lastBlueprintToggleFrame = -1;
         private const float ToggleDebounceSeconds = .25f;
         [SerializedDictionary] public SerializedDictionary<string, PanelBase> uiPanels = new();
 
@@ -49,18 +52,27 @@ namespace _001_Scripts.Managers
             _panelPresenter.ToggleExclusive("Inventory", PlayerUIState.Inventory);
         }
 
-        public void OnCraftToggle()
+        public void OnLogToggle()
         {
-            if (_lastCraftToggleFrame == Time.frameCount) return;
-            if (Time.unscaledTime - _lastCraftToggleTime < ToggleDebounceSeconds) return;
-            _lastCraftToggleFrame = Time.frameCount;
-            _lastCraftToggleTime = Time.unscaledTime;
+            if (_lastLogToggleFrame == Time.frameCount) return;
+            if (Time.unscaledTime - _lastLogToggleTime < ToggleDebounceSeconds) return;
+            _lastLogToggleFrame = Time.frameCount;
+            _lastLogToggleTime = Time.unscaledTime;
             if (_panelPresenter == null)
             {
-                Debug.LogError("[UIManager] Cannot toggle Craft before UI services are ready.", this);
+                Debug.LogError("[UIManager] Cannot toggle Log before UI services are ready.", this);
                 return;
             }
-            _panelPresenter.ToggleExclusive("Craft", PlayerUIState.Craft);
+            _panelPresenter.ToggleExclusive("Log", PlayerUIState.Log);
+        }
+
+        public void OnBlueprintToggle()
+        {
+            if (_lastBlueprintToggleFrame == Time.frameCount) return;
+            if (Time.unscaledTime - _lastBlueprintToggleTime < ToggleDebounceSeconds) return;
+            _lastBlueprintToggleFrame = Time.frameCount;
+            _lastBlueprintToggleTime = Time.unscaledTime;
+            _panelPresenter?.ToggleExclusive("Blueprint", PlayerUIState.Blueprint);
         }
 
         public void OpenWorkbench() => OpenPanel("Workbench");
@@ -91,14 +103,16 @@ namespace _001_Scripts.Managers
             if (keyboard.escapeKey.wasPressedThisFrame && _panelPresenter != null &&
                 _panelPresenter.CloseAllModalPanels()) return;
             if (keyboard.tabKey.wasPressedThisFrame) OnInvToggle();
-            if (keyboard.vKey.wasPressedThisFrame) OnCraftToggle();
+            if (keyboard.vKey.wasPressedThisFrame) OnLogToggle();
+            if (keyboard.bKey.wasPressedThisFrame) OnBlueprintToggle();
         }
 
         private void BindInputOnce()
         {
             if (_inputBound || _inputServ == null) return;
             _inputServ.OnInventoryToggle += OnInvToggle;
-            _inputServ.OnCraftToggle += OnCraftToggle;
+            _inputServ.OnLogToggle += OnLogToggle;
+            _inputServ.OnBlueprintToggle += OnBlueprintToggle;
             _inputBound = true;
         }
 
@@ -124,7 +138,9 @@ namespace _001_Scripts.Managers
             if (_inputBound && _inputServ != null)
                 _inputServ.OnInventoryToggle -= OnInvToggle;
             if (_inputBound && _inputServ != null)
-                _inputServ.OnCraftToggle -= OnCraftToggle;
+                _inputServ.OnLogToggle -= OnLogToggle;
+            if (_inputBound && _inputServ != null)
+                _inputServ.OnBlueprintToggle -= OnBlueprintToggle;
             _inputBound = false;
 
             _bag?.Dispose();

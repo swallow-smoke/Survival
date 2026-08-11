@@ -56,6 +56,12 @@ namespace _001_Scripts.Data.SOJ
                 if (!names.Add(blueprint.bluePrintName))
                     throw new FormatException($"Duplicate blueprint name: {blueprint.bluePrintName}.");
                 blueprint.categoryPath = NormalizeCategoryPath(blueprint.categoryPath);
+                blueprint.unlockRequired = Math.Max(1, blueprint.unlockRequired);
+                blueprint.unlockProgress = Math.Max(0, blueprint.unlockProgress);
+                if (blueprint.isUnlocked)
+                    blueprint.unlockProgress = Math.Max(blueprint.unlockProgress, blueprint.unlockRequired);
+                else if (blueprint.unlockProgress >= blueprint.unlockRequired)
+                    blueprint.isUnlocked = true;
                 blueprint.recipe ??= new List<BluePrint.RecipeEntry>();
                 foreach (var entry in blueprint.recipe)
                     if (entry == null || entry.count <= 0)

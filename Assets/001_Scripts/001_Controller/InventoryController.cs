@@ -14,6 +14,7 @@ using VContainer;
 
 namespace _001_Scripts.Controller
 {
+    [DisallowMultipleComponent]
     public class InventoryController : MonoBehaviour, IInventoryService, IHotbarReader, IHotbarActions
     {
         private IPublisher<InvChangedMessage> _invChangedPublisher;
@@ -68,7 +69,8 @@ namespace _001_Scripts.Controller
             if (items.Count > maxSlots)
                 items.RemoveRange(maxSlots, items.Count - maxSlots);
             for (int i = 0; i < items.Count; i++)
-                items[i] ??= EmptySlot();
+                if (items[i] == null || items[i].ins == null || items[i].stack <= 0)
+                    items[i] = EmptySlot();
             while (items.Count < maxSlots)
                 items.Add(EmptySlot());
 
@@ -77,7 +79,8 @@ namespace _001_Scripts.Controller
             if (hotbarItems.Count > hotbarSlotCount)
                 hotbarItems.RemoveRange(hotbarSlotCount, hotbarItems.Count - hotbarSlotCount);
             for (int i = 0; i < hotbarItems.Count; i++)
-                hotbarItems[i] ??= EmptySlot();
+                if (hotbarItems[i] == null || hotbarItems[i].ins == null || hotbarItems[i].stack <= 0)
+                    hotbarItems[i] = EmptySlot();
             while (hotbarItems.Count < hotbarSlotCount)
                 hotbarItems.Add(EmptySlot());
         }

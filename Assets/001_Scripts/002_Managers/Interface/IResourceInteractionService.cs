@@ -6,11 +6,13 @@ namespace _001_Scripts.Interface
     {
         public readonly bool CanInteract;
         public readonly string Label;
+        public readonly Vector3 HitPoint;
 
-        public ResourceInteractionFocus(bool canInteract, string label)
+        public ResourceInteractionFocus(bool canInteract, string label, Vector3 hitPoint)
         {
             CanInteract = canInteract;
             Label = label ?? string.Empty;
+            HitPoint = hitPoint;
         }
     }
 

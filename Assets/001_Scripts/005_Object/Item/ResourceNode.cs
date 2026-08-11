@@ -12,6 +12,7 @@ namespace _001_Scripts.Structure
     {
         [SerializeField] private int requiredToolId;
         [SerializeField, Min(.01f)] private float damagePerInteraction = 10f;
+        [SerializeField] private ResourceNodeHitFX hitEffect;
 
         private IInventoryReader _inventory;
         private IPickupSpawner _pickupSpawner;
@@ -28,6 +29,7 @@ namespace _001_Scripts.Structure
             _health = GetComponent<Health>();
             if (!_health) _health = gameObject.AddComponent<Health>();
             _health.Died += SpawnDrop;
+            if (!hitEffect) hitEffect = GetComponentInChildren<ResourceNodeHitFX>(true);
         }
 
         protected override void OnDisable()
@@ -49,7 +51,9 @@ namespace _001_Scripts.Structure
 
         public void Interact()
         {
-            if (CanInteract()) _health.ApplyDamage(damagePerInteraction);
+            if (!CanInteract()) return;
+            hitEffect?.Play();
+            _health.ApplyDamage(damagePerInteraction);
         }
 
         public void Destroy() => _health.ApplyDamage(_health.CurrentHealth);

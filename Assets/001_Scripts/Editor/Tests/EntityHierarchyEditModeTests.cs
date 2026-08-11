@@ -5,6 +5,7 @@ using _001_Scripts.Data.Structure.Interface;
 using _001_Scripts.Entities;
 using _001_Scripts.Structure;
 using NUnit.Framework;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -12,6 +13,16 @@ namespace _001_Scripts.Editor.Tests
 {
     public sealed class EntityHierarchyEditModeTests
     {
+        [Test]
+        public void SampleScene_HasExactlyOneInventoryController()
+        {
+            EditorSceneManager.OpenScene("Assets/000_Scenes/SampleScene.unity");
+            var controllers = UnityEngine.Object.FindObjectsByType<InventoryController>(FindObjectsInactive.Include);
+
+            Assert.That(controllers, Has.Length.EqualTo(1),
+                "Multiple inventory message subscribers duplicate every crafted output.");
+        }
+
         [Test]
         public void Entity_AutomaticallyFindsChildFeatures()
         {

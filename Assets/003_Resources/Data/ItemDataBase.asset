@@ -152,3 +152,179 @@ MonoBehaviour:
             value: 3
             duration: 0
             cooldown: 0
+    - Key: 8
+      Value:
+        itemId: 8
+        itemName: Titanium Ore
+        itemDesc: Raw titanium-bearing mineral gathered from pale deposits.
+        itemGrade: 0
+        itemType: 0
+        weight: 0.8
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 99
+            duration: 0
+            cooldown: 0
+    - Key: 9
+      Value:
+        itemId: 9
+        itemName: Quartz Crystal
+        itemDesc: Clear crystal used for batteries and electronic components.
+        itemGrade: 0
+        itemType: 0
+        weight: 0.5
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 99
+            duration: 0
+            cooldown: 0
+    - Key: 10
+      Value:
+        itemId: 10
+        itemName: Carbon Powder
+        itemDesc: Fine conductive powder used in advanced fabrication tests.
+        itemGrade: 0
+        itemType: 0
+        weight: 0.2
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 99
+            duration: 0
+            cooldown: 0
+    - Key: 11
+      Value:
+        itemId: 11
+        itemName: Titanium Ingot
+        itemDesc: Refined structural metal for equipment and construction.
+        itemGrade: 0
+        itemType: 0
+        weight: 1.2
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 50
+            duration: 0
+            cooldown: 0
+    - Key: 12
+      Value:
+        itemId: 12
+        itemName: Copper Wire
+        itemDesc: Flexible wiring used by powered tools and machinery.
+        itemGrade: 0
+        itemType: 0
+        weight: 0.3
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 50
+            duration: 0
+            cooldown: 0
+    - Key: 13
+      Value:
+        itemId: 13
+        itemName: Compact Battery
+        itemDesc: A small rechargeable cell for handheld equipment.
+        itemGrade: 0
+        itemType: 0
+        weight: 0.6
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 20
+            duration: 0
+            cooldown: 0
+    - Key: 14
+      Value:
+        itemId: 14
+        itemName: Handheld Scanner
+        itemDesc: Exploration tool that records nearby targets.
+        itemGrade: 1
+        itemType: 1
+        weight: 1
+        ItemAttributes:
+        - attrType: 1
+          modifiers:
+          - modifierType: 4
+            value: 100
+            duration: 0
+            cooldown: 0
+        - attrType: 3
+          modifiers:
+          - modifierType: 3
+            value: 1
+            duration: 0
+            cooldown: 0
+        - attrType: 4
+          modifiers: []
+        - attrType: 7
+          modifiers:
+          - modifierType: 13
+            value: 8
+            duration: 0
+            cooldown: 0
+    - Key: 15
+      Value:
+        itemId: 15
+        itemName: Field Repair Tool
+        itemDesc: Compact maintenance tool for damaged structures and vehicles.
+        itemGrade: 0
+        itemType: 1
+        weight: 1.1
+        ItemAttributes:
+        - attrType: 1
+          modifiers:
+          - modifierType: 4
+            value: 100
+            duration: 0
+            cooldown: 0
+        - attrType: 3
+          modifiers:
+          - modifierType: 3
+            value: 1
+            duration: 0
+            cooldown: 0
+        - attrType: 4
+          modifiers: []
+        - attrType: 5
+          modifiers: []
+    - Key: 16
+      Value:
+        itemId: 16
+        itemName: Waterproof Structural Panel
+        itemDesc: Reinforced panel used by underwater structures.
+        itemGrade: 0
+        itemType: 0
+        weight: 1.8
+        ItemAttributes:
+        - attrType: 0
+          modifiers:
+          - modifierType: 1
+            value: 20
+            duration: 0
+            cooldown: 0
+    - Key: 17
+      Value:
+        itemId: 17
+        itemName: Compact Oxygen Tank
+        itemDesc: Wearable tank that extends underwater operation time.
+        itemGrade: 1
+        itemType: 2
+        weight: 2.2
+        ItemAttributes:
+        - attrType: 1
+          modifiers:
+          - modifierType: 4
+            value: 150
+            duration: 0
+            cooldown: 0
+        - attrType: 4
+          modifiers: []

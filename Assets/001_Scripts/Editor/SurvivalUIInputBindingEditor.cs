@@ -11,17 +11,9 @@ using UnityEngine.UI;
 
 namespace _001_Scripts.Editor
 {
-    [InitializeOnLoad]
     internal static class SurvivalUIInputBindingEditor
     {
         private const int BindingVersion = 4;
-
-        static SurvivalUIInputBindingEditor()
-        {
-            EditorApplication.playModeStateChanged -= OnPlayModeChanged;
-            EditorApplication.playModeStateChanged += OnPlayModeChanged;
-            EditorApplication.delayCall += ApplyIfNeeded;
-        }
 
         private static void OnPlayModeChanged(PlayModeStateChange state)
         {

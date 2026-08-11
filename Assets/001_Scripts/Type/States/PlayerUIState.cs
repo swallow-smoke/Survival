@@ -4,7 +4,8 @@
     {
         None,
         Inventory,
-        Craft,
+        Log,
+        Blueprint,
         Workbench,
         SubmarineFabricator,
         Build,

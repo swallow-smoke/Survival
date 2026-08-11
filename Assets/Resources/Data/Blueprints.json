@@ -1,0 +1,155 @@
+{
+  "blueprints": [
+    {
+      "resultCraft": 2,
+      "recipe": [
+        { "item": 0, "count": 2 }
+      ],
+      "craftTime": 1.5,
+      "requiredLevel": 0,
+      "isUnlocked": true,
+      "unlockProgress": 1,
+      "unlockRequired": 1,
+      "categoryPath": "Materials/Metal/Iron",
+      "iconResource": "",
+      "bluePrintName": "Simple Oxygen Filter",
+      "bluePrintId": 0
+    },
+    {
+      "resultCraft": 2,
+      "recipe": [],
+      "craftTime": 4.0,
+      "requiredLevel": 0,
+      "isUnlocked": false,
+      "unlockProgress": 1,
+      "unlockRequired": 3,
+      "categoryPath": "Vehicles/Submarine/Hull",
+      "iconResource": "",
+      "bluePrintName": "Compact Submarine Hull",
+      "bluePrintId": 1
+    },
+    {
+      "resultCraft": 2,
+      "recipe": [],
+      "craftTime": 2.0,
+      "requiredLevel": 0,
+      "isUnlocked": false,
+      "unlockProgress": 2,
+      "unlockRequired": 4,
+      "categoryPath": "Structures/Fabrication",
+      "iconResource": "",
+      "bluePrintName": "Submarine Fabricator",
+      "bluePrintId": 2
+    },
+    {
+      "resultCraft": 11,
+      "recipe": [
+        { "item": 8, "count": 2 }
+      ],
+      "craftTime": 1.2,
+      "requiredLevel": 0,
+      "isUnlocked": true,
+      "unlockProgress": 1,
+      "unlockRequired": 1,
+      "categoryPath": "Materials/Processed Metal",
+      "iconResource": "",
+      "bluePrintName": "티타늄 주괴",
+      "bluePrintId": 10
+    },
+    {
+      "resultCraft": 12,
+      "recipe": [
+        { "item": 4, "count": 2 }
+      ],
+      "craftTime": 1.0,
+      "requiredLevel": 0,
+      "isUnlocked": true,
+      "unlockProgress": 1,
+      "unlockRequired": 1,
+      "categoryPath": "Materials/Electronics",
+      "iconResource": "",
+      "bluePrintName": "구리 전선",
+      "bluePrintId": 11
+    },
+    {
+      "resultCraft": 13,
+      "recipe": [
+        { "item": 4, "count": 1 },
+        { "item": 9, "count": 1 }
+      ],
+      "craftTime": 1.5,
+      "requiredLevel": 0,
+      "isUnlocked": true,
+      "unlockProgress": 1,
+      "unlockRequired": 1,
+      "categoryPath": "Materials/Electronics",
+      "iconResource": "",
+      "bluePrintName": "소형 배터리",
+      "bluePrintId": 12
+    },
+    {
+      "resultCraft": 14,
+      "recipe": [
+        { "item": 12, "count": 1 },
+        { "item": 13, "count": 1 }
+      ],
+      "craftTime": 2.5,
+      "requiredLevel": 0,
+      "isUnlocked": true,
+      "unlockProgress": 1,
+      "unlockRequired": 1,
+      "categoryPath": "Tools/Exploration",
+      "iconResource": "",
+      "bluePrintName": "휴대용 스캐너",
+      "bluePrintId": 13
+    },
+    {
+      "resultCraft": 15,
+      "recipe": [
+        { "item": 11, "count": 1 },
+        { "item": 12, "count": 1 }
+      ],
+      "craftTime": 2.2,
+      "requiredLevel": 0,
+      "isUnlocked": true,
+      "unlockProgress": 1,
+      "unlockRequired": 1,
+      "categoryPath": "Tools/Maintenance",
+      "iconResource": "",
+      "bluePrintName": "간이 수리 도구",
+      "bluePrintId": 14
+    },
+    {
+      "resultCraft": 16,
+      "recipe": [
+        { "item": 11, "count": 2 },
+        { "item": 1, "count": 2 }
+      ],
+      "craftTime": 3.0,
+      "requiredLevel": 0,
+      "isUnlocked": false,
+      "unlockProgress": 2,
+      "unlockRequired": 3,
+      "categoryPath": "Structures/Components",
+      "iconResource": "",
+      "bluePrintName": "방수 구조 패널",
+      "bluePrintId": 15
+    },
+    {
+      "resultCraft": 17,
+      "recipe": [
+        { "item": 11, "count": 2 },
+        { "item": 2, "count": 1 }
+      ],
+      "craftTime": 3.5,
+      "requiredLevel": 0,
+      "isUnlocked": false,
+      "unlockProgress": 1,
+      "unlockRequired": 4,
+      "categoryPath": "Equipment/Survival",
+      "iconResource": "",
+      "bluePrintName": "소형 산소 탱크",
+      "bluePrintId": 16
+    }
+  ]
+}

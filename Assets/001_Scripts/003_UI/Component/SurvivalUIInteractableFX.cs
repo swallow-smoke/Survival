@@ -1,4 +1,3 @@
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -19,6 +18,7 @@ namespace _001_Scripts.UI.Component
         private Vector3 _baseScale;
         private Vector3 _targetScale;
         private bool _hovered;
+        private UIInteractionParticlePool _particlePool;
 
         private void Awake()
         {
@@ -26,6 +26,7 @@ namespace _001_Scripts.UI.Component
             _selectable = GetComponent<Selectable>();
             _baseScale = _rect ? _rect.localScale : transform.localScale;
             _targetScale = _baseScale;
+            _particlePool = GetComponentInParent<UIInteractionParticlePool>(true);
         }
 
         private void OnEnable()
@@ -76,44 +77,15 @@ namespace _001_Scripts.UI.Component
         {
             var canvas = GetComponentInParent<Canvas>();
             var canvasRect = canvas ? canvas.transform as RectTransform : null;
-            if (!canvasRect || clickParticleCount <= 0) return;
+            if (!_particlePool) _particlePool = GetComponentInParent<UIInteractionParticlePool>(true);
+            if (!canvasRect || !_particlePool || clickParticleCount <= 0) return;
 
             Camera eventCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     canvasRect, eventData.position, eventCamera, out var origin)) return;
 
             var sourceImage = _selectable?.targetGraphic as Image;
-            for (int i = 0; i < clickParticleCount; i++)
-            {
-                var particleObject = new GameObject("UI_ClickSpark", typeof(RectTransform),
-                    typeof(CanvasRenderer), typeof(Image));
-                particleObject.layer = gameObject.layer;
-                particleObject.transform.SetParent(canvasRect, false);
-                particleObject.transform.SetAsLastSibling();
-
-                var particleRect = particleObject.GetComponent<RectTransform>();
-                float size = Random.Range(4f, 9f);
-                particleRect.sizeDelta = new Vector2(size, size);
-                particleRect.anchoredPosition = origin;
-                particleRect.localScale = Vector3.one;
-
-                var particleImage = particleObject.GetComponent<Image>();
-                particleImage.sprite = sourceImage ? sourceImage.sprite : null;
-                particleImage.type = sourceImage && sourceImage.sprite ? Image.Type.Sliced : Image.Type.Simple;
-                particleImage.color = Color.Lerp(clickParticleColor,
-                    new Color(.78f, .52f, 1f, .95f), Random.value);
-                particleImage.raycastTarget = false;
-
-                float angle = (360f / clickParticleCount) * i + Random.Range(-18f, 18f);
-                float distance = Random.Range(24f, 48f);
-                Vector2 destination = origin + new Vector2(
-                    Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * distance;
-                float duration = Random.Range(.28f, .44f);
-                particleRect.DOAnchorPos(destination, duration).SetEase(Ease.OutCubic).SetUpdate(true);
-                particleRect.DOScale(.15f, duration).SetEase(Ease.InQuad).SetUpdate(true);
-                particleImage.DOFade(0f, duration).SetEase(Ease.InQuad).SetUpdate(true)
-                    .OnComplete(() => Destroy(particleObject));
-            }
+            _particlePool.Emit(origin, clickParticleCount, clickParticleColor, sourceImage ? sourceImage.sprite : null);
         }
 
         private bool CanInteract() => !_selectable || _selectable.IsInteractable();

@@ -27,7 +27,8 @@ namespace _001_Scripts.Controller.Handler
     public interface IUIInput
     {
         event Action OnInventoryToggle;
-        event Action OnCraftToggle;
+        event Action OnLogToggle;
+        event Action OnBlueprintToggle;
     }
 
     public interface IHotbarInput

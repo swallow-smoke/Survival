@@ -210,7 +210,8 @@ namespace _001_Scripts.Controller
             switch (msg.state)
             {
                 case PlayerUIState.Inventory:
-                case PlayerUIState.Craft:
+                case PlayerUIState.Log:
+                case PlayerUIState.Blueprint:
                 case PlayerUIState.Workbench:
                 case PlayerUIState.SubmarineFabricator:
                     isCanMove = false;

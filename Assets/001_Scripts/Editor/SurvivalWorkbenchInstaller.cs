@@ -56,6 +56,15 @@ namespace _001_Scripts.Editor
             Debug.Log("[Workbench] Installed dedicated station and compact radial recipe UI.");
         }
 
+        public static void RebuildSampleScene()
+        {
+            const string scenePath = "Assets/000_Scenes/SampleScene.unity";
+            if (EditorSceneManager.GetActiveScene().path != scenePath)
+                EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            InstallWorkbenchExperience();
+            SurvivalSubmarineFabricatorInstaller.InstallExperience();
+        }
+
         private static WorkbenchPanel EnsurePanel(UIManager uiManager)
         {
             var panel = UnityEngine.Object.FindAnyObjectByType<WorkbenchPanel>(FindObjectsInactive.Include);

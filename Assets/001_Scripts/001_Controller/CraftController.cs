@@ -18,10 +18,10 @@ namespace _001_Scripts.Controller
         
         private IDisposable msgBag;
         
-        private IPublisher<InvReqMessage> _invMessagePublisher;
         private IPublisher<CraftResultMessage> _craftResultMessagePublisher;
         
         private IInventoryReader _invServ;
+        private IInventoryWriter _inventoryWriter;
         
         
         public void Craft(string itemName)
@@ -39,13 +39,20 @@ namespace _001_Scripts.Controller
             
             if (!isUnlocked) return;
             
+            var requiredCounts = new Dictionary<int, int>();
             ingredient.ForEach(e =>
             {
-                if (!_invServ.HasItem(e.item, e.count))
-                {
-                    missingItems.Add(e);
-                }
+                requiredCounts.TryGetValue(e.item, out int current);
+                requiredCounts[e.item] = current + e.count;
             });
+
+            foreach (var required in requiredCounts)
+            {
+                if (!_invServ.HasItem(required.Key, required.Value))
+                {
+                    missingItems.Add(new RecipeEntry { item = required.Key, count = required.Value });
+                }
+            }
 
             if (missingItems.Count > 0)
             {
@@ -58,23 +65,10 @@ namespace _001_Scripts.Controller
                 return;
             };
             
-            ingredient.ForEach(e =>
-            {
-                InvReqMessage resultMsg = new InvReqMessage(
-                    InvMessageType.Removed,
-                    e.item,
-                    e.count);
-                
-                _invMessagePublisher.Publish(resultMsg);
-            });
-            
+            foreach (var required in requiredCounts)
+                _inventoryWriter.RemoveItem(required.Key, required.Value);
 
-
-            InvReqMessage msg = new InvReqMessage(
-                InvMessageType.Added,
-                item, 
-                1);
-            _invMessagePublisher.Publish(msg);
+            _inventoryWriter.AddItem(item, 1);
             _craftResultMessagePublisher.Publish(new CraftResultMessage(CraftMessageType.Success, item));
         }
 
@@ -86,13 +80,13 @@ namespace _001_Scripts.Controller
         private void OnDestroy() => msgBag?.Dispose();
 
         [Inject]
-        public void Constructor(IPublisher<InvReqMessage> invPublisher,
+        public void Constructor(IInventoryWriter inventoryWriter,
             IPublisher<CraftResultMessage> craftResultPublisher,
             ISubscriber<CraftReqMessage> craftMessageSubscriber,
             IInventoryReader invService)
         {
             msgBag?.Dispose();
-            _invMessagePublisher = invPublisher;
+            _inventoryWriter = inventoryWriter;
             _craftResultMessagePublisher = craftResultPublisher;
             _invServ = invService;
             _craftMessageSubScriber = craftMessageSubscriber;

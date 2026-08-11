@@ -12,7 +12,7 @@ namespace _001_Scripts.UI
 {
     public sealed class SubmarineFabricatorPanel : PanelBase
     {
-        public const int CurrentVisualVersion = 3;
+        public const int CurrentVisualVersion = 4;
         private const string LegacyRootName = "SubmarineFabricatorRadialRoot";
 
         [SerializeField, HideInInspector] private int visualVersion;

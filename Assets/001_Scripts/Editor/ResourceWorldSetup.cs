@@ -49,8 +49,14 @@ namespace _001_Scripts.Editor
             GameObject reinforced = CreateResourcePrefab("ReinforcedOreResource", 1300, PrimitiveType.Cube,
                 new Vector3(2.2f, 1.7f, 2f), new Color(0.2f, 0.75f, 0.9f), "Reinforced Deposit",
                 180f, HarvestMethod.Drill, 7, 3, 3f, 4, 3, 6, 180f);
+            GameObject titanium = CreateResourcePrefab("TitaniumOreResource", 1400, PrimitiveType.Sphere,
+                new Vector3(1.7f, 1.35f, 1.55f), new Color(0.55f, 0.68f, 0.78f), "Titanium Deposit",
+                100f, HarvestMethod.Pickaxe | HarvestMethod.Drill, -1, 1, 1.25f, 8, 2, 4, 100f);
+            GameObject quartz = CreateResourcePrefab("QuartzResource", 1500, PrimitiveType.Capsule,
+                new Vector3(1.15f, 1.8f, 1.15f), new Color(0.45f, 0.88f, 1f), "Quartz Deposit",
+                70f, HarvestMethod.Hand | HarvestMethod.Pickaxe, -1, 0, 1f, 9, 2, 3, 75f);
 
-            CreateEntityScene(grid, droppedItem, tree, ore, reinforced);
+            CreateEntityScene(grid, droppedItem, tree, ore, reinforced, titanium, quartz);
             AttachSubSceneAndRegionFocus(grid, toolCatalog);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -134,7 +140,7 @@ namespace _001_Scripts.Editor
             SerializedObject serialized = new SerializedObject(runtime);
             SerializedProperty entries = serialized.FindProperty("prefabs");
             entries.arraySize = prefabs.Length;
-            int[] ids = { 1000, 1100, 1200, 1300 };
+            int[] ids = { 1000, 1100, 1200, 1300, 1400, 1500 };
             for (int i = 0; i < prefabs.Length; i++)
             {
                 SerializedProperty entry = entries.GetArrayElementAtIndex(i);
@@ -158,6 +164,10 @@ namespace _001_Scripts.Editor
                 new Vector3(15f, 1f, 10f), new Vector3(45f, 8f, 45f), 10, 1, 3f);
             CreateZone("ReinforcedOre", ResourceFieldSpawnKind.ResourceNode, 1300, 0,
                 new Vector3(-20f, 1f, -10f), new Vector3(30f, 8f, 30f), 4, 1, 8f);
+            CreateZone("TitaniumOre", ResourceFieldSpawnKind.ResourceNode, 1400, 0,
+                new Vector3(-12f, 1f, 16f), new Vector3(42f, 8f, 42f), 8, 1, 4f);
+            CreateZone("Quartz", ResourceFieldSpawnKind.ResourceNode, 1500, 0,
+                new Vector3(18f, 1f, -14f), new Vector3(36f, 8f, 36f), 7, 1, 4f);
             EditorSceneManager.SaveScene(scene, EntityScenePath);
         }
 

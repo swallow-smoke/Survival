@@ -24,7 +24,7 @@ namespace _001_Scripts.Managers
         public bool TryFocus(Vector3 origin, Vector3 direction, float distance, out ResourceInteractionFocus focus)
         {
             focus = default;
-            if (!gateway.TryRaycast(origin, direction, distance, out Entity target) ||
+            if (!gateway.TryRaycast(origin, direction, distance, out Entity target, out float fraction) ||
                 !gateway.TryGetInteractionInfo(target, out ResourceInteractionInfo info))
             {
                 ClearFocus();
@@ -38,7 +38,8 @@ namespace _001_Scripts.Managers
             string label = info.IsDroppedItem
                 ? $"Pick up {info.DisplayName}"
                 : canInteract ? $"Harvest {info.DisplayName}" : "Required harvesting tool";
-            focus = new ResourceInteractionFocus(canInteract, label);
+            Vector3 hitPoint = origin + direction.normalized * (Mathf.Max(0f, distance) * Mathf.Clamp01(fraction));
+            focus = new ResourceInteractionFocus(canInteract, label, hitPoint);
             return true;
         }
 

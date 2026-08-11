@@ -16,6 +16,7 @@ using UnityEngine.InputSystem.LowLevel;
 using VContainer;
 using VContainer.Unity;
 using UnityEngine;
+using _001_Scripts.Data.SOJ;
 
 namespace _001_Scripts.Core
 {
@@ -46,6 +47,8 @@ namespace _001_Scripts.Core
             builder.RegisterMessageBroker<UIReqMessage>(options);
             builder.RegisterMessageBroker<InteractionUIMessage>(options);
             builder.RegisterMessageBroker<NotificationMessage>(options);
+            builder.RegisterMessageBroker<LogCollectionChangedMessage>(options);
+            builder.RegisterMessageBroker<BlueprintProgressChangedMessage>(options);
             #endregion
 
             #region Player
@@ -64,6 +67,18 @@ namespace _001_Scripts.Core
             #region Services
 
             builder.Register<NotificationService>(Lifetime.Singleton).As<INotificationService>();
+            builder.Register<LogCollectionService>(Lifetime.Singleton)
+                .As<ILogCollectionService>()
+                .As<ILogCollectionReader>()
+                .As<ILogCollectionWriter>();
+            builder.Register<JsonLogCatalog>(Lifetime.Singleton).As<ILogCatalog>();
+            var blueprintDatabase = ScriptableObject.CreateInstance<BluePrintDataBase>();
+            blueprintDatabase.Reload();
+            builder.RegisterInstance(blueprintDatabase);
+            builder.Register<BlueprintProgressService>(Lifetime.Singleton)
+                .As<IBlueprintProgressService>()
+                .As<IBlueprintProgressReader>()
+                .As<IBlueprintProgressWriter>();
             builder.RegisterComponentInHierarchy<ItemSpawner>()
                 .AsSelf()
                 .As<IPickupSpawner>();
@@ -98,6 +113,7 @@ namespace _001_Scripts.Core
                 .As<ICraftingService>();
             builder.RegisterComponentInHierarchy<WorkbenchPanel>();
             builder.RegisterComponentInHierarchy<SubmarineFabricatorPanel>();
+            builder.RegisterComponentInHierarchy<BlueprintPanel>();
             if (harvestToolCatalog == null)
                 throw new InvalidOperationException(
                     "HarvestToolCatalog is required on GLifeTimeScope. Run the WorldBuilder resource setup or assign it explicitly.");

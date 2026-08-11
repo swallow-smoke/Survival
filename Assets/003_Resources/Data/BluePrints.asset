@@ -13,4 +13,14 @@ MonoBehaviour:
   m_Name: BluePrints
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Data.SOJ.BluePrintDataBase
   jsonSource: {fileID: 4900000, guid: 7e9f59f6c8c34a43ac824e0c86731c68, type: 3}
-  bluePrints: []
+  bluePrints:
+  - resultCraft: 2
+    recipe:
+    - item: 0
+      count: 2
+    craftTime: 1.5
+    requiredLevel: 0
+    isUnlocked: 1
+    categoryPath: Materials/Metal/Iron
+    bluePrintName: Simple Oxygen Filter
+    bluePrintId: 0

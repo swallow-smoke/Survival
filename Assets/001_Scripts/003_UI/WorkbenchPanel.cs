@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using _001_Scripts.Base;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.SOJ;
@@ -14,7 +15,7 @@ namespace _001_Scripts.UI
 {
     public sealed class WorkbenchPanel : PanelBase
     {
-        public const int CurrentVisualVersion = 7;
+        public const int CurrentVisualVersion = 9;
         private const string LegacyRootName = "WorkbenchRadialRoot";
 
         [Header("Data")]
@@ -25,11 +26,15 @@ namespace _001_Scripts.UI
         private CanvasGroup _group;
         private SimpleRadialMenuView _radial;
         private IInventoryReader _inventory;
+        private IHotbarReader _hotbar;
         private IPublisher<CraftReqMessage> _craftPublisher;
         private IPublisher<UIReqMessage> _uiPublisher;
         private IDisposable _subscriptions;
         private string _currentPath = string.Empty;
         private float _lastCraftTime = -10f;
+        private bool _refreshPending;
+        private bool _building;
+        private int _pinnedBlueprintId = -1;
 
         public int VisualVersion => visualVersion;
 
@@ -45,12 +50,14 @@ namespace _001_Scripts.UI
             IPublisher<UIReqMessage> uiPublisher,
             ISubscriber<CraftResultMessage> craftResults,
             ISubscriber<InvChangedMessage> inventoryChanges,
-            IInventoryReader inventory)
+            IInventoryReader inventory,
+            IHotbarReader hotbar)
         {
             _subscriptions?.Dispose();
             _craftPublisher = craftPublisher;
             _uiPublisher = uiPublisher;
             _inventory = inventory;
+            _hotbar = hotbar;
             var builder = DisposableBag.CreateBuilder();
             builder.Add(craftResults.Subscribe(OnCraftResult));
             builder.Add(inventoryChanges.Subscribe(_ => Refresh()));
@@ -63,6 +70,7 @@ namespace _001_Scripts.UI
             EnsureView();
             _currentPath = string.Empty;
             BuildCurrentLevel();
+            UpdatePinnedRecipe();
             _group.alpha = 1f;
             _group.interactable = true;
             _group.blocksRaycasts = true;
@@ -75,6 +83,7 @@ namespace _001_Scripts.UI
             isViz = false;
             _group.interactable = false;
             _group.blocksRaycasts = false;
+            _radial.HideTooltip();
             _radial.PlayCloseAnimation(SetHidden);
         }
 
@@ -88,11 +97,16 @@ namespace _001_Scripts.UI
 
         private void BuildCurrentLevel()
         {
+            if (_building) return;
+            _building = true;
+            try
+            {
             var entries = new List<SimpleRadialEntry>();
             string[] current = SplitPath(_currentPath);
 
             if (current.Length > 0)
-                entries.Add(new SimpleRadialEntry("Back", "←", "Back", GoBack));
+                entries.Add(new SimpleRadialEntry("Back", "←", "뒤로", GoBack, true,
+                    "이전 제작 카테고리로 돌아갑니다."));
 
             if (blueprintDatabase && itemDatabase)
             {
@@ -112,7 +126,7 @@ namespace _001_Scripts.UI
                         if (!childCategories.Add(child)) continue;
                         string targetPath = CombinePath(_currentPath, child);
                         entries.Add(new SimpleRadialEntry($"Category_{child}", "○", child,
-                            () => EnterCategory(targetPath)));
+                            () => EnterCategory(targetPath), true, $"{child} 제작 목록 열기"));
                         continue;
                     }
 
@@ -121,6 +135,11 @@ namespace _001_Scripts.UI
             }
 
             _radial.SetEntries(entries);
+            }
+            finally
+            {
+                _building = false;
+            }
         }
 
         private void AddRecipe(List<SimpleRadialEntry> entries, BlueprintModel blueprint)
@@ -130,8 +149,10 @@ namespace _001_Scripts.UI
             string label = string.IsNullOrWhiteSpace(blueprint.bluePrintName)
                 ? result.itemName
                 : blueprint.bluePrintName;
+            string tooltip = BuildRecipeText(blueprint, label, true);
             entries.Add(new SimpleRadialEntry($"Recipe_{blueprint.bluePrintId}",
-                InventoryPanel.GetGlyph(result.itemType), label, () => Craft(blueprint), affordable));
+                InventoryPanel.GetGlyph(result.itemType), label, () => Craft(blueprint), affordable, tooltip,
+                () => PinRecipe(blueprint)));
         }
 
         private void EnterCategory(string path)
@@ -166,7 +187,15 @@ namespace _001_Scripts.UI
 
         private void Refresh()
         {
-            if (isViz) BuildCurrentLevel();
+            if (isViz) _refreshPending = true;
+        }
+
+        private void LateUpdate()
+        {
+            if (!_refreshPending || !isViz) return;
+            _refreshPending = false;
+            BuildCurrentLevel();
+            UpdatePinnedRecipe();
         }
 
         private bool CanAfford(BlueprintModel blueprint)
@@ -178,6 +207,98 @@ namespace _001_Scripts.UI
                 if (!_inventory.HasItem(required.item, required.count)) return false;
             }
             return true;
+        }
+
+        private void PinRecipe(BlueprintModel blueprint)
+        {
+            if (blueprint == null) return;
+            _pinnedBlueprintId = blueprint.bluePrintId;
+            UpdatePinnedRecipe();
+        }
+
+        private void UpdatePinnedRecipe()
+        {
+            if (_pinnedBlueprintId < 0 || !blueprintDatabase || !_radial) return;
+            BlueprintModel blueprint = blueprintDatabase.GetBluePrint(_pinnedBlueprintId);
+            if (blueprint == null || !TryGetResult(blueprint, out var result))
+            {
+                _pinnedBlueprintId = -1;
+                _radial.ClearPinnedRecipe();
+                return;
+            }
+
+            string label = string.IsNullOrWhiteSpace(blueprint.bluePrintName)
+                ? result.itemName
+                : blueprint.bluePrintName;
+            _radial.SetPinnedRecipe($"📌 {label}", BuildRecipeText(blueprint, label, false));
+        }
+
+        private string BuildRecipeText(BlueprintModel blueprint, string label, bool includeControls)
+        {
+            var text = new StringBuilder(192);
+            if (includeControls)
+            {
+                text.Append(label).Append('\n');
+                text.Append("제작 시간  ").Append(blueprint.craftTime.ToString("0.#")).Append("초\n\n");
+            }
+            text.Append("필요 재료\n");
+            if (blueprint.recipe == null || blueprint.recipe.Count == 0)
+            {
+                text.Append("  재료 없음\n");
+            }
+            else
+            {
+                for (int i = 0; i < blueprint.recipe.Count; i++)
+                {
+                    var required = blueprint.recipe[i];
+                    int owned = GetOwnedCount(required.item);
+                    int missing = Mathf.Max(0, required.count - owned);
+                    text.Append("  ").Append(TryGetItemName(required.item)).Append("  ")
+                        .Append(owned).Append(" / ").Append(required.count);
+                    if (missing > 0)
+                        text.Append("   <color=#FF778A>부족 ").Append(missing).Append("</color>");
+                    else
+                        text.Append("   <color=#8FE6C4>충족</color>");
+                    text.Append('\n');
+                }
+            }
+            if (includeControls) text.Append("\n좌클릭 제작   우클릭 제작법 고정");
+            return text.ToString();
+        }
+
+        private int GetOwnedCount(int itemId)
+        {
+            int count = 0;
+            if (_inventory != null)
+            {
+                var items = _inventory.GetAllItems();
+                for (int i = 0; i < items.Count; i++)
+                    if (items[i] != null && !items[i].IsEmpty && items[i].ins.itemId == itemId)
+                        count += items[i].stack;
+            }
+            if (_hotbar != null)
+            {
+                for (int i = 0; i < _hotbar.HotbarSlotCount; i++)
+                {
+                    var slot = _hotbar.GetHotbarSlot(i);
+                    if (slot != null && !slot.IsEmpty && slot.ins.itemId == itemId) count += slot.stack;
+                }
+            }
+            return count;
+        }
+
+        private string TryGetItemName(int itemId)
+        {
+            if (!itemDatabase) return $"아이템 {itemId}";
+            try
+            {
+                var item = itemDatabase.GetItem(itemId);
+                return string.IsNullOrWhiteSpace(item.itemName) ? $"아이템 {itemId}" : item.itemName;
+            }
+            catch (KeyNotFoundException)
+            {
+                return $"아이템 {itemId}";
+            }
         }
 
         private bool TryGetResult(BlueprintModel blueprint, out _001_Scripts.Data.Item.Item result)
@@ -218,8 +339,11 @@ namespace _001_Scripts.UI
             if (!_radial) _radial = gameObject.AddComponent<SimpleRadialMenuView>();
             _radial.Ensure("⚙");
             _radial.SetOutsideClick(RequestClose);
+            _radial.SetPinnedCleared(OnPinnedCleared);
             visualVersion = CurrentVisualVersion;
         }
+
+        private void OnPinnedCleared() => _pinnedBlueprintId = -1;
 
         private void RequestClose()
         {

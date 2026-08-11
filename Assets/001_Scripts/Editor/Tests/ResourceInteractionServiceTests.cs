@@ -115,9 +115,11 @@ namespace _001_Scripts.Editor.Tests
             public int HarvestCount;
             public int PickupCount;
 
-            public bool TryRaycast(Vector3 origin, Vector3 direction, float distance, out Entity result)
+            public bool TryRaycast(Vector3 origin, Vector3 direction, float distance, out Entity result,
+                out float fraction)
             {
                 result = target;
+                fraction = .5f;
                 return true;
             }
 

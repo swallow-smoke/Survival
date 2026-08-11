@@ -7,7 +7,7 @@ namespace _001_Scripts.Data.Item
     {
         public Instance ins;
         public int stack;
-        public bool IsEmpty => ins == null;
+        public bool IsEmpty => ins == null || stack <= 0;
         
         public InventorySlot(Instance ins, int stack) 
         {

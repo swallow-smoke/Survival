@@ -13,14 +13,19 @@ namespace _001_Scripts.UI.Component
         public readonly string Label;
         public readonly bool Interactable;
         public readonly Action Selected;
+        public readonly string Tooltip;
+        public readonly Action SecondarySelected;
 
-        public SimpleRadialEntry(string id, string icon, string label, Action selected, bool interactable = true)
+        public SimpleRadialEntry(string id, string icon, string label, Action selected, bool interactable = true,
+            string tooltip = null, Action secondarySelected = null)
         {
             Id = id;
             Icon = icon;
             Label = label;
             Selected = selected;
             Interactable = interactable;
+            Tooltip = tooltip;
+            SecondarySelected = secondarySelected;
         }
     }
 
@@ -28,10 +33,13 @@ namespace _001_Scripts.UI.Component
     public sealed class SimpleRadialMenuView : MonoBehaviour
     {
         private const string RootName = "SimpleRadialRoot";
-        private static readonly Color CenterColor = new(.1f, .13f, .15f, .84f);
-        private static readonly Color NodeColor = new(.12f, .17f, .19f, .82f);
-        private static readonly Color DisabledColor = new(.08f, .1f, .11f, .62f);
-        private static readonly Color StrokeColor = new(.62f, .82f, .86f, .58f);
+        private const int NodePoolSize = 24;
+        private static readonly Color CenterColor = new(.18f, .075f, .29f, .78f);
+        private static readonly Color NodeColor = new(.24f, .10f, .38f, .74f);
+        private static readonly Color DisabledColor = new(.105f, .055f, .16f, .52f);
+        private static readonly Color StrokeColor = new(.73f, .46f, 1f, .72f);
+        private static readonly Color TooltipColor = new(.105f, .045f, .18f, .88f);
+        private static readonly Color PinnedColor = new(.12f, .05f, .21f, .86f);
 
         [SerializeField, Min(1f)] private float radius = 210f;
         [SerializeField, Min(1f)] private float centerSize = 104f;
@@ -48,7 +56,14 @@ namespace _001_Scripts.UI.Component
         private CanvasGroup _rootGroup;
         private Button _outsideButton;
         private Action _outsideClicked;
+        private Action _pinnedCleared;
         private Coroutine _animation;
+        private readonly List<SimpleRadialNodeView> _nodePool = new(NodePoolSize);
+        private RectTransform _tooltip;
+        private Text _tooltipText;
+        private RectTransform _pinnedPanel;
+        private Text _pinnedTitle;
+        private Text _pinnedBody;
 
         public void Rebuild(string centerIcon)
         {
@@ -69,11 +84,20 @@ namespace _001_Scripts.UI.Component
                     _centerIcon = existing.Find("Menu/Center/Icon")?.GetComponent<Text>();
                     _rootGroup = existing.GetComponent<CanvasGroup>();
                     _outsideButton = existing.Find("Outside")?.GetComponent<Button>();
+                    _tooltip = existing.Find("RecipeTooltip") as RectTransform;
+                    _tooltipText = existing.Find("RecipeTooltip/Text")?.GetComponent<Text>();
+                    _pinnedPanel = existing.Find("PinnedRecipe") as RectTransform;
+                    _pinnedTitle = existing.Find("PinnedRecipe/Title")?.GetComponent<Text>();
+                    _pinnedBody = existing.Find("PinnedRecipe/Body")?.GetComponent<Text>();
                 }
             }
 
-            if (!_root || !_menu || !_nodes || !_centerIcon || !_rootGroup || !_outsideButton) Rebuild(centerIcon);
+            if (!_root || !_menu || !_nodes || !_centerIcon || !_rootGroup || !_outsideButton || !_tooltip ||
+                !_tooltipText || !_pinnedPanel || !_pinnedTitle || !_pinnedBody) Rebuild(centerIcon);
             else _centerIcon.text = centerIcon;
+            CollectNodePool();
+            if (_nodePool.Count < NodePoolSize) Rebuild(centerIcon);
+            ApplyThemeToExisting();
             BindOutsideClick();
         }
 
@@ -82,6 +106,8 @@ namespace _001_Scripts.UI.Component
             _outsideClicked = callback;
             BindOutsideClick();
         }
+
+        public void SetPinnedCleared(Action callback) => _pinnedCleared = callback;
 
         public void PlayOpenAnimation()
         {
@@ -115,17 +141,60 @@ namespace _001_Scripts.UI.Component
         public void SetEntries(IReadOnlyList<SimpleRadialEntry> entries)
         {
             if (!_nodes) return;
-            ClearChildren(_nodes);
+            CollectNodePool();
+            for (int i = 0; i < _nodePool.Count; i++) _nodePool[i].Clear();
+            HideTooltip();
             if (entries == null || entries.Count == 0) return;
 
-            for (int i = 0; i < entries.Count; i++)
+            int visibleCount = Mathf.Min(entries.Count, _nodePool.Count);
+            if (entries.Count > _nodePool.Count)
+                Debug.LogWarning($"[Radial] {entries.Count} entries exceed the preallocated {_nodePool.Count} node pool.", this);
+            for (int i = 0; i < visibleCount; i++)
             {
                 var entry = entries[i];
-                float angle = 90f - i * 360f / entries.Count;
+                float angle = 90f - i * 360f / visibleCount;
                 float radians = angle * Mathf.Deg2Rad;
                 Vector2 position = new(Mathf.Cos(radians) * radius, Mathf.Sin(radians) * radius);
-                CreateNode(entry, position);
+                _nodePool[i].Configure(entry, position, this, NodeColor, DisabledColor);
             }
+        }
+
+        public void ShowTooltip(string text, Vector2 screenPosition)
+        {
+            if (!_tooltip || !_tooltipText || string.IsNullOrWhiteSpace(text)) return;
+            _tooltipText.text = text;
+            _tooltip.gameObject.SetActive(true);
+            Camera eventCamera = GetComponentInParent<Canvas>()?.renderMode == RenderMode.ScreenSpaceOverlay
+                ? null
+                : GetComponentInParent<Canvas>()?.worldCamera;
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, screenPosition, eventCamera,
+                    out Vector2 local)) return;
+            Vector2 half = _tooltip.sizeDelta * .5f;
+            Rect bounds = _root.rect;
+            local += new Vector2(half.x + 18f, -half.y - 18f);
+            local.x = Mathf.Clamp(local.x, bounds.xMin + half.x + 8f, bounds.xMax - half.x - 8f);
+            local.y = Mathf.Clamp(local.y, bounds.yMin + half.y + 8f, bounds.yMax - half.y - 8f);
+            _tooltip.anchoredPosition = local;
+            _tooltip.SetAsLastSibling();
+        }
+
+        public void HideTooltip()
+        {
+            if (_tooltip) _tooltip.gameObject.SetActive(false);
+        }
+
+        public void SetPinnedRecipe(string title, string body)
+        {
+            if (!_pinnedPanel || !_pinnedTitle || !_pinnedBody) return;
+            _pinnedTitle.text = title;
+            _pinnedBody.text = body;
+            _pinnedPanel.gameObject.SetActive(true);
+        }
+
+        public void ClearPinnedRecipe()
+        {
+            if (_pinnedPanel) _pinnedPanel.gameObject.SetActive(false);
+            _pinnedCleared?.Invoke();
         }
 
         private void Build(string centerIcon)
@@ -151,40 +220,114 @@ namespace _001_Scripts.UI.Component
             _nodes = Rect("Nodes", _menu);
             Stretch((RectTransform)_nodes);
 
+            _nodePool.Clear();
+            for (int i = 0; i < NodePoolSize; i++)
+                _nodePool.Add(CreateNodeShell($"PooledNode_{i:00}"));
+
             var center = Circle("Center", _menu, centerSize, CenterColor);
             AddStroke(center);
             center.raycastTarget = true;
             _centerIcon = Label("Icon", center.transform, centerIcon, 34, TextAnchor.MiddleCenter);
             Stretch(_centerIcon.rectTransform);
+            BuildTooltip();
+            BuildPinnedPanel();
             BindOutsideClick();
             SetFinalVisualState();
         }
 
-        private void CreateNode(SimpleRadialEntry entry, Vector2 position)
+        private SimpleRadialNodeView CreateNodeShell(string name)
         {
-            var circle = Circle(string.IsNullOrWhiteSpace(entry.Id) ? "Node" : entry.Id, _nodes, nodeSize,
-                entry.Interactable ? NodeColor : DisabledColor);
-            circle.rectTransform.anchoredPosition = position;
+            var circle = Circle(name, _nodes, nodeSize, NodeColor);
             var button = circle.gameObject.AddComponent<Button>();
             button.targetGraphic = circle;
-            button.interactable = entry.Interactable;
             var colors = button.colors;
             colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1.24f, 1.24f, 1.24f, 1f);
+            colors.highlightedColor = new Color(1.18f, 1.08f, 1.25f, 1f);
             colors.selectedColor = colors.highlightedColor;
-            colors.pressedColor = new Color(.82f, .88f, .9f, 1f);
-            colors.disabledColor = new Color(.65f, .65f, .65f, .7f);
+            colors.pressedColor = new Color(.88f, .72f, 1f, 1f);
+            colors.disabledColor = new Color(.62f, .54f, .68f, .68f);
             colors.fadeDuration = .08f;
             button.colors = colors;
-            if (entry.Selected != null) button.onClick.AddListener(() => entry.Selected());
             circle.gameObject.AddComponent<CanvasGroup>();
             AddStroke(circle);
-
-            string text = string.IsNullOrWhiteSpace(entry.Label)
-                ? entry.Icon
-                : $"{entry.Icon}\n{entry.Label}";
-            var label = Label("Content", circle.transform, text, 13, TextAnchor.MiddleCenter);
+            var label = Label("Content", circle.transform, string.Empty, 13, TextAnchor.MiddleCenter);
             Stretch(label.rectTransform);
+            var view = circle.gameObject.AddComponent<SimpleRadialNodeView>();
+            view.BindSerializedReferences(circle, button, label);
+            view.Clear();
+            return view;
+        }
+
+        private void BuildTooltip()
+        {
+            var image = Panel("RecipeTooltip", _root, TooltipColor);
+            _tooltip = image.rectTransform;
+            Anchor(_tooltip, new Vector2(.5f, .5f), new Vector2(330f, 220f), Vector2.zero);
+            AddStroke(image);
+            _tooltipText = Label("Text", _tooltip, string.Empty, 14, TextAnchor.UpperLeft);
+            Stretch(_tooltipText.rectTransform, 14f);
+            image.raycastTarget = false;
+            _tooltip.gameObject.SetActive(false);
+        }
+
+        private void BuildPinnedPanel()
+        {
+            var image = Panel("PinnedRecipe", _root, PinnedColor);
+            _pinnedPanel = image.rectTransform;
+            _pinnedPanel.anchorMin = _pinnedPanel.anchorMax = _pinnedPanel.pivot = new Vector2(1f, 1f);
+            _pinnedPanel.sizeDelta = new Vector2(350f, 250f);
+            _pinnedPanel.anchoredPosition = new Vector2(-24f, -24f);
+            AddStroke(image);
+            _pinnedTitle = Label("Title", _pinnedPanel, string.Empty, 18, TextAnchor.UpperLeft);
+            Anchor(_pinnedTitle.rectTransform, new Vector2(0f, 1f), new Vector2(294f, 40f), new Vector2(16f, -14f),
+                new Vector2(0f, 1f));
+            _pinnedBody = Label("Body", _pinnedPanel, string.Empty, 14, TextAnchor.UpperLeft);
+            Anchor(_pinnedBody.rectTransform, new Vector2(0f, 1f), new Vector2(318f, 180f), new Vector2(16f, -58f),
+                new Vector2(0f, 1f));
+            var close = Panel("Unpin", _pinnedPanel, new Color(.28f, .12f, .42f, .82f));
+            Anchor(close.rectTransform, new Vector2(1f, 1f), new Vector2(34f, 34f), new Vector2(-10f, -10f),
+                new Vector2(1f, 1f));
+            var button = close.gameObject.AddComponent<Button>();
+            button.targetGraphic = close;
+            button.onClick.AddListener(ClearPinnedRecipe);
+            var x = Label("Label", close.transform, "×", 20, TextAnchor.MiddleCenter);
+            Stretch(x.rectTransform);
+            _pinnedPanel.gameObject.SetActive(false);
+        }
+
+        private void CollectNodePool()
+        {
+            _nodePool.Clear();
+            if (!_nodes) return;
+            for (int i = 0; i < _nodes.childCount; i++)
+            {
+                var view = _nodes.GetChild(i).GetComponent<SimpleRadialNodeView>();
+                if (view) _nodePool.Add(view);
+            }
+        }
+
+        private void ApplyThemeToExisting()
+        {
+            var center = _menu ? _menu.Find("Center")?.GetComponent<RadialCircleGraphic>() : null;
+            if (center) center.color = CenterColor;
+            if (_tooltip)
+            {
+                var image = _tooltip.GetComponent<Image>();
+                if (image) image.color = TooltipColor;
+            }
+            if (_pinnedPanel)
+            {
+                var image = _pinnedPanel.GetComponent<Image>();
+                if (image) image.color = PinnedColor;
+                var unpin = _pinnedPanel.Find("Unpin")?.GetComponent<Image>();
+                if (unpin) unpin.color = new Color(.28f, .12f, .42f, .82f);
+            }
+            foreach (var outline in _root.GetComponentsInChildren<Outline>(true))
+            {
+                outline.effectColor = StrokeColor;
+                outline.effectDistance = Vector2.one * strokeWidth;
+                outline.useGraphicAlpha = true;
+            }
         }
 
         private void AddStroke(Graphic graphic)
@@ -198,9 +341,11 @@ namespace _001_Scripts.UI.Component
         private void BindOutsideClick()
         {
             if (!_outsideButton) return;
-            _outsideButton.onClick.RemoveAllListeners();
-            _outsideButton.onClick.AddListener(() => _outsideClicked?.Invoke());
+            _outsideButton.onClick.RemoveListener(InvokeOutsideClick);
+            _outsideButton.onClick.AddListener(InvokeOutsideClick);
         }
+
+        private void InvokeOutsideClick() => _outsideClicked?.Invoke();
 
         private IEnumerator AnimateOpen()
         {
@@ -345,17 +490,22 @@ namespace _001_Scripts.UI.Component
             _centerIcon = null;
             _rootGroup = null;
             _outsideButton = null;
+            _nodePool.Clear();
+            _tooltip = null;
+            _tooltipText = null;
+            _pinnedPanel = null;
+            _pinnedTitle = null;
+            _pinnedBody = null;
         }
 
-        private static void ClearChildren(Transform parent)
+        private static Image Panel(string name, Transform parent, Color color)
         {
-            for (int i = parent.childCount - 1; i >= 0; i--)
-            {
-                var child = parent.GetChild(i).gameObject;
-                child.SetActive(false);
-                if (Application.isPlaying) Destroy(child);
-                else DestroyImmediate(child);
-            }
+            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            go.layer = 5;
+            go.transform.SetParent(parent, false);
+            var image = go.GetComponent<Image>();
+            image.color = color;
+            return image;
         }
 
         private static RectTransform Rect(string name, Transform parent)
@@ -374,10 +524,20 @@ namespace _001_Scripts.UI.Component
             rect.offsetMax = Vector2.zero;
         }
 
+        private static void Stretch(RectTransform rect, float inset)
+        {
+            Stretch(rect);
+            rect.offsetMin = new Vector2(inset, inset);
+            rect.offsetMax = new Vector2(-inset, -inset);
+        }
+
         private static void Anchor(RectTransform rect, Vector2 anchor, Vector2 size, Vector2 position)
+            => Anchor(rect, anchor, size, position, new Vector2(.5f, .5f));
+
+        private static void Anchor(RectTransform rect, Vector2 anchor, Vector2 size, Vector2 position, Vector2 pivot)
         {
             rect.anchorMin = rect.anchorMax = anchor;
-            rect.pivot = new Vector2(.5f, .5f);
+            rect.pivot = pivot;
             rect.sizeDelta = size;
             rect.anchoredPosition = position;
             rect.localScale = Vector3.one;

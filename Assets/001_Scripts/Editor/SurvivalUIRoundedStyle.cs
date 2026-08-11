@@ -232,8 +232,8 @@ namespace _001_Scripts.Editor
             string name = image.name;
             string path = GetPath(image.transform);
             if (isHud && name == "UGUI_HUDRoot") return new Color(.055f, .035f, .11f, .015f);
-            if (name == "UGUI_InventoryRoot") return new Color(.012f, .006f, .035f, .24f);
-            if (name == "InventoryCard") return new Color(.045f, .025f, .10f, .72f);
+            if (name == "UGUI_InventoryRoot") return new Color(.012f, .006f, .035f, .94f);
+            if (name == "InventoryCard") return new Color(.04f, .02f, .09f, .96f);
             if (name == "SlotBay" || name == "ItemDetails") return new Color(.075f, .045f, .15f, .60f);
             if (name.EndsWith("Row")) return new Color(.12f, .075f, .20f, isHud ? .12f : .68f);
             if (name == "Accent") return new Color(.66f, .46f, 1f, .78f);

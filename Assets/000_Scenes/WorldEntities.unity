@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &92247823
+--- !u!1 &49868795
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,54 +127,54 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 92247825}
-  - component: {fileID: 92247824}
+  - component: {fileID: 49868797}
+  - component: {fileID: 49868796}
   m_Layer: 0
-  m_Name: Trees
+  m_Name: CopperOre
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &92247824
+--- !u!114 &49868796
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 92247823}
+  m_GameObject: {fileID: 49868795}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7384c0e7194ce8c4b834a68596a89934, type: 3}
   m_Name: 
   m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Resources.Authoring.ResourceFieldSpawnZoneAuthoring
   kind: 0
-  prefabId: 1100
+  prefabId: 1200
   itemId: 0
   minimumItemCount: 1
   maximumItemCount: 3
-  size: {x: 65, y: 8, z: 65}
+  size: {x: 45, y: 8, z: 45}
   raycastHeight: 10
-  spawnInterval: 2
-  maximumAlive: 18
-  spawnPerTick: 2
-  randomSeed: 1100
---- !u!4 &92247825
+  spawnInterval: 3
+  maximumAlive: 10
+  spawnPerTick: 1
+  randomSeed: 1200
+--- !u!4 &49868797
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 92247823}
+  m_GameObject: {fileID: 49868795}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 15, y: 1, z: 10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &231489659
+--- !u!1 &505866269
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -182,8 +182,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 231489661}
-  - component: {fileID: 231489660}
+  - component: {fileID: 505866271}
+  - component: {fileID: 505866270}
   m_Layer: 0
   m_Name: WorldEntityRuntime
   m_TagString: Untagged
@@ -191,13 +191,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &231489660
+--- !u!114 &505866270
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 231489659}
+  m_GameObject: {fileID: 505866269}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fec1e53766847ee4ca8ccee9e4f3ca24, type: 3}
@@ -217,13 +217,19 @@ MonoBehaviour:
   - PrefabId: 1300
     Prefab: {fileID: 3325906750323105707, guid: 106d9aca7500d834a9f4f0f429a1b1fd,
       type: 3}
---- !u!4 &231489661
+  - PrefabId: 1400
+    Prefab: {fileID: 3190101527214778989, guid: 5725d0a890ef5a148ba83e685d433d9e,
+      type: 3}
+  - PrefabId: 1500
+    Prefab: {fileID: 4165307778059918261, guid: 001a602acb8ddde4e831fccaf6206a33,
+      type: 3}
+--- !u!4 &505866271
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 231489659}
+  m_GameObject: {fileID: 505866269}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -232,7 +238,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &544643654
+--- !u!1 &858677447
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -240,54 +246,54 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 544643656}
-  - component: {fileID: 544643655}
+  - component: {fileID: 858677449}
+  - component: {fileID: 858677448}
   m_Layer: 0
-  m_Name: ReinforcedOre
+  m_Name: Quartz
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &544643655
+--- !u!114 &858677448
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 544643654}
+  m_GameObject: {fileID: 858677447}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7384c0e7194ce8c4b834a68596a89934, type: 3}
   m_Name: 
   m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Resources.Authoring.ResourceFieldSpawnZoneAuthoring
   kind: 0
-  prefabId: 1300
+  prefabId: 1500
   itemId: 0
   minimumItemCount: 1
   maximumItemCount: 3
-  size: {x: 30, y: 8, z: 30}
+  size: {x: 36, y: 8, z: 36}
   raycastHeight: 10
-  spawnInterval: 8
-  maximumAlive: 4
+  spawnInterval: 4
+  maximumAlive: 7
   spawnPerTick: 1
-  randomSeed: 1300
---- !u!4 &544643656
+  randomSeed: 1500
+--- !u!4 &858677449
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 544643654}
+  m_GameObject: {fileID: 858677447}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -20, y: 1, z: -10}
+  m_LocalPosition: {x: 18, y: 1, z: -14}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1489303431
+--- !u!1 &1116774203
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -295,54 +301,54 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1489303433}
-  - component: {fileID: 1489303432}
+  - component: {fileID: 1116774205}
+  - component: {fileID: 1116774204}
   m_Layer: 0
-  m_Name: CopperOre
+  m_Name: Trees
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1489303432
+--- !u!114 &1116774204
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1489303431}
+  m_GameObject: {fileID: 1116774203}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7384c0e7194ce8c4b834a68596a89934, type: 3}
   m_Name: 
   m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Resources.Authoring.ResourceFieldSpawnZoneAuthoring
   kind: 0
-  prefabId: 1200
+  prefabId: 1100
   itemId: 0
   minimumItemCount: 1
   maximumItemCount: 3
-  size: {x: 45, y: 8, z: 45}
+  size: {x: 65, y: 8, z: 65}
   raycastHeight: 10
-  spawnInterval: 3
-  maximumAlive: 10
-  spawnPerTick: 1
-  randomSeed: 1200
---- !u!4 &1489303433
+  spawnInterval: 2
+  maximumAlive: 18
+  spawnPerTick: 2
+  randomSeed: 1100
+--- !u!4 &1116774205
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1489303431}
+  m_GameObject: {fileID: 1116774203}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 15, y: 1, z: 10}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1727785817
+--- !u!1 &1442742094
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -350,8 +356,116 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1727785819}
-  - component: {fileID: 1727785818}
+  - component: {fileID: 1442742096}
+  - component: {fileID: 1442742095}
+  m_Layer: 0
+  m_Name: TitaniumOre
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1442742095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1442742094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7384c0e7194ce8c4b834a68596a89934, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Resources.Authoring.ResourceFieldSpawnZoneAuthoring
+  kind: 0
+  prefabId: 1400
+  itemId: 0
+  minimumItemCount: 1
+  maximumItemCount: 3
+  size: {x: 42, y: 8, z: 42}
+  raycastHeight: 10
+  spawnInterval: 4
+  maximumAlive: 8
+  spawnPerTick: 1
+  randomSeed: 1400
+--- !u!4 &1442742096
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1442742094}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -12, y: 1, z: 16}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1533301693
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1533301695}
+  - component: {fileID: 1533301694}
+  m_Layer: 0
+  m_Name: ResourceSpawnSurface
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!65 &1533301694
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1533301693}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &1533301695
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1533301693}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.5, z: 0}
+  m_LocalScale: {x: 100, y: 1, z: 100}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1681038376
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1681038378}
+  - component: {fileID: 1681038377}
   m_Layer: 0
   m_Name: LooseItems
   m_TagString: Untagged
@@ -359,13 +473,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1727785818
+--- !u!114 &1681038377
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1727785817}
+  m_GameObject: {fileID: 1681038376}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7384c0e7194ce8c4b834a68596a89934, type: 3}
@@ -382,13 +496,13 @@ MonoBehaviour:
   maximumAlive: 20
   spawnPerTick: 2
   randomSeed: 1000
---- !u!4 &1727785819
+--- !u!4 &1681038378
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1727785817}
+  m_GameObject: {fileID: 1681038376}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: 0}
@@ -397,7 +511,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1925966186
+--- !u!1 &2088268329
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -405,47 +519,49 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1925966188}
-  - component: {fileID: 1925966187}
+  - component: {fileID: 2088268331}
+  - component: {fileID: 2088268330}
   m_Layer: 0
-  m_Name: ResourceSpawnSurface
+  m_Name: ReinforcedOre
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!65 &1925966187
-BoxCollider:
+--- !u!114 &2088268330
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1925966186}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
+  m_GameObject: {fileID: 2088268329}
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!4 &1925966188
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7384c0e7194ce8c4b834a68596a89934, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Resources.Authoring.ResourceFieldSpawnZoneAuthoring
+  kind: 0
+  prefabId: 1300
+  itemId: 0
+  minimumItemCount: 1
+  maximumItemCount: 3
+  size: {x: 30, y: 8, z: 30}
+  raycastHeight: 10
+  spawnInterval: 8
+  maximumAlive: 4
+  spawnPerTick: 1
+  randomSeed: 1300
+--- !u!4 &2088268331
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1925966186}
+  m_GameObject: {fileID: 2088268329}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.5, z: 0}
-  m_LocalScale: {x: 100, y: 1, z: 100}
+  m_LocalPosition: {x: -20, y: 1, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -454,9 +570,11 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 231489661}
-  - {fileID: 1925966188}
-  - {fileID: 1727785819}
-  - {fileID: 92247825}
-  - {fileID: 1489303433}
-  - {fileID: 544643656}
+  - {fileID: 505866271}
+  - {fileID: 1533301695}
+  - {fileID: 1681038378}
+  - {fileID: 1116774205}
+  - {fileID: 49868797}
+  - {fileID: 2088268331}
+  - {fileID: 1442742096}
+  - {fileID: 858677449}

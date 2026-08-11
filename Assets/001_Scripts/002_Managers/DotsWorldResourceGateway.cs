@@ -9,9 +9,10 @@ namespace _001_Scripts.Managers
 {
     public sealed class DotsWorldResourceGateway : IWorldResourceGateway
     {
-        public bool TryRaycast(Vector3 origin, Vector3 direction, float distance, out Entity target)
+        public bool TryRaycast(Vector3 origin, Vector3 direction, float distance, out Entity target,
+            out float fraction)
         {
-            return WorldResourceCommandQueue.TryRaycast(origin, direction, distance, out target, out _);
+            return WorldResourceCommandQueue.TryRaycast(origin, direction, distance, out target, out fraction);
         }
 
         public bool TryGetInteractionInfo(Entity target, out ResourceInteractionInfo info)

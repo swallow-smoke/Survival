@@ -12,6 +12,39 @@ namespace _001_Scripts.Editor.Tests
     public sealed class HotbarTransferEditModeTests
     {
         [Test]
+        public void NormalizeSlots_ClearsZeroStackInstancesRestoredByUnitySerialization()
+        {
+            var gameObject = new GameObject("Inventory Serialization Test");
+            try
+            {
+                var controller = gameObject.AddComponent<InventoryController>();
+                SetField(controller, "maxSlots", 2);
+                SetField(controller, "hotbarSlotCount", 1);
+                SetField(controller, "items", new List<InventorySlot>
+                {
+                    new(new Instance(0, 0, 0f), 0),
+                    new(new Instance(5, 10, 100f), 1)
+                });
+                SetField(controller, "hotbarItems", new List<InventorySlot>
+                {
+                    new(new Instance(0, 0, 0f), 0)
+                });
+
+                controller.GetAllItems();
+
+                Assert.That(controller.GetSlot(0).IsEmpty, Is.True);
+                Assert.That(controller.GetSlot(0).ins, Is.Null,
+                    "A zero-stack default instance must not become item id 0.");
+                Assert.That(controller.GetSlot(1).ins.itemId, Is.EqualTo(5));
+                Assert.That(controller.GetHotbarSlot(0).ins, Is.Null);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(gameObject);
+            }
+        }
+
+        [Test]
         public void SwapItem_MovesBetweenInventoryAndHotbarInBothDirections()
         {
             var gameObject = new GameObject("InventoryController Test");
@@ -36,10 +69,10 @@ namespace _001_Scripts.Editor.Tests
                 Assert.That(controller.GetSlot(0).IsEmpty, Is.True);
                 Assert.That(controller.GetHotbarSlot(0).ins.itemId, Is.EqualTo(5));
 
-                InvokeSwap(controller, new InvSwapMessage(0, 1,
+                InvokeSwap(controller, new InvSwapMessage(0, 0,
                     InventorySlotArea.Hotbar, InventorySlotArea.Inventory));
                 Assert.That(controller.GetHotbarSlot(0).IsEmpty, Is.True);
-                Assert.That(controller.GetSlot(1).ins.itemId, Is.EqualTo(5));
+                Assert.That(controller.GetSlot(0).ins.itemId, Is.EqualTo(5));
             }
             finally
             {

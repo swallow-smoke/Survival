@@ -36,6 +36,8 @@ namespace _001_Scripts.Controller
         private bool _hasResourceTarget;
         private string _resourceLabel;
         private FirstPersonItemHolder _itemHolder;
+        [SerializeField] private ResourceHitParticlePool resourceHitParticles;
+        private Vector3 _resourceHitPoint;
 
         [Inject]
         public void Construct(IPublisher<InteractionUIMessage> uiPublisher,
@@ -139,6 +141,7 @@ namespace _001_Scripts.Controller
                     _resourceLabel = resourceFocus.Label;
                     _uiPublisher.Publish(new InteractionUIMessage(true, resourceFocus.Label, "F"));
                 }
+                _resourceHitPoint = resourceFocus.HitPoint;
             }
             else if (_lastHitTrs != null || _hasResourceTarget)
             {
@@ -157,7 +160,10 @@ namespace _001_Scripts.Controller
             }
 
             if (_resourceInteraction?.InteractFocused() == true)
+            {
+                resourceHitParticles?.Play(_resourceHitPoint);
                 _itemHolder?.TryPerformPrimaryAction();
+            }
         }
 
         private void OnDestroy()

@@ -15,26 +15,27 @@ namespace _001_Scripts.Controller.Handler
         public event Action OnInteract;
         public event Action OnExitVehicle;
         public event Action OnInventoryToggle;
-        public event Action OnCraftToggle;
+        public event Action OnLogToggle;
+        public event Action OnBlueprintToggle;
         public event Action<int> OnHotbarSlot;
         public event Action<float> OnHotbarScroll;
 
         [SerializeField, HideInInspector] private int uiBindingVersion;
         private PlayerInput _playerInput;
         private InputAction _inventoryAction;
-        private InputAction _craftAction;
-        private int _lastCraftToggleFrame = -1;
+        private InputAction _logAction;
+        private int _lastLogToggleFrame = -1;
         private float _lastScroll;
 
         private void Awake()
         {
             _playerInput = GetComponent<PlayerInput>();
             _inventoryAction = _playerInput?.actions?.FindAction("Inventory", false);
-            _craftAction = _playerInput?.actions?.FindAction("Craft", false);
+            _logAction = _playerInput?.actions?.FindAction("Log", false);
             if (_inventoryAction != null)
                 _inventoryAction.started += HandleInventoryToggle;
-            if (_craftAction != null)
-                _craftAction.started += HandleCraftToggle;
+            if (_logAction != null)
+                _logAction.started += HandleLogToggle;
         }
 
         private void Update()
@@ -50,6 +51,7 @@ namespace _001_Scripts.Controller.Handler
                 else if (keyboard.digit6Key.wasPressedThisFrame) OnHotbarSlot?.Invoke(5);
                 else if (keyboard.digit7Key.wasPressedThisFrame) OnHotbarSlot?.Invoke(6);
                 else if (keyboard.digit8Key.wasPressedThisFrame) OnHotbarSlot?.Invoke(7);
+                if (keyboard.bKey.wasPressedThisFrame) OnBlueprintToggle?.Invoke();
             }
 
             float scroll = Mouse.current?.scroll.ReadValue().y ?? 0f;
@@ -98,19 +100,19 @@ namespace _001_Scripts.Controller.Handler
             if (ctx.started) OnInventoryToggle?.Invoke();
         }
 
-        public void HandleCraftToggle(InputAction.CallbackContext ctx)
+        public void HandleLogToggle(InputAction.CallbackContext ctx)
         {
-            if (!ctx.started || _lastCraftToggleFrame == Time.frameCount) return;
-            _lastCraftToggleFrame = Time.frameCount;
-            OnCraftToggle?.Invoke();
+            if (!ctx.started || _lastLogToggleFrame == Time.frameCount) return;
+            _lastLogToggleFrame = Time.frameCount;
+            OnLogToggle?.Invoke();
         }
 
         private void OnDestroy()
         {
             if (_inventoryAction != null)
                 _inventoryAction.started -= HandleInventoryToggle;
-            if (_craftAction != null)
-                _craftAction.started -= HandleCraftToggle;
+            if (_logAction != null)
+                _logAction.started -= HandleLogToggle;
         }
     }
 }
