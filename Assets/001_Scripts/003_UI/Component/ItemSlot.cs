@@ -65,12 +65,12 @@ namespace _001_Scripts.UI.Component
             if (slotIndex >= 0) index = slotIndex;
         }
 
-        public void Set(InventorySlot slot, Template template, int slotIndex)
+        public void Set(InventorySlot slot, Item item, int slotIndex)
         {
             index = slotIndex;
-            itemName = template.itemName;
-            itemDesc = template.itemDesc;
-            itemType = template.itemType.ToString();
+            itemName = item.itemName;
+            itemDesc = item.itemDesc;
+            itemType = item.Role.ToString();
             _occupied = true;
 
             if (itemImage)
@@ -79,9 +79,9 @@ namespace _001_Scripts.UI.Component
                 itemImage.preserveAspect = true;
             }
 
-            if (template.HasAttribute(AttributesType.Equippable) && durability)
+            if (item.TryGetFeature<IEquippable>(out var equippable) && durability)
             {
-                float maximum = template.GetModifierValue(AttributesType.Equippable, ModifierType.DurabilityMax, 1f);
+                float maximum = equippable.MaxDurability;
                 durability.fillAmount = maximum <= 0 ? 0 : slot.ins.durability / maximum;
                 if (stock) stock.gameObject.SetActive(false);
                 durability.gameObject.SetActive(true);
@@ -98,11 +98,11 @@ namespace _001_Scripts.UI.Component
 
             if (_glyph)
             {
-                _glyph.text = InventoryPanel.GetGlyph(template.itemType);
-                _glyph.color = GetItemColor(template.itemGrade);
+                _glyph.text = InventoryPanel.GetGlyph(item.itemType);
+                _glyph.color = GetItemColor(item.itemGrade);
             }
             if (_runtimeName)
-                _runtimeName.text = string.IsNullOrWhiteSpace(template.itemName) ? $"아이템 {template.itemId}" : template.itemName;
+                _runtimeName.text = string.IsNullOrWhiteSpace(item.itemName) ? $"아이템 {item.itemId}" : item.itemName;
             if (_runtimeCount)
                 _runtimeCount.text = slot.stack > 1 ? $"×{slot.stack}" : "";
             ApplyVisualState();

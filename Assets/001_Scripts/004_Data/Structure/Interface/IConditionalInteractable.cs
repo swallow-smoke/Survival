@@ -5,4 +5,6 @@ namespace _001_Scripts.Data.Structure.Interface
         bool CanInteract();
         string RequirementLabel();
     }
+
+    public interface IConditionalInteractionTarget : IConditionalInteractable, IInteractionTarget { }
 }

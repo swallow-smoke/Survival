@@ -2,8 +2,10 @@ using UnityEngine;
 
 namespace _001_Scripts.Interface
 {
-    public interface IPlayerContext
+    public interface IPlayerTransformProvider
     {
         Transform PlayerTrs { get; }
     }
+
+    public interface IPlayerContext : IPlayerTransformProvider { }
 }

@@ -124,7 +124,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 683ab852fad9d0e4e81966713497dc7c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Structure.PickupObject
+  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Structure.Pickup
   itemId: 0
   count: 1
   displayName: Woowang

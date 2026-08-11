@@ -25,7 +25,8 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _USEWAVES_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -70,13 +71,13 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMapA:
-        m_Texture: {fileID: 2800000, guid: c7e70cd831cfacd48a59bf3575f76ff5, type: 3}
-        m_Scale: {x: 5, y: 5}
-        m_Offset: {x: 5, y: 5}
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _NormalMapB:
-        m_Texture: {fileID: 2800000, guid: c7e70cd831cfacd48a59bf3575f76ff5, type: 3}
-        m_Scale: {x: 25, y: 25}
-        m_Offset: {x: -1, y: -1}
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -120,40 +121,60 @@ Material:
     - _CastShadows: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
+    - _ColorSteps: 7.25
     - _Cull: 2
     - _Cutoff: 0.5
+    - _DeepTintStrength: 0.36
     - _DepthScale: 5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
+    - _FacetColorStrength: 0.664
+    - _FacetStrength: 0
     - _Float: 0
     - _Float_1: 0.2
     - _Float_2: 0.7
     - _Float_3: 0
     - _FlowSpeed: 0.05
-    - _FoamNoiseSpeed: 0.1
-    - _FoamThreshold: 0.1
+    - _FoamAmount: 0
+    - _FoamNoiseSpeed: 5
+    - _FoamThreshold: 0
+    - _FoamWidth: 0.001
     - _FoemThre: 15
-    - _FresnelPower: 4
+    - _FresnelPower: 9.9
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _HighlightSoftness: 0.04
+    - _HighlightThreshold: 0.78
+    - _LightSteps: 8
     - _Metallic: 0
+    - _MicroNormalStrength: 0.32
     - _MultiPlyer: 0.05
     - _Multiplyone: 0.01
     - _Multiplytwo: 0.03
-    - _NormalStrength: 0.05
+    - _NormalStrength: 0.012
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _ReflectionStrength: 1
+    - _RimPower: 1.66
+    - _RimStrength: 0.404
     - _Scalla: 0.15
-    - _Smoothness: 0.5
+    - _ShadowStrength: 0
+    - _ShallowOpacity: 0.539
+    - _ShallowTintStrength: 0.238
+    - _Smoothness: 0.921
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
+    - _SpecularSize: 36
+    - _SpecularSoftness: 0.2
+    - _SpecularStrength: 0.069
+    - _SpecularThreshold: 0.737
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
@@ -163,7 +184,8 @@ Material:
     - _TilingOne: 5
     - _TilingTwo: 15
     - _Tiling_1: 25
-    - _Transparency: 0.7
+    - _Transparency: 0.602
+    - _UseWaves: 1
     - _WaterScaleDepth: 5
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
@@ -173,14 +195,22 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 0.6639247, g: 0.46052867, b: 0.745283, a: 1}
-    - _DeepColor: {r: 0, g: 0.02, b: 0.15, a: 1}
+    - _DeepColor: {r: 0, g: 0.02, b: 0.14999995, a: 0.6117647}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FoamColor: {r: 1, g: 1, b: 1, a: 0.1764706}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 0.5176471}
+    - _MidColor: {r: 0, g: 0.28697708, b: 0.4716981, a: 0.7921569}
+    - _RimColor: {r: 0.6, g: 0.9, b: 1, a: 0.44705883}
     - _ShadowColor: {r: 0.02, g: 0.25, b: 0.35, a: 1}
-    - _ShallowColor: {r: 0.09999997, g: 0.7, b: 0.6, a: 1}
+    - _ShadowTint: {r: 0.72, g: 0.85, b: 1, a: 0.3882353}
+    - _ShallowColor: {r: 0.3915094, g: 0.89210695, b: 1, a: 0.7882353}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _TilingOne_1: {r: 0, g: 0, b: 0, a: 0}
     - _TilingTwo_1: {r: 0, g: 0, b: 0, a: 0}
+    - _Wave0: {r: 1, g: 0, b: 0.5, a: 48}
+    - _Wave1: {r: 0, g: 1, b: 0.7, a: 8}
+    - _Wave2: {r: 1, g: 1, b: 0.9, a: 5.5}
+    - _Wave3: {r: -1, g: 1, b: 0.1, a: 3.5}
+    - _WaveSpeed: {r: 0.35, g: 0.28, b: -0.5, a: 0.18}
     - _yahoo: {r: 0, g: 0.9355136, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

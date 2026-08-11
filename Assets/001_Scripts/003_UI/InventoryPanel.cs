@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using _001_Scripts.Base;
+using _001_Scripts.Data.Item;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.SOJ;
 using _001_Scripts.Interface;
@@ -153,13 +154,13 @@ namespace _001_Scripts.UI
 
             var template = itemDB.GetItem(slot.ins.itemId);
             SetText(itemNameText, string.IsNullOrWhiteSpace(template.itemName) ? $"아이템 {template.itemId}" : template.itemName);
-            SetText(itemTypeText, GetTypeName(template.itemType) + "  /  " + template.itemGrade.ToString().ToUpperInvariant());
+            SetText(itemTypeText, GetRoleName(template.Role) + "  /  " + template.itemGrade.ToString().ToUpperInvariant());
             SetText(itemQuantityText, $"보유 수량  {slot.stack}     무게  {template.weight:0.##}");
             SetText(itemDescriptionText, string.IsNullOrWhiteSpace(template.itemDesc)
                 ? "수집한 생존 자원입니다. 제작과 탐사에 사용할 수 있습니다."
                 : template.itemDesc);
             SetText(itemGlyphText, GetGlyph(template.itemType));
-            if (useButton) useButton.interactable = template.HasAttribute(AttributesType.Consumable);
+            if (useButton) useButton.interactable = template.HasFeature<IUsable>();
             if (dropButton) dropButton.interactable = true;
         }
 
@@ -234,6 +235,15 @@ namespace _001_Scripts.UI
             ItemType.armor => "보호 장비",
             ItemType.consumable => "소모품",
             _ => "아이템"
+        };
+
+        private static string GetRoleName(ItemRole role) => role switch
+        {
+            ItemRole.Tool => "도구",
+            ItemRole.Usable => "사용 아이템",
+            ItemRole.Equipment => "장비",
+            ItemRole.Material => "재료",
+            _ => "기타"
         };
 
         public static string GetGlyph(ItemType type) => type switch

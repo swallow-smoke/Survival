@@ -4,6 +4,7 @@ using _001_Scripts.Controller.Interaction;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Data.Structure.Interface;
+using _001_Scripts.Entities;
 using _001_Scripts.Interface;
 using _001_Scripts.Type.States;
 using MessagePipe;
@@ -24,7 +25,7 @@ namespace _001_Scripts.Controller
         [SerializeField] private Material _outlineMat;
 
         private IPublisher<InteractionUIMessage> _uiPublisher;
-        private IInteractable _current;
+        private IInteractionTarget _current;
         private Transform _lastHitTrs;
         private bool _canInteract;
         private PlayerUIState _uiState;
@@ -92,26 +93,32 @@ namespace _001_Scripts.Controller
                         _highlighter.SetHighlight(_lastHitTrs.gameObject, false);
 
                     _lastHitTrs = hitTrs;
-                    _current = hitTrs.GetComponent<IInteractable>();
+                    _current = hitTrs.GetComponentInParent<IInteractionTarget>();
+                    if (_current == null)
+                    {
+                        var entity = hitTrs.GetComponentInParent<Entity>();
+                        if (entity) entity.TryGetFeature(out _current);
+                    }
 
                     if (_current != null)
                         _highlighter.SetHighlight(hitTrs.gameObject, true);
 
                     string label;
-                    if (_current is IConditionalInteractable conditional)
+                    if (_current is IConditionalInteractionTarget conditional)
                     {
                         _canInteract = conditional.CanInteract();
                         label = _canInteract
-                            ? (_current is IInteractableInfo condInfo ? condInfo.GetLabel() : "")
+                            ? conditional.GetLabel()
                             : conditional.RequirementLabel();
                     }
                     else
                     {
                         _canInteract = true;
-                        label = _current is IInteractableInfo info ? info.GetLabel() : "";
+                        label = _current?.GetLabel() ?? "";
                     }
 
-                    _uiPublisher.Publish(new InteractionUIMessage(_current != null, label, "F"));
+                    string promptKey = _current is IInteractionPrompt prompt ? prompt.GetPromptKey() : "F";
+                    _uiPublisher.Publish(new InteractionUIMessage(_current != null, label, promptKey));
                 }
             }
             else if (_resourceInteraction != null &&
@@ -140,7 +147,7 @@ namespace _001_Scripts.Controller
         private void HandleInteract()
         {
             if (_uiState != PlayerUIState.None) return;
-            if (_current is IConditionalInteractable && !_canInteract) return;
+            if (_current is IConditionalInteractionTarget && !_canInteract) return;
             if (_current != null)
             {
                 _current.Interact();

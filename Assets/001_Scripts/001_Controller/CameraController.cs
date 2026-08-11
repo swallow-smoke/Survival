@@ -58,6 +58,8 @@ namespace _001_Scripts.Controller
             {
                 case PlayerUIState.Inventory:
                 case PlayerUIState.Craft:
+                case PlayerUIState.Workbench:
+                case PlayerUIState.SubmarineFabricator:
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
                     curCamState = false;

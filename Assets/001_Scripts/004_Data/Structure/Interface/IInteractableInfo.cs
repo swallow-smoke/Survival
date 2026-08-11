@@ -4,4 +4,9 @@ namespace _001_Scripts.Data.Structure.Interface
     {
         string GetLabel();
     }
+
+    public interface IInteractionPrompt
+    {
+        string GetPromptKey();
+    }
 }

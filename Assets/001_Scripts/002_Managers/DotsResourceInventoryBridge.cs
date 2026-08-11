@@ -6,11 +6,11 @@ namespace _001_Scripts.Managers
 {
     public sealed class DotsResourceInventoryBridge : ITickable
     {
-        private readonly IInventoryService inventory;
+        private readonly IInventoryWriter inventory;
         private readonly IWorldResourceGateway resourceGateway;
 
         [Inject]
-        public DotsResourceInventoryBridge(IInventoryService inventory, IWorldResourceGateway resourceGateway)
+        public DotsResourceInventoryBridge(IInventoryWriter inventory, IWorldResourceGateway resourceGateway)
         {
             this.inventory = inventory;
             this.resourceGateway = resourceGateway;

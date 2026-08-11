@@ -8,6 +8,7 @@ using _001_Scripts.Data.Item;
 using _001_Scripts.Interface;
 using _001_Scripts.Managers;
 using _001_Scripts.Structure;
+using _001_Scripts.UI;
 using _001_Scripts.Vehicle.Core;
 using System;
 using MessagePipe;
@@ -60,15 +61,37 @@ namespace _001_Scripts.Core
 
             #region Services
 
-            builder.RegisterComponentInHierarchy<ItemSpawner>();
-            builder.RegisterComponentInHierarchy<InventoryController>().As<IInventoryService>();
+            builder.RegisterComponentInHierarchy<ItemSpawner>()
+                .AsSelf()
+                .As<IPickupSpawner>();
+            builder.RegisterComponentInHierarchy<InventoryController>()
+                .As<IInventoryService>()
+                .As<IInventoryReader>()
+                .As<IInventoryWriter>()
+                .As<IInventoryActions>();
             builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>().As<IInitializable>();
-            builder.RegisterComponentInHierarchy<UIManager>().As<IUIService>().As<IInitializable>();
-            builder.RegisterComponentInHierarchy<PlayerContext>().As<IPlayerContext>();
+            builder.RegisterComponentInHierarchy<UIManager>()
+                .As<IUIService>()
+                .As<IUIPanelNavigator>()
+                .As<IInitializable>();
+            builder.RegisterComponentInHierarchy<PlayerContext>()
+                .As<IPlayerContext>()
+                .As<IPlayerTransformProvider>();
             builder.RegisterComponentInHierarchy<VehicleInjector>();
-            builder.RegisterComponentInHierarchy<VehicleSpawner>();
-            builder.RegisterComponentInHierarchy<InputHandler>().As<IInputService>();
-            builder.RegisterComponentInHierarchy<CraftController>().As<ICraftService>();
+            builder.RegisterComponentInHierarchy<VehicleSpawner>()
+                .AsSelf()
+                .As<IVehicleSpawner>();
+            builder.RegisterComponentInHierarchy<InputHandler>()
+                .As<IInputService>()
+                .As<IMovementInput>()
+                .As<IInteractionInput>()
+                .As<IVehicleInput>()
+                .As<IUIInput>();
+            builder.RegisterComponentInHierarchy<CraftController>()
+                .As<ICraftService>()
+                .As<ICraftingService>();
+            builder.RegisterComponentInHierarchy<WorkbenchPanel>();
+            builder.RegisterComponentInHierarchy<SubmarineFabricatorPanel>();
             if (harvestToolCatalog == null)
                 throw new InvalidOperationException(
                     "HarvestToolCatalog is required on GLifeTimeScope. Run the WorldBuilder resource setup or assign it explicitly.");

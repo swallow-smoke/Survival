@@ -21,6 +21,7 @@ namespace _001_Scripts.Data
         [SerializeField, Range(0, 100)] private float waterUsage = 100f;
 
         public void ModifyHP(int value) => HP = Mathf.Clamp(HP + value, 0, 100);
+        public void SetHP(int value) => HP = Mathf.Clamp(value, 0, 100);
         public void ModifyStamina(float value) => stamina = Mathf.Clamp(stamina + value, 0, 100);
         public void ModifyHungry(float value) => hungry = Mathf.Clamp(hungry + value, 0, 100);
         public void ModifyWater(float value) => water = Mathf.Clamp(water + value, 0, 100);

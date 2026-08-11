@@ -1,13 +1,16 @@
 using _001_Scripts.Core._000_World._001_Water.Interface;
+using _001_Scripts.Entities;
 using _001_Scripts.Object.Vehicle;
 using _001_Scripts.Vehicle.Core;
 using UnityEngine;
 using VContainer;
+using EntityVehicle = _001_Scripts.Entities.Vehicle;
 
 namespace _001_Scripts.Structure
 {
-    [RequireComponent(typeof(Rigidbody))]
-    public class SmallSubVehicle : VehicleBody, IVehicleControllable
+    [RequireComponent(typeof(Rigidbody), typeof(Entity), typeof(Health))]
+    [RequireComponent(typeof(EntityVehicle), typeof(Submarine))]
+    public class SmallSubVehicle : MonoBehaviour, IVehicleControllable
     {
         [SerializeField] private float moveSpeed = 10f;
         [SerializeField] private float turnSensitivity = 2f;
@@ -39,6 +42,8 @@ namespace _001_Scripts.Structure
 
         private void Awake()
         {
+            if (!GetComponent<Entity>()) gameObject.AddComponent<Entity>();
+            if (!GetComponent<Submarine>()) gameObject.AddComponent<Submarine>();
             _airLinearDrag = _rb.linearDamping;
             _airAngularDrag = _rb.angularDamping;
             _buoyancy = GetComponent<BuoyancyController>();

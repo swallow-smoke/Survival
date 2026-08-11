@@ -1,7 +1,4 @@
 ﻿namespace _001_Scripts.Interface
 {
-    public interface IGameService
-    {
-        
-    }
+    public interface IGameService : IManager { }
 }

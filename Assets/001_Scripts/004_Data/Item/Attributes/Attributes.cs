@@ -14,8 +14,11 @@ namespace _001_Scripts.Data.Item.Attributes
 
         public Attributes Clone()
         {
-            var result = (Attributes)this.MemberwiseClone();
-            modifiers.ForEach(item => { result.modifiers.Add(item.Clone()); });
+            var result = (Attributes)MemberwiseClone();
+            result.modifiers = new List<Modifier.Modifier>();
+            if (modifiers != null)
+                foreach (var modifier in modifiers)
+                    if (modifier != null) result.modifiers.Add(modifier.Clone());
             return result;
         }
     }

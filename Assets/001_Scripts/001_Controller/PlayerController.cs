@@ -4,7 +4,7 @@ using _001_Scripts.Controller.Survival;
 using _001_Scripts.Data;
 using _001_Scripts.Data.Item;
 using _001_Scripts.Data.Message;
-using _001_Scripts.Type.Item;
+using _001_Scripts.Entities;
 using _001_Scripts.Type.States;
 using MessagePipe;
 using UnityEngine;
@@ -12,8 +12,9 @@ using VContainer;
 
 namespace _001_Scripts.Controller
 {
-    [RequireComponent(typeof(InventoryController))]
-    public class PlayerController : MonoBehaviour
+    [RequireComponent(typeof(InventoryController), typeof(Entity), typeof(Health))]
+    [RequireComponent(typeof(Living))]
+    public class PlayerController : MonoBehaviour, IItemUseTarget
     {
         private IPublisher<InvReqMessage> _invMessagePublisher;
         private IInputService _input;
@@ -25,6 +26,19 @@ namespace _001_Scripts.Controller
         private IDisposable bag;
 
         [SerializeField] private PlayerStat stat;
+        private Health _health;
+
+        private void Awake()
+        {
+            var entity = GetComponent<Entity>();
+            if (!entity) entity = gameObject.AddComponent<Entity>();
+            entity.SetKind(EntityKind.Player);
+            _health = GetComponent<Health>();
+            if (!_health) _health = gameObject.AddComponent<Health>();
+            if (!GetComponent<Living>()) gameObject.AddComponent<Living>();
+            _health.Changed += SyncEntityHealthToStat;
+            SyncEntityHealthToStat();
+        }
 
         private void Update()
         {
@@ -51,15 +65,22 @@ namespace _001_Scripts.Controller
             _invMessagePublisher.Publish(invMsg);
         }
 
-        public bool ApplyConsumable(Template item)
+        public bool ApplyConsumable(Item item)
         {
-            if (item == null || !item.HasAttribute(AttributesType.Consumable)) return false;
-
-            stat.ModifyHP(Mathf.RoundToInt(item.GetModifierValue(AttributesType.Consumable, ModifierType.HealAmount)));
-            stat.ModifyOxygen(item.GetModifierValue(AttributesType.Consumable, ModifierType.OxygenAmount));
-            stat.ModifyHungry(item.GetModifierValue(AttributesType.Consumable, ModifierType.FoodValue));
-            stat.ModifyWater(item.GetModifierValue(AttributesType.Consumable, ModifierType.WaterValue));
+            if (item == null || !item.TryGetFeature<IUsable>(out var usable)) return false;
+            usable.Use(this);
             return true;
+        }
+
+        public void RestoreHealth(float amount) => _health.RestoreHealth(amount);
+        public void ModifyOxygen(float amount) => stat.ModifyOxygen(amount);
+        public void ModifyFood(float amount) => stat.ModifyHungry(amount);
+        public void ModifyWater(float amount) => stat.ModifyWater(amount);
+
+        private void SyncEntityHealthToStat()
+        {
+            if (stat == null) return;
+            stat.SetHP(Mathf.RoundToInt(_health.HealthRatio * 100f));
         }
 
         private void OnMove(PlayerMovementMessage msg)
@@ -103,6 +124,7 @@ namespace _001_Scripts.Controller
 
         private void OnDestroy()
         {
+            if (_health) _health.Changed -= SyncEntityHealthToStat;
             if (_input != null)
             {
                 _input.OnRun -= HandleRun;

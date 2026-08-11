@@ -5,7 +5,6 @@ using _001_Scripts.Data.Item;
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.SOJ;
 using _001_Scripts.Interface;
-using _001_Scripts.Type.Item;
 using MessagePipe;
 using UnityEngine;
 using VContainer;
@@ -65,10 +64,9 @@ namespace _001_Scripts.Controller
             int remaining = count;
             var changed = new List<int>();
 
-            if (template.HasAttribute(AttributesType.Stackable))
+            if (template.TryGetFeature<IStackable>(out var stackable))
             {
-                int maximum = Mathf.Max(1, Mathf.RoundToInt(
-                    template.GetModifierValue(AttributesType.Stackable, ModifierType.MaxStack, 1f)));
+                int maximum = stackable.MaxStack;
                 for (int i = 0; i < items.Count && remaining > 0; i++)
                 {
                     var slot = items[i];
@@ -122,14 +120,14 @@ namespace _001_Scripts.Controller
             PublishChanges(changed);
         }
 
-        public void RemoveItem(Template item) => RemoveAll(slot => slot.ins.itemId == item.itemId);
+        public void RemoveItem(Item item) => RemoveAll(slot => slot.ins.itemId == item.itemId);
 
         public void RemoveItem(Instance instance) => RemoveAll(slot => slot.ins.instanceId == instance.instanceId);
 
         public bool HasItem(int id, int count = 1) =>
             items.Where(slot => slot != null && !slot.IsEmpty && slot.ins.itemId == id).Sum(slot => slot.stack) >= count;
 
-        public bool HasItem(Template template, int count = 1) => HasItem(template.itemId, count);
+        public bool HasItem(Item item, int count = 1) => HasItem(item.itemId, count);
 
         public bool HasItem(Instance instance) =>
             items.Any(slot => slot != null && !slot.IsEmpty && slot.ins.instanceId == instance.instanceId);
@@ -151,11 +149,12 @@ namespace _001_Scripts.Controller
         public bool UseItem(int index)
         {
             if (!IsValidIndex(index) || items[index].IsEmpty) return false;
-            var template = itemDB.GetItem(items[index].ins.itemId);
-            if (!template.HasAttribute(AttributesType.Consumable)) return false;
+            var item = itemDB.GetItem(items[index].ins.itemId);
+            if (!item.TryGetFeature<IUsable>(out var usable)) return false;
 
             var player = GetComponent<PlayerController>();
-            if (player == null || !player.ApplyConsumable(template)) return false;
+            if (player == null) return false;
+            usable.Use(player);
             RemoveAt(index, 1);
             return true;
         }

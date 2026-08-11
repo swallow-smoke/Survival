@@ -223,6 +223,8 @@ namespace _001_Scripts.Controller
             {
                 case PlayerUIState.Inventory:
                 case PlayerUIState.Craft:
+                case PlayerUIState.Workbench:
+                case PlayerUIState.SubmarineFabricator:
                     isCanMove = false;
                     break;
                 default:

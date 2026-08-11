@@ -1,10 +1,9 @@
+using _001_Scripts.Interface;
 using UnityEngine;
-using VContainer;
-using VContainer.Unity;
 
 namespace _001_Scripts.Managers
 {
-    public class VehicleSpawner : MonoBehaviour
+    public class VehicleSpawner : EntitySpawnerBase, IVehicleSpawner
     {
         [SerializeField] private GameObject smallSubPrefab;
         [SerializeField] private GameObject largeSubPrefab;
@@ -12,25 +11,12 @@ namespace _001_Scripts.Managers
         [SerializeField] private Transform _trs;
         [SerializeField] private Quaternion _rot;
 
-        private IObjectResolver _resolver;
-
-        [Inject]
-        public void Construct(IObjectResolver resolver) => _resolver = resolver;
-
         public GameObject SpawnSmallSub(Vector3 position, Quaternion rotation)
-        {
-            var go = Instantiate(smallSubPrefab, position, rotation);
-            _resolver.InjectGameObject(go);
-            return go;
-        }
+            => SpawnPrefab(smallSubPrefab, position, rotation);
 
         public void SpawnSmallSub() => SpawnSmallSub(_trs.position, _rot);
 
         public GameObject SpawnLargeSub(Vector3 position, Quaternion rotation)
-        {
-            var go = Instantiate(largeSubPrefab, position, rotation);
-            _resolver.InjectGameObject(go);
-            return go;
-        }
+            => SpawnPrefab(largeSubPrefab, position, rotation);
     }
 }

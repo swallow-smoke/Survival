@@ -14,9 +14,13 @@ namespace _001_Scripts.Controller.Interaction
 
         public void SetHighlight(GameObject go, bool on)
         {
-            var renderer = go.GetComponent<Renderer>();
-            if (renderer == null) return;
+            var renderers = go.GetComponentsInChildren<Renderer>();
+            for (int i = 0; i < renderers.Length; i++)
+                SetRendererHighlight(renderers[i], on);
+        }
 
+        private void SetRendererHighlight(Renderer renderer, bool on)
+        {
             var current = renderer.sharedMaterials;
 
             if (on)

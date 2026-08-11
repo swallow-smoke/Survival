@@ -148,10 +148,10 @@ namespace _001_Scripts.Editor.Tests
             public FakeInventory(params int[] itemIds) => owned = new HashSet<int>(itemIds);
             public AddItemResult AddItem(int id, int count) => default;
             public void RemoveItem(int id, int count) { }
-            public void RemoveItem(Template item) { }
+            public void RemoveItem(Item item) { }
             public void RemoveItem(Instance ins) { }
             public bool HasItem(int id, int count = 1) => owned.Contains(id);
-            public bool HasItem(Template item, int count = 1) => HasItem(item.itemId, count);
+            public bool HasItem(Item item, int count = 1) => HasItem(item.itemId, count);
             public bool HasItem(Instance ins) => HasItem(ins.itemId);
             public IReadOnlyList<InventorySlot> GetAllItems() => Array.Empty<InventorySlot>();
             public InventorySlot GetSlot(int index) => null;

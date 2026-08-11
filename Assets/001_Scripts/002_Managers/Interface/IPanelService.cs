@@ -1,8 +1,14 @@
 ﻿namespace _001_Scripts.Interface
 {
-    public interface IPanelService
+    public interface IOpenable
     {
-        public void Open();
-        public void Close();
+        void Open();
     }
+
+    public interface ICloseable
+    {
+        void Close();
+    }
+
+    public interface IPanelService : IOpenable, ICloseable { }
 }

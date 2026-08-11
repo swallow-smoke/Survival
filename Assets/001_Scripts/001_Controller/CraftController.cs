@@ -21,7 +21,7 @@ namespace _001_Scripts.Controller
         private IPublisher<InvReqMessage> _invMessagePublisher;
         private IPublisher<CraftResultMessage> _craftResultMessagePublisher;
         
-        private IInventoryService _invServ;
+        private IInventoryReader _invServ;
         
         
         public void Craft(string itemName)
@@ -89,7 +89,7 @@ namespace _001_Scripts.Controller
         public void Constructor(IPublisher<InvReqMessage> invPublisher,
             IPublisher<CraftResultMessage> craftResultPublisher,
             ISubscriber<CraftReqMessage> craftMessageSubscriber,
-            IInventoryService invService)
+            IInventoryReader invService)
         {
             msgBag?.Dispose();
             _invMessagePublisher = invPublisher;

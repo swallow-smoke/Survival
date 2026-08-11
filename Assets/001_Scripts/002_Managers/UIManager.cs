@@ -63,6 +63,20 @@ namespace _001_Scripts.Managers
             _panelPresenter.ToggleExclusive("Craft", PlayerUIState.Craft);
         }
 
+        public void OpenWorkbench() => OpenPanel("Workbench");
+
+        public void OpenSubmarineFabricator() => OpenPanel("SubmarineFabricator");
+
+        public void OpenPanel(string panelKey)
+        {
+            if (_panelPresenter == null)
+            {
+                Debug.LogError($"[UIManager] Cannot open '{panelKey}' before UI services are ready.", this);
+                return;
+            }
+            _panelPresenter.OpenExclusive(panelKey);
+        }
+
         private void Start()
         {
             BindInputOnce();
@@ -74,6 +88,8 @@ namespace _001_Scripts.Managers
             // behavior or VContainer initialization order changes in the scene.
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
+            if (keyboard.escapeKey.wasPressedThisFrame && _panelPresenter != null &&
+                _panelPresenter.CloseAllModalPanels()) return;
             if (keyboard.tabKey.wasPressedThisFrame) OnInvToggle();
             if (keyboard.vKey.wasPressedThisFrame) OnCraftToggle();
         }

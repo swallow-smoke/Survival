@@ -1,4 +1,5 @@
 using UnityEngine;
+using _001_Scripts.Entities;
 using VContainer;
 using VContainer.Unity;
 
@@ -13,7 +14,7 @@ namespace _001_Scripts.Vehicle.Core
 
         private void Start()
         {
-            foreach (var vehicle in FindObjectsByType<VehicleBody>(FindObjectsSortMode.None))
+            foreach (var vehicle in FindObjectsByType<Submarine>(FindObjectsSortMode.None))
                 _resolver.InjectGameObject(vehicle.gameObject);
         }
     }

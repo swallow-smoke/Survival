@@ -5,6 +5,8 @@
         None,
         Inventory,
         Craft,
+        Workbench,
+        SubmarineFabricator,
         Build,
         Pause
     }

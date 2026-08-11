@@ -1,21 +1,21 @@
-using _001_Scripts.Data.Structure.Interface;
+using _001_Scripts.Entities;
 using UnityEngine;
 
 namespace _001_Scripts.Structure
 {
-    public class DoorInteractable : MonoBehaviour, IInteractable, IInteractableInfo
+    public class DoorInteractable : InteractableComponentBase
     {
         [SerializeField] private Animator animator;
         [SerializeField] private string openParam = "IsOpen";
 
         private bool isOpen;
 
-        public void Interact()
+        public override void Interact()
         {
             isOpen = !isOpen;
             animator.SetBool(openParam, isOpen);
         }
 
-        public string GetLabel() => isOpen ? "Close Door" : "Open Door";
+        public override string GetLabel() => isOpen ? "Close Door" : "Open Door";
     }
 }

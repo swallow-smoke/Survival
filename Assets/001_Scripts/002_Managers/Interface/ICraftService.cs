@@ -1,7 +1,9 @@
 ﻿namespace _001_Scripts.Interface
 {
-    public interface ICraftService
+    public interface ICraftingService
     {
         void Craft(string itemName);
     }
+
+    public interface ICraftService : ICraftingService { }
 }

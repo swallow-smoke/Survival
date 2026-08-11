@@ -4,4 +4,6 @@
     {
         void Interact();
     }
+
+    public interface IInteractionTarget : IInteractable, IInteractableInfo { }
 }

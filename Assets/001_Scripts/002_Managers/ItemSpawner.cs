@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Threading;
+using _001_Scripts.Entities;
+using _001_Scripts.Interface;
 using _001_Scripts.Structure;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using VContainer;
-using VContainer.Unity;
 
 namespace _001_Scripts.Managers
 {
-    public class ItemSpawner : MonoBehaviour
+    public class ItemSpawner : EntitySpawnerBase, IPickupSpawner
     {
         [SerializeField] private GameObject pickupPrefab;
         [SerializeField] private Transform playerTrs;
@@ -25,14 +25,7 @@ namespace _001_Scripts.Managers
         [SerializeField] private int count = 1;
         [SerializeField] private string displayName;
 
-        private IObjectResolver _resolver;
         private readonly List<GameObject> _alive = new();
-
-        [Inject]
-        public void Construct(IObjectResolver resolver)
-        {
-            _resolver = resolver;
-        }
 
         private void Start()
         {
@@ -79,11 +72,17 @@ namespace _001_Scripts.Managers
 
         public GameObject SpawnPickup(Vector3 position, Quaternion rotation, int itemId, int count, string displayName = null)
         {
-            var go = Instantiate(pickupPrefab, position, rotation);
-            _resolver.InjectGameObject(go);
+            var go = SpawnPrefab(pickupPrefab, position, rotation);
+            if (!go) return null;
 
-            var pickup = go.GetComponent<PickupObject>();
-            pickup.Setup(itemId, count, displayName);
+            var pickup = go.GetComponent<Pickup>();
+            if (!pickup)
+            {
+                Debug.LogError("[ItemSpawner] Pickup prefab requires Pickup.", go);
+                Destroy(go);
+                return null;
+            }
+            go.GetComponent<WorldItem>().Setup(itemId, count, displayName);
 
             return go;
         }

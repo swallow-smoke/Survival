@@ -1,13 +1,16 @@
 using _001_Scripts.Data.Structure.Interface;
+using _001_Scripts.Entities;
 using _001_Scripts.Interface;
 using _001_Scripts.Object.Vehicle;
 using _001_Scripts.Vehicle.Core;
 using UnityEngine;
+using EntityVehicle = _001_Scripts.Entities.Vehicle;
 
 namespace _001_Scripts.Structure
 {
-    [RequireComponent(typeof(Rigidbody))]
-    public class LargeSubVehicle : VehicleBody, IVehicleControllable, ISurfaceDetectable
+    [RequireComponent(typeof(Rigidbody), typeof(Entity), typeof(Health))]
+    [RequireComponent(typeof(EntityVehicle), typeof(Submarine))]
+    public class LargeSubVehicle : MonoBehaviour, IVehicleControllable, ISurfaceDetectable
     {
         [SerializeField] private float moveSpeed = 6f;
         [SerializeField] private float verticalSpeed = 3f;
@@ -24,12 +27,16 @@ namespace _001_Scripts.Structure
         private Vector2 moveInput;
         private float verticalInput;
         private bool isControlled;
+        private EntityVehicle _vehicle;
 
         public Transform CameraAnchor => _cameraAnchor;
         public Transform InteriorAnchor => _interiorAnchor;
 
         private void Awake()
         {
+            if (!GetComponent<Entity>()) gameObject.AddComponent<Entity>();
+            if (!GetComponent<Submarine>()) gameObject.AddComponent<Submarine>();
+            _vehicle = GetComponent<EntityVehicle>();
             if (_buoyancy == null) _buoyancy = GetComponent<BuoyancyController>();
             if (_buoyancy == null) _buoyancy = gameObject.AddComponent<BuoyancyController>();
         }
@@ -54,7 +61,7 @@ namespace _001_Scripts.Structure
 
         private void FixedUpdate()
         {
-            if (fuel <= 0f && hasEmergencyBuoyancyModule)
+            if (_vehicle.Fuel <= 0f && hasEmergencyBuoyancyModule)
             {
                 _buoyancy.ActivateEmergencyBuoyancy();
                 return;

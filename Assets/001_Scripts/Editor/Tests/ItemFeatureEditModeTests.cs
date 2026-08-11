@@ -1,0 +1,108 @@
+#if UNITY_EDITOR
+using System.Collections.Generic;
+using _001_Scripts.Data.Item;
+using _001_Scripts.Type.Item;
+using NUnit.Framework;
+using ItemAttribute = _001_Scripts.Data.Item.Attributes.Attributes;
+using ItemModifier = _001_Scripts.Data.Item.Modifier.Modifier;
+
+namespace _001_Scripts.Editor.Tests
+{
+    public sealed class ItemFeatureEditModeTests
+    {
+        [Test]
+        public void Tool_CanComposeEquipmentAndQuickSlotFeatures()
+        {
+            var item = CreateItem(
+                Attribute(AttributesType.Harvestable, ModifierType.HarvestRate, 2.5f),
+                Attribute(AttributesType.Equippable, ModifierType.DurabilityMax, 80f),
+                Attribute(AttributesType.QuickSlottable));
+
+            Assert.That(item.Role, Is.EqualTo(ItemRole.Tool));
+            Assert.That(item.TryGetFeature<ITool>(out var tool), Is.True);
+            Assert.That(tool.HarvestRate, Is.EqualTo(2.5f));
+            Assert.That(tool.MaxDurability, Is.EqualTo(80f));
+            Assert.That(item.HasFeature<IEquippable>(), Is.True);
+            Assert.That(item.HasFeature<IQuickSlottable>(), Is.True);
+        }
+
+        [Test]
+        public void Usable_AppliesConfiguredValuesThroughUseTargetContract()
+        {
+            var consumable = new ItemAttribute
+            {
+                attrType = AttributesType.Consumable,
+                modifiers = new List<ItemModifier>
+                {
+                    Modifier(ModifierType.HealAmount, 10f),
+                    Modifier(ModifierType.OxygenAmount, 20f),
+                    Modifier(ModifierType.FoodValue, 30f),
+                    Modifier(ModifierType.WaterValue, 40f)
+                }
+            };
+            var item = CreateItem(consumable, Attribute(AttributesType.Stackable, ModifierType.MaxStack, 6f));
+            var target = new FakeUseTarget();
+
+            Assert.That(item.Role, Is.EqualTo(ItemRole.Usable));
+            Assert.That(item.TryGetFeature<IUsable>(out var usable), Is.True);
+            Assert.That(item.TryGetFeature<IStackable>(out var stackable), Is.True);
+            Assert.That(stackable.MaxStack, Is.EqualTo(6));
+
+            usable.Use(target);
+
+            Assert.That(target.Health, Is.EqualTo(10f));
+            Assert.That(target.Oxygen, Is.EqualTo(20f));
+            Assert.That(target.Food, Is.EqualTo(30f));
+            Assert.That(target.Water, Is.EqualTo(40f));
+        }
+
+        [Test]
+        public void MaterialWithoutBehavior_RemainsMaterial()
+        {
+            var item = CreateItem(Attribute(AttributesType.Stackable, ModifierType.MaxStack, 10f));
+
+            Assert.That(item.Role, Is.EqualTo(ItemRole.Material));
+            Assert.That(item.HasFeature<IStackable>(), Is.True);
+            Assert.That(item.HasFeature<ITool>(), Is.False);
+            Assert.That(item.HasFeature<IUsable>(), Is.False);
+        }
+
+        private static Item CreateItem(params ItemAttribute[] attributes) => new()
+        {
+            itemType = ItemType.materials,
+            ItemAttributes = new List<ItemAttribute>(attributes)
+        };
+
+        private static ItemAttribute Attribute(AttributesType type) => new()
+        {
+            attrType = type,
+            modifiers = new List<ItemModifier>()
+        };
+
+        private static ItemAttribute Attribute(AttributesType type, ModifierType modifierType, float value) => new()
+        {
+            attrType = type,
+            modifiers = new List<ItemModifier> { Modifier(modifierType, value) }
+        };
+
+        private static ItemModifier Modifier(ModifierType type, float value) => new()
+        {
+            modifierType = type,
+            value = value
+        };
+
+        private sealed class FakeUseTarget : IItemUseTarget
+        {
+            public float Health { get; private set; }
+            public float Oxygen { get; private set; }
+            public float Food { get; private set; }
+            public float Water { get; private set; }
+
+            public void RestoreHealth(float amount) => Health += amount;
+            public void ModifyOxygen(float amount) => Oxygen += amount;
+            public void ModifyFood(float amount) => Food += amount;
+            public void ModifyWater(float amount) => Water += amount;
+        }
+    }
+}
+#endif

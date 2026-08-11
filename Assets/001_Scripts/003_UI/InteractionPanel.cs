@@ -26,7 +26,9 @@ namespace _001_Scripts.UI
         {
             if (msg.isVisible)
             {
-                labelText.text = msg.label;
+                labelText.text = string.IsNullOrWhiteSpace(msg.promptKey)
+                    ? msg.label
+                    : $"[{msg.promptKey}]  {msg.label}";
                 if (!isViz) Open();
             }
             else

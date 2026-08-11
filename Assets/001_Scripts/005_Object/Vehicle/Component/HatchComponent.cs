@@ -1,6 +1,7 @@
 using _001_Scripts.Data.Message;
 using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Data.Structure.Interface;
+using _001_Scripts.Entities;
 using _001_Scripts.Interface;
 using _001_Scripts.Structure;
 using _001_Scripts.Type.States;
@@ -18,14 +19,13 @@ namespace _001_Scripts.Vehicle.Component
         LargeExit
     }
 
-    public class HatchComponent : MonoBehaviour, IInteractable, IInteractableInfo
+    public class HatchComponent : InteractableComponentBase
     {
         [SerializeField] private HatchType type;
         [SerializeField] private SeatComponent linkedSeat;
         [SerializeField] private Transform interiorSpawnPoint;
         [SerializeField] private Transform exteriorSpawnPoint;
         [SerializeField] private LargeSubVehicle parentVehicle;
-        [SerializeField] private string displayLabel = "Enter";
 
         private IPublisher<PlayerVehicleStateMsg> _statePublisher;
         private IPlayerContext _playerContext;
@@ -39,9 +39,9 @@ namespace _001_Scripts.Vehicle.Component
             _playerContext = playerContext;
         }
 
-        public string GetLabel() => displayLabel;
+        protected override string DefaultInteractionLabel => "Enter";
 
-        public void Interact()
+        public override void Interact()
         {
             var player = _playerContext.PlayerTrs;
             switch (type)

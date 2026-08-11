@@ -78,10 +78,29 @@ namespace _001_Scripts.Managers
         {
             foreach (var pair in _panels)
             {
-                if (pair.Key == exceptKey || (pair.Key != "Inventory" && pair.Key != "Craft")) continue;
+                if (pair.Key == exceptKey || !IsModalPanel(pair.Key)) continue;
                 if (pair.Value && pair.Value.isViz) pair.Value.Close();
             }
         }
+
+        public bool CloseAllModalPanels()
+        {
+            bool closedAny = false;
+            foreach (var pair in _panels)
+            {
+                if (!IsModalPanel(pair.Key) || !pair.Value || !pair.Value.isViz) continue;
+                pair.Value.Close();
+                closedAny = true;
+            }
+
+            if (closedAny)
+                _statePublisher.Publish(new PlayerUIStateMsg(PlayerUIState.None));
+            return closedAny;
+        }
+
+        private static bool IsModalPanel(string key)
+            => key == "Inventory" || key == "Craft" || key == "Workbench" ||
+               key == "SubmarineFabricator";
 
         public void Open(string key)
         {

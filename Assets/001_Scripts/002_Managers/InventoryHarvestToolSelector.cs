@@ -7,10 +7,10 @@ namespace _001_Scripts.Managers
 {
     public sealed class InventoryHarvestToolSelector : IHarvestToolSelector
     {
-        private readonly IInventoryService inventory;
+        private readonly IInventoryReader inventory;
         private readonly HarvestToolCatalog catalog;
 
-        public InventoryHarvestToolSelector(IInventoryService inventory, HarvestToolCatalog catalog)
+        public InventoryHarvestToolSelector(IInventoryReader inventory, HarvestToolCatalog catalog)
         {
             this.inventory = inventory;
             this.catalog = catalog;
