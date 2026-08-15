@@ -27,6 +27,16 @@ namespace _001_Scripts.Vehicle.Component
         public Transform CameraAnchor => seatAnchor;
         public IVehicleControllable Controller => _controller;
 
+        public void Configure(Transform anchor, Transform exitPoint, MonoBehaviour controller)
+        {
+            seatAnchor = anchor;
+            standSpawnPoint = exitPoint;
+            controllerBehaviour = controller;
+            standState = PlayerVehicleState.None;
+            standReparentTarget = null;
+            _controller = controllerBehaviour as IVehicleControllable;
+        }
+
         [Inject]
         public void Construct(
             IPublisher<PlayerVehicleStateMsg> statePublisher,
@@ -47,7 +57,7 @@ namespace _001_Scripts.Vehicle.Component
 
         public void Sit(Transform player)
         {
-            if (IsOccupied) return;
+            if (IsOccupied || !player || !seatAnchor || _controller == null) return;
 
             if (player.TryGetComponent<Rigidbody>(out var playerRb))
             {

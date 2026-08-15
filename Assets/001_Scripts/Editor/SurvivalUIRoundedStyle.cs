@@ -13,7 +13,7 @@ namespace _001_Scripts.Editor
     [InitializeOnLoad]
     internal static class SurvivalUIRoundedStyle
     {
-        private const int StyleVersion = 3;
+        private const int StyleVersion = 6;
         private const string RoundedSpritePath = "Assets/003_Resources/UI/SurvivalRoundedPanel.png";
         private static readonly Color DarkPurple = new(.055f, .035f, .11f, .66f);
         private static readonly Color MidPurple = new(.13f, .085f, .23f, .68f);
@@ -60,11 +60,15 @@ namespace _001_Scripts.Editor
             var hud = UnityEngine.Object.FindFirstObjectByType<HUDPanel>(FindObjectsInactive.Include);
             var inventory = UnityEngine.Object.FindFirstObjectByType<InventoryPanel>(FindObjectsInactive.Include);
             var craft = UnityEngine.Object.FindFirstObjectByType<CraftPanel>(FindObjectsInactive.Include);
+            var logs = UnityEngine.Object.FindFirstObjectByType<LogPanel>(FindObjectsInactive.Include);
+            var blueprints = UnityEngine.Object.FindFirstObjectByType<BlueprintPanel>(FindObjectsInactive.Include);
             var uiManager = UnityEngine.Object.FindFirstObjectByType<_001_Scripts.Managers.UIManager>(FindObjectsInactive.Include);
             if (uiManager) ApplyToRoot(uiManager.gameObject);
             ApplyPanel(hud);
             ApplyPanel(inventory);
             ApplyPanel(craft);
+            ApplyPanel(logs);
+            ApplyPanel(blueprints);
 
             var scene = SceneManager.GetActiveScene();
             if (!scene.IsValid() || !scene.isLoaded) return;
@@ -109,6 +113,7 @@ namespace _001_Scripts.Editor
         {
             if (!root) return;
             var rounded = GetOrCreateRoundedSprite();
+            EnsureUnifiedDataPanelShell(root, rounded);
             bool isHud = root.GetComponent<HUDPanel>();
 
             foreach (var image in root.GetComponentsInChildren<Image>(true))
@@ -119,7 +124,7 @@ namespace _001_Scripts.Editor
                     image.type = Image.Type.Sliced;
                     image.pixelsPerUnitMultiplier = 1f;
                 }
-                image.color = ResolveImageColor(image, isHud);
+                image.color = NormalizeSurfaceOpacity(image, ResolveImageColor(image, isHud));
                 EditorUtility.SetDirty(image);
             }
 
@@ -155,6 +160,111 @@ namespace _001_Scripts.Editor
 
             foreach (var slot in root.GetComponentsInChildren<ItemSlot>(true))
                 AddInteraction(slot.gameObject);
+        }
+
+        private static void EnsureUnifiedDataPanelShell(GameObject root, Sprite rounded)
+        {
+            bool isDataPanel = root.GetComponent<InventoryPanel>() || root.GetComponent<LogPanel>() ||
+                               root.GetComponent<BlueprintPanel>() || root.GetComponent<CraftPanel>();
+            if (!isDataPanel) return;
+
+            Transform card = FindNamed(root.transform, "InventoryCard") ?? FindNamed(root.transform, "LogCard") ??
+                             FindNamed(root.transform, "BlueprintCard") ?? FindNamed(root.transform, "CraftCard");
+            if (!card) return;
+            var cardRect = card as RectTransform;
+            if (cardRect) cardRect.sizeDelta = new Vector2(1500f, 760f);
+
+            Transform old = card.Find("UnifiedOrganicGradient");
+            if (old) Undo.DestroyObjectImmediate(old.gameObject);
+            var gradientGo = new GameObject("UnifiedOrganicGradient", typeof(RectTransform), typeof(CanvasRenderer),
+                typeof(OrganicGradientGraphic));
+            Undo.RegisterCreatedObjectUndo(gradientGo, "Create unified organic UI shell");
+            gradientGo.layer = card.gameObject.layer;
+            gradientGo.transform.SetParent(card, false);
+            var gradientRect = gradientGo.GetComponent<RectTransform>();
+            gradientRect.anchorMin = Vector2.zero;
+            gradientRect.anchorMax = Vector2.one;
+            gradientRect.offsetMin = new Vector2(2f, 2f);
+            gradientRect.offsetMax = new Vector2(-2f, -2f);
+            gradientGo.GetComponent<OrganicGradientGraphic>().Configure(
+                new Color(.16f, .075f, .29f, .70f), new Color(.015f, .006f, .05f, .78f),
+                new Color(.70f, .38f, 1f, .14f), new Color(.24f, .52f, 1f, .09f));
+            gradientRect.SetAsFirstSibling();
+
+            CreateOrganicCapsule(card, rounded, "OrganicGlowLeft", new Vector2(0f, 0f), new Vector2(430f, 118f),
+                new Vector2(66f, 38f), new Vector2(0f, 0f), 8f);
+            CreateOrganicCapsule(card, rounded, "OrganicGlowRight", new Vector2(1f, 1f), new Vector2(510f, 96f),
+                new Vector2(-60f, -102f), new Vector2(1f, 1f), -7f);
+
+            Transform header = card.Find("Header");
+            if (header)
+            {
+                var headerRect = header as RectTransform;
+                if (headerRect)
+                {
+                    headerRect.anchorMin = new Vector2(0f, 1f);
+                    headerRect.anchorMax = new Vector2(1f, 1f);
+                    headerRect.pivot = new Vector2(.5f, 1f);
+                    headerRect.sizeDelta = new Vector2(-40f, 64f);
+                    headerRect.anchoredPosition = new Vector2(0f, -14f);
+                }
+                var headerImage = header.GetComponent<Image>();
+                if (headerImage)
+                {
+                    headerImage.sprite = rounded;
+                    headerImage.type = Image.Type.Sliced;
+                    if (!header.GetComponent<Outline>())
+                    {
+                        var headerOutline = Undo.AddComponent<Outline>(header.gameObject);
+                        headerOutline.effectColor = new Color(.72f, .52f, 1f, .34f);
+                        headerOutline.effectDistance = new Vector2(1f, -1f);
+                        headerOutline.useGraphicAlpha = false;
+                    }
+                }
+                Transform oldLine = header.Find("HeaderFlowLine");
+                if (oldLine) Undo.DestroyObjectImmediate(oldLine.gameObject);
+                var line = new GameObject("HeaderFlowLine", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                Undo.RegisterCreatedObjectUndo(line, "Create unified header line");
+                line.layer = header.gameObject.layer;
+                line.transform.SetParent(header, false);
+                var lineImage = line.GetComponent<Image>();
+                lineImage.raycastTarget = false;
+                var lineRect = line.GetComponent<RectTransform>();
+                lineRect.anchorMin = new Vector2(0f, 0f);
+                lineRect.anchorMax = new Vector2(1f, 0f);
+                lineRect.pivot = new Vector2(.5f, 0f);
+                lineRect.sizeDelta = new Vector2(0f, 2f);
+                lineRect.anchoredPosition = Vector2.zero;
+            }
+        }
+
+        private static void CreateOrganicCapsule(Transform parent, Sprite rounded, string name, Vector2 anchor,
+            Vector2 size, Vector2 position, Vector2 pivot, float rotation)
+        {
+            Transform old = parent.Find(name);
+            if (old) Undo.DestroyObjectImmediate(old.gameObject);
+            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            Undo.RegisterCreatedObjectUndo(go, "Create organic UI decoration");
+            go.layer = parent.gameObject.layer;
+            go.transform.SetParent(parent, false);
+            var rect = go.GetComponent<RectTransform>();
+            rect.anchorMin = rect.anchorMax = anchor;
+            rect.pivot = pivot;
+            rect.sizeDelta = size;
+            rect.anchoredPosition = position;
+            rect.localRotation = Quaternion.Euler(0f, 0f, rotation);
+            var image = go.GetComponent<Image>();
+            image.sprite = rounded;
+            image.type = Image.Type.Sliced;
+            image.raycastTarget = false;
+            rect.SetSiblingIndex(1);
+        }
+
+        private static Transform FindNamed(Transform root, string name)
+        {
+            foreach (var child in root.GetComponentsInChildren<Transform>(true))
+                if (child.name == name) return child;
+            return null;
         }
 
         private static bool ShouldUseRoundedSprite(Image image)
@@ -232,11 +342,16 @@ namespace _001_Scripts.Editor
             string name = image.name;
             string path = GetPath(image.transform);
             if (isHud && name == "UGUI_HUDRoot") return new Color(.055f, .035f, .11f, .015f);
-            if (name == "UGUI_InventoryRoot") return new Color(.012f, .006f, .035f, .94f);
-            if (name == "InventoryCard") return new Color(.04f, .02f, .09f, .96f);
+            if (name == "UGUI_InventoryRoot") return new Color(.012f, .006f, .035f, .22f);
+            if (name == "InventoryCard" || name == "LogCard" || name == "BlueprintCard" || name == "CraftCard")
+                return new Color(.04f, .02f, .09f, .76f);
             if (name == "SlotBay" || name == "ItemDetails") return new Color(.075f, .045f, .15f, .60f);
             if (name.EndsWith("Row")) return new Color(.12f, .075f, .20f, isHud ? .12f : .68f);
             if (name == "Accent") return new Color(.66f, .46f, 1f, .78f);
+            if (name == "OrganicGlowLeft") return new Color(.62f, .32f, 1f, .055f);
+            if (name == "OrganicGlowRight") return new Color(.20f, .48f, 1f, .045f);
+            if (name == "HeaderFlowLine") return new Color(.69f, .48f, 1f, .46f);
+            if (name == "RecipeTooltip") return new Color(.18f, .18f, .20f, .70f);
             if (name.Contains("Divider")) return new Color(.75f, .62f, 1f, .30f);
             if (name == "Track") return new Color(.15f, .11f, .23f, .72f);
             if (name == "Fill")
@@ -270,6 +385,26 @@ namespace _001_Scripts.Editor
                 return MidPurple;
             return new Color(image.color.r * .55f + .08f, image.color.g * .38f + .05f,
                 image.color.b * .70f + .14f, Mathf.Min(image.color.a, .84f));
+        }
+
+        private static Color NormalizeSurfaceOpacity(Image image, Color value)
+        {
+            string name = image.name.ToLowerInvariant();
+            string path = GetPath(image.transform);
+            bool modalRoot = name.EndsWith("root") &&
+                             (path.Contains("InventoryPanel") || path.Contains("LogPanel") ||
+                              path.Contains("BlueprintPanel") || path.Contains("CraftPanel"));
+            if (modalRoot)
+            {
+                value.a = .22f;
+                return value;
+            }
+
+            bool contentImage = image.sprite && (name.Contains("icon") || name.Contains("itemimage") ||
+                                                  name.Contains("thumbnail") || name.Contains("portrait"));
+            if (contentImage) return value;
+            if (value.a >= .45f) value.a = Mathf.Clamp(value.a, .70f, .80f);
+            return value;
         }
 
         private static Color ResolveTextColor(Text label)

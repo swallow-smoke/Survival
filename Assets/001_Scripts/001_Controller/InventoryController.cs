@@ -15,8 +15,10 @@ using VContainer;
 namespace _001_Scripts.Controller
 {
     [DisallowMultipleComponent]
-    public class InventoryController : MonoBehaviour, IInventoryService, IHotbarReader, IHotbarActions
+    public class InventoryController : MonoBehaviour, IInventoryService, IHotbarReader, IHotbarActions, IEquipmentReader,
+        IItemCatalog
     {
+        private const int EquipmentSlots = 8;
         private IPublisher<InvChangedMessage> _invChangedPublisher;
         private IDisposable _messageBag;
 
@@ -27,6 +29,9 @@ namespace _001_Scripts.Controller
         [SerializeField] private int maxSlots = 40;
         [SerializeField, Range(1, 8)] private int hotbarSlotCount = 8;
         [SerializeField] private List<InventorySlot> hotbarItems = new();
+
+        [Header("Player Equipment")]
+        [SerializeField] private List<InventorySlot> equipmentItems = new();
 
         private FirstPersonItemHolder _itemHolder;
         private IInputService _input;
@@ -44,6 +49,13 @@ namespace _001_Scripts.Controller
             }
         }
         public int SelectedHotbarIndex => _selectedHotbarIndex;
+        public int EquipmentSlotCount => EquipmentSlots;
+
+        public bool TryGetItem(int id, out Item item)
+        {
+            item = null;
+            return itemDB && itemDB.itemList.TryGetValue(id, out item) && item != null;
+        }
 
         public int SlotCount
         {
@@ -83,6 +95,15 @@ namespace _001_Scripts.Controller
                     hotbarItems[i] = EmptySlot();
             while (hotbarItems.Count < hotbarSlotCount)
                 hotbarItems.Add(EmptySlot());
+
+            equipmentItems ??= new List<InventorySlot>();
+            if (equipmentItems.Count > EquipmentSlots)
+                equipmentItems.RemoveRange(EquipmentSlots, equipmentItems.Count - EquipmentSlots);
+            for (int i = 0; i < equipmentItems.Count; i++)
+                if (equipmentItems[i] == null || equipmentItems[i].ins == null || equipmentItems[i].stack <= 0)
+                    equipmentItems[i] = EmptySlot();
+            while (equipmentItems.Count < EquipmentSlots)
+                equipmentItems.Add(EmptySlot());
         }
 
         private static InventorySlot EmptySlot() => new(null, 0);
@@ -95,18 +116,29 @@ namespace _001_Scripts.Controller
 
             var from = GetArea(message.fromArea);
             var to = GetArea(message.toArea);
+            if (message.toArea == InventorySlotArea.Hotbar &&
+                !CanPlaceInHotbar(from[message.fromIndex])) return;
+            if (message.toArea == InventorySlotArea.Equipment &&
+                !CanPlaceInEquipment(from[message.fromIndex], message.toIndex)) return;
+            if (message.fromArea == InventorySlotArea.Equipment &&
+                !CanPlaceInEquipment(to[message.toIndex], message.fromIndex)) return;
             (from[message.fromIndex], to[message.toIndex]) =
                 (to[message.toIndex], from[message.fromIndex]);
 
             var inventoryChanged = new List<int>();
             var hotbarChanged = new List<int>();
-            AddChanged(message.fromArea, message.fromIndex, inventoryChanged, hotbarChanged);
-            AddChanged(message.toArea, message.toIndex, inventoryChanged, hotbarChanged);
-            PublishChanges(inventoryChanged, hotbarChanged);
+            var equipmentChanged = new List<int>();
+            AddChanged(message.fromArea, message.fromIndex, inventoryChanged, hotbarChanged, equipmentChanged);
+            AddChanged(message.toArea, message.toIndex, inventoryChanged, hotbarChanged, equipmentChanged);
+            PublishChanges(inventoryChanged, hotbarChanged, equipmentChanged);
         }
 
-        private List<InventorySlot> GetArea(InventorySlotArea area) =>
-            area == InventorySlotArea.Hotbar ? hotbarItems : items;
+        private List<InventorySlot> GetArea(InventorySlotArea area) => area switch
+        {
+            InventorySlotArea.Hotbar => hotbarItems,
+            InventorySlotArea.Equipment => equipmentItems,
+            _ => items
+        };
 
         private bool IsValidAreaIndex(InventorySlotArea area, int index)
         {
@@ -115,10 +147,49 @@ namespace _001_Scripts.Controller
         }
 
         private static void AddChanged(InventorySlotArea area, int index,
-            List<int> inventoryChanged, List<int> hotbarChanged)
+            List<int> inventoryChanged, List<int> hotbarChanged, List<int> equipmentChanged)
         {
-            var target = area == InventorySlotArea.Hotbar ? hotbarChanged : inventoryChanged;
+            var target = area switch
+            {
+                InventorySlotArea.Hotbar => hotbarChanged,
+                InventorySlotArea.Equipment => equipmentChanged,
+                _ => inventoryChanged
+            };
             if (!target.Contains(index)) target.Add(index);
+        }
+
+        private bool CanPlaceInEquipment(InventorySlot slot, int equipmentIndex)
+        {
+            if (slot == null || slot.IsEmpty) return true;
+            if (equipmentIndex < 0 || equipmentIndex >= EquipmentSlots || itemDB == null) return false;
+            Item item = itemDB.GetItem(slot.ins.itemId);
+            return item.TryGetFeature<IEquipmentItem>(out var equipment) &&
+                   equipment.SlotType == GetEquipmentSlotType(equipmentIndex);
+        }
+
+        private bool CanPlaceInHotbar(InventorySlot slot)
+        {
+            if (slot == null || slot.IsEmpty) return true;
+            if (itemDB == null) return true;
+            return !itemDB.GetItem(slot.ins.itemId).HasFeature<IEquipmentItem>();
+        }
+
+        public EquipmentSlotType GetEquipmentSlotType(int index) => index switch
+        {
+            0 => EquipmentSlotType.Head,
+            1 => EquipmentSlotType.Body,
+            2 => EquipmentSlotType.Legs,
+            3 => EquipmentSlotType.Feet,
+            >= 4 and < EquipmentSlots => EquipmentSlotType.UpgradeChip,
+            _ => EquipmentSlotType.None
+        };
+
+        public InventorySlot GetEquipmentSlot(int index)
+        {
+            NormalizeSlots();
+            if (index < 0 || index >= EquipmentSlots)
+                throw new IndexOutOfRangeException($"Equipment index {index} is out of range.");
+            return equipmentItems[index];
         }
 
         public AddItemResult AddItem(int id, int count)
@@ -322,12 +393,14 @@ namespace _001_Scripts.Controller
 
         private void PublishChanges(params int[] indices) => PublishChanges(indices.ToList());
 
-        private void PublishChanges(List<int> indices, List<int> hotbarIndices = null)
+        private void PublishChanges(List<int> indices, List<int> hotbarIndices = null,
+            List<int> equipmentIndices = null)
         {
             hotbarIndices ??= new List<int>();
+            equipmentIndices ??= new List<int>();
             if (hotbarIndices.Contains(_selectedHotbarIndex)) SyncHeldItem();
-            if (indices.Count > 0 || hotbarIndices.Count > 0)
-                _invChangedPublisher?.Publish(new InvChangedMessage(indices, hotbarIndices));
+            if (indices.Count > 0 || hotbarIndices.Count > 0 || equipmentIndices.Count > 0)
+                _invChangedPublisher?.Publish(new InvChangedMessage(indices, hotbarIndices, equipmentIndices));
         }
 
         private void SyncHeldItem()

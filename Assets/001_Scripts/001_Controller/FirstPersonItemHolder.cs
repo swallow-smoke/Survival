@@ -13,6 +13,9 @@ namespace _001_Scripts.Controller
         [SerializeField, Tooltip("Item view prefabs are parented here. Defaults to this transform.")]
         private Transform mount;
 
+        [SerializeField, Tooltip("Optional scene-authored procedural motion rig.")]
+        private FirstPersonItemMotion motion;
+
         [Header("Held View")]
         [SerializeField] private bool disableColliders = true;
         [SerializeField] private bool disableRigidbodyCollisions = true;
@@ -37,7 +40,7 @@ namespace _001_Scripts.Controller
         {
             if (!viewPrefab) return false;
 
-            Unequip();
+            ClearHeldObject();
             HeldItem = item;
             HeldInstance = instance;
             HeldObject = Instantiate(viewPrefab, Mount, false);
@@ -50,13 +53,24 @@ namespace _001_Scripts.Controller
             PrepareView(HeldObject);
             InvokeEquippedHooks();
             TrySetTrigger(EquipTrigger);
+            ResolveMotion()?.PlayEquip();
             return true;
         }
 
         public bool TryPerformPrimaryAction()
         {
             if (!HeldObject) return false;
-            bool handled = TrySetTrigger(UseTrigger);
+            bool handled = PlayMotion(FirstPersonItemAction.Use) | TrySetTrigger(UseTrigger);
+            foreach (var behaviour in HeldObject.GetComponentsInChildren<MonoBehaviour>(true))
+                if (behaviour is IHeldItemAction action)
+                    handled |= action.TryPerformPrimaryAction(HeldItem, HeldInstance);
+            return handled;
+        }
+
+        public bool TryPerformHarvestAction()
+        {
+            if (!HeldObject || HeldItem == null || !HeldItem.HasFeature<ITool>()) return false;
+            bool handled = PlayMotion(FirstPersonItemAction.Harvest) | TrySetTrigger(UseTrigger);
             foreach (var behaviour in HeldObject.GetComponentsInChildren<MonoBehaviour>(true))
                 if (behaviour is IHeldItemAction action)
                     handled |= action.TryPerformPrimaryAction(HeldItem, HeldInstance);
@@ -65,12 +79,43 @@ namespace _001_Scripts.Controller
 
         public void Unequip()
         {
+            if (!HeldObject) return;
+            FirstPersonItemMotion resolved = ResolveMotion();
+            if (Application.isPlaying && resolved)
+                resolved.PlayUnequip(ClearHeldObject);
+            else
+                ClearHeldObject();
+        }
+
+        public void Configure(Transform itemMount, FirstPersonItemMotion itemMotion)
+        {
+            mount = itemMount;
+            motion = itemMotion;
+        }
+
+        private FirstPersonItemMotion ResolveMotion()
+        {
+            if (!motion && Mount)
+                motion = Mount.GetComponentInParent<FirstPersonItemMotion>();
+            return motion;
+        }
+
+        private bool PlayMotion(FirstPersonItemAction action)
+        {
+            FirstPersonItemMotion resolved = ResolveMotion();
+            if (!resolved) return false;
+            resolved.Play(action);
+            return true;
+        }
+
+        private void ClearHeldObject()
+        {
+            ResolveMotion()?.Cancel(resetPose: true);
             if (HeldObject)
             {
                 if (Application.isPlaying) Destroy(HeldObject);
                 else DestroyImmediate(HeldObject);
             }
-
             HeldObject = null;
             HeldItem = null;
             HeldInstance = null;

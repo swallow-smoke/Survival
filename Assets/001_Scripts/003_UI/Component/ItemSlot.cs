@@ -11,7 +11,8 @@ using UnityEngine.UI;
 namespace _001_Scripts.UI.Component
 {
     [RequireComponent(typeof(CanvasGroup))]
-    public class ItemSlot : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
+    public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler,
+        IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
     {
         [SerializeField] private Image itemImage;
         [SerializeField] private string itemName;
@@ -27,6 +28,8 @@ namespace _001_Scripts.UI.Component
         [SerializeField] private Text glyphText;
         [SerializeField] private Text nameText;
         [SerializeField] private Text countText;
+        [SerializeField] private string emptyGlyph = "＋";
+        [SerializeField] private string emptyName = "";
 
         private Image _background;
         private Text _glyph;
@@ -36,6 +39,8 @@ namespace _001_Scripts.UI.Component
         private IPublisher<InvSwapMessage> _publisher;
         private RectTransform _rectTransform;
         private Action<int> _onSelected;
+        private Action<int, InventorySlotArea> _onHover;
+        private Action _onHoverExit;
         private Vector2 _originPosition;
         private bool _occupied;
         private bool _selected;
@@ -58,6 +63,19 @@ namespace _001_Scripts.UI.Component
             _runtimeName = nameText;
             _runtimeCount = countText;
             _onSelected = onSelected;
+        }
+
+        public void ConfigurePlaceholder(string glyph, string label)
+        {
+            emptyGlyph = glyph;
+            emptyName = label;
+            if (!_occupied) Clear();
+        }
+
+        public void ConfigureTooltip(Action<int, InventorySlotArea> onHover, Action onHoverExit)
+        {
+            _onHover = onHover;
+            _onHoverExit = onHoverExit;
         }
 
         public void Init(IPublisher<InvSwapMessage> publisher, int slotIndex = -1,
@@ -126,10 +144,10 @@ namespace _001_Scripts.UI.Component
             if (durability) durability.gameObject.SetActive(false);
             if (_glyph)
             {
-                _glyph.text = "＋";
+                _glyph.text = string.IsNullOrWhiteSpace(emptyGlyph) ? "＋" : emptyGlyph;
                 _glyph.color = new Color(0.32f, 0.48f, 0.50f, 0.45f);
             }
-            if (_runtimeName) _runtimeName.text = "";
+            if (_runtimeName) _runtimeName.text = emptyName;
             if (_runtimeCount) _runtimeCount.text = "";
             ApplyVisualState();
         }
@@ -144,10 +162,10 @@ namespace _001_Scripts.UI.Component
         {
             if (!_background) return;
             _background.color = _selected
-                ? new Color(0.42f, 0.25f, 0.72f, 0.96f)
+                ? new Color(0.42f, 0.25f, 0.72f, 0.80f)
                 : _occupied
-                    ? new Color(0.13f, 0.08f, 0.23f, 0.88f)
-                    : new Color(0.08f, 0.05f, 0.15f, 0.64f);
+                    ? new Color(0.13f, 0.08f, 0.23f, 0.74f)
+                    : new Color(0.08f, 0.05f, 0.15f, 0.70f);
         }
 
         private static Color GetItemColor(ItemGrade grade) => grade switch
@@ -174,6 +192,13 @@ namespace _001_Scripts.UI.Component
             if (eventData.button == PointerEventData.InputButton.Left)
                 _onSelected?.Invoke(index);
         }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (_occupied) _onHover?.Invoke(index, area);
+        }
+
+        public void OnPointerExit(PointerEventData eventData) => _onHoverExit?.Invoke();
 
         public void OnBeginDrag(PointerEventData eventData)
         {

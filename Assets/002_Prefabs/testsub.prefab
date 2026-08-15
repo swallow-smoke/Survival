@@ -194,9 +194,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Structure.SeatComponent
   seatAnchor: {fileID: 3454132141532865145}
-  standSpawnPoint: {fileID: 0}
+  standSpawnPoint: {fileID: 7335687829038158712}
   controllerBehaviour: {fileID: 2113116293550957212}
-  standState: 2
+  standState: 0
   standReparentTarget: {fileID: 0}
 --- !u!1 &2918052492972256608
 GameObject:
@@ -548,6 +548,11 @@ GameObject:
   - component: {fileID: 3937685978243852729}
   - component: {fileID: 2113116293550957212}
   - component: {fileID: 3622592401149688569}
+  - component: {fileID: 4359918610060694652}
+  - component: {fileID: 6879710521937596241}
+  - component: {fileID: 4090223485501870712}
+  - component: {fileID: 7253258277116847274}
+  - component: {fileID: 6481765299900774144}
   m_Layer: 0
   m_Name: testsub
   m_TagString: Untagged
@@ -582,6 +587,7 @@ Transform:
   - {fileID: 1319107713327519856}
   - {fileID: 4128668512984798355}
   - {fileID: 3454132141532865145}
+  - {fileID: 7335687829038158712}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &3937685978243852729
@@ -592,9 +598,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5332611111309986305}
   serializedVersion: 5
-  m_Mass: 10
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 400
+  m_LinearDamping: 1.5
+  m_AngularDamping: 2
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -606,11 +612,11 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 64
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!114 &2113116293550957212
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -623,22 +629,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef8f44eb6c4994a44a61e9b4df7e595a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Structure.SmallSubVehicle
-  fuel: 50
-  maxFuel: 50
-  condition: 0
-  moveSpeed: 100
+  moveSpeed: 10
   turnSensitivity: 0.5
   pitchMin: -80
   pitchMax: 80
-  accelForce: 5
+  accelForce: 8
+  propulsionResponse: 3
+  softSpeedLimit: 4
   _rb: {fileID: 3937685978243852729}
   _cameraAnchor: {fileID: 3454132141532865145}
-  waterLayer:
-    serializedVersion: 2
-    m_Bits: 16
-  waterLinearDrag: 2
-  waterAngularDrag: 2
-  gravityNeutralizeSpeed: 1
+  configurationVersion: 6
+  ignoreSurfaceForces: 1
+  waterLinearDrag: 0.7
+  waterAngularDrag: 3
+  minimumSubmersionDepth: 0.8
+  airLinearDrag: 0.1
+  airAngularDrag: 0.5
+  waterEntryBlendDistance: 1.5
+  surfaceBrakeDistance: 0.8
+  surfaceReturnStrength: 20
+  surfaceReturnDamping: 8
+  rotationDamping: 5
+  lookImpulseStrength: 8
+  angularCoastDamping: 4
+  maximumTurnSpeed: 100
 --- !u!65 &3622592401149688569
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -660,6 +674,75 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1.3, z: 2}
   m_Center: {x: 0, y: 0.6, z: 0.5}
+--- !u!114 &4359918610060694652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5332611111309986305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d5cf57f6f24ea3b9ccf44bb624bfe0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Entities.Entity
+  entityId: prototype_small_submarine
+  displayName: "1\uC778\uC6A9 \uC18C\uD615 \uC7A0\uC218\uD568"
+  kind: 6
+--- !u!114 &6879710521937596241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5332611111309986305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81d85e6d989b44e2b7c3e72be59764d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Entities.Health
+  maxHealth: 100
+  currentHealth: 100
+  destroyEntityOnDeath: 1
+--- !u!114 &4090223485501870712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5332611111309986305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13a1c4679d164b819c6cc164f6e9c022, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Entities.Vehicle
+  fuel: 100
+  maxFuel: 100
+--- !u!114 &7253258277116847274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5332611111309986305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72009c9e659f4f3cb4595341f54c5ad5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Entities.Submarine
+  supportsInterior: 0
+--- !u!114 &6481765299900774144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5332611111309986305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c75b1bd5a8c64715a8c9220c36cc8229, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Structure.PrototypeSubmarine
 --- !u!1 &5359139737623125358
 GameObject:
   m_ObjectHideFlags: 0
@@ -966,12 +1049,44 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d624c48f6e8b6548bea1f215488eda2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_001_Scripts.Structure.HatchComponent
+  displayLabel: "\uC7A0\uC218\uD568 \uD0D1\uC2B9"
+  promptKey: LMB
   type: 0
   linkedSeat: {fileID: 6429315892079601668}
   interiorSpawnPoint: {fileID: 0}
   exteriorSpawnPoint: {fileID: 0}
   parentVehicle: {fileID: 0}
-  displayLabel: Enter
+--- !u!1 &6126685739253038107
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7335687829038158712}
+  m_Layer: 0
+  m_Name: ExitPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7335687829038158712
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126685739253038107}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.7, y: 0.2, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4704833490965663931}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6534377069309969619
 GameObject:
   m_ObjectHideFlags: 0

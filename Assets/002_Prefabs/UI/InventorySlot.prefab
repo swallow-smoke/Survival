@@ -223,7 +223,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.13, g: 0.085, b: 0.23, a: 0.68}
+  m_Color: {r: 0.13, g: 0.085, b: 0.23, a: 0.7}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -271,10 +271,13 @@ MonoBehaviour:
   stock: {fileID: 0}
   durability: {fileID: 0}
   index: 0
+  area: 0
   background: {fileID: 7697266307384492125}
   glyphText: {fileID: 5375145454055403545}
   nameText: {fileID: 4929558561138986132}
   countText: {fileID: 3273336578627068811}
+  emptyGlyph: "\uFF0B"
+  emptyName: 
 --- !u!114 &2641080166111476297
 MonoBehaviour:
   m_ObjectHideFlags: 0

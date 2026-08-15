@@ -19,6 +19,13 @@ namespace _001_Scripts.Data.Item
         public float weight;
         public List<Attributes.Attributes> ItemAttributes = new();
 
+        [Header("Equipment")]
+        public EquipmentSlotType equipmentSlot;
+
+        [Header("Presentation")]
+        [Tooltip("Optional inventory/recipe icon. A type glyph is used when this is empty.")]
+        public Sprite icon;
+
         [Header("First Person")]
         [Tooltip("Optional view prefab spawned by FirstPersonItemHolder.")]
         public GameObject firstPersonPrefab;
@@ -30,6 +37,7 @@ namespace _001_Scripts.Data.Item
             get
             {
                 EnsureFeatures();
+                if (HasFeature<IEquipmentItem>()) return ItemRole.Equipment;
                 if (HasFeature<ITool>()) return ItemRole.Tool;
                 if (HasFeature<IUsable>()) return ItemRole.Usable;
                 if (HasFeature<IEquippable>()) return ItemRole.Equipment;
@@ -89,12 +97,14 @@ namespace _001_Scripts.Data.Item
             _features = new List<IItemFeature>();
             if (HasAttribute(AttributesType.Stackable)) _features.Add(new Stackable(this));
             if (HasAttribute(AttributesType.Equippable)) _features.Add(new Equippable(this));
+            if (equipmentSlot != EquipmentSlotType.None) _features.Add(new EquipmentItem(this));
             if (HasAttribute(AttributesType.Consumable)) _features.Add(new Usable(this));
             if (HasAttribute(AttributesType.Harvestable)) _features.Add(new Tool(this));
             if (HasAttribute(AttributesType.QuickSlottable)) _features.Add(new QuickSlottable(this));
             if (HasAttribute(AttributesType.Repairable)) _features.Add(new RepairableItem(this));
             if (HasAttribute(AttributesType.Explosive)) _features.Add(new ExplosiveItem(this));
             if (HasAttribute(AttributesType.Scannable)) _features.Add(new ScannableItem(this));
+            if (HasAttribute(AttributesType.Buildable)) _features.Add(new BuildTool(this));
             if (firstPersonPrefab) _features.Add(new Holdable(this));
         }
     }

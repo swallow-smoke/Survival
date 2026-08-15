@@ -41,6 +41,8 @@ namespace _001_Scripts.Controller
         private bool isSwimUp;
         private bool isSwimDown;
         private bool isCrouching;
+        private float _lastJumpTime = -10f;
+        [SerializeField, Min(0f)] private float jumpRepeatDelay = .18f;
 
         private MovementContext _ctx;
         private IMovementMode _ground;
@@ -50,7 +52,6 @@ namespace _001_Scripts.Controller
         private IPublisher<PlayerMovementMessage> iMovementPublisher;
         private IInputService _input;
         private IDisposable _bag;
-        private Action<PlayerWaterState> _waterStateHandler;
 
         private IVehicleControllable _activeVehicle;
         private SeatComponent _activeSeat;
@@ -85,6 +86,7 @@ namespace _001_Scripts.Controller
             _input.OnVerticalUp += HandleVerticalUp;
             _input.OnJump += HandleJump;
             _input.OnRun += HandleRun;
+            _input.OnCrouch += HandleCrouch;
             _input.OnVerticalDown += HandleVerticalDown;
             _input.OnExitVehicle += HandleExitVehicle;
         }
@@ -132,15 +134,11 @@ namespace _001_Scripts.Controller
         private void HandleMove(Vector2 value)
         {
             inputValue = value;
-
-            if (_activeVehicle != null)
-                _activeVehicle.HandleMove(inputValue);
         }
 
         private void HandleLook(Vector2 value)
         {
-            if (_activeVehicle is SmallSubVehicle small)
-                small.HandleLook(value);
+            // A controlled vehicle owns its input subscriptions directly.
         }
 
         private void HandleVerticalUp(float value)
@@ -148,10 +146,7 @@ namespace _001_Scripts.Controller
             if (!isCanMove) return;
 
             if (_activeVehicle != null)
-            {
-                _activeVehicle.HandleVertical(value);
                 return;
-            }
 
             if (isSwimming)
                 isSwimUp = value > 0f;
@@ -163,8 +158,24 @@ namespace _001_Scripts.Controller
             if (_activeVehicle != null) return;
             if (isSwimming) return;
 
-            if (isGround)
-                _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            bool groundedNow = isGround || CheckGroundedNow();
+            if (groundedNow && Time.time - _lastJumpTime >= jumpRepeatDelay)
+            {
+                Vector3 velocity = _rb.linearVelocity;
+                velocity.y = Mathf.Max(0f, velocity.y);
+                _rb.linearVelocity = velocity;
+                _rb.WakeUp();
+                _rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
+                isGround = false;
+                _lastJumpTime = Time.time;
+            }
+        }
+
+        private bool CheckGroundedNow()
+        {
+            if (!footTrs) return false;
+            return Physics.Raycast(footTrs.position, Vector3.down, maxDistance, layer,
+                QueryTriggerInteraction.Ignore);
         }
 
         private void HandleRun(bool value)
@@ -172,18 +183,19 @@ namespace _001_Scripts.Controller
             isRunning = value;
         }
 
+        private void HandleCrouch(bool value)
+        {
+            if (_activeVehicle != null || isSwimming) return;
+            isCrouching = value;
+        }
+
         private void HandleVerticalDown(float value)
         {
             if (_activeVehicle != null)
-            {
-                _activeVehicle.HandleVertical(value);
                 return;
-            }
 
             if (isSwimming)
                 isSwimDown = value < 0f;
-            else
-                isCrouching = value < 0f;
         }
 
         private void SetSwimming(bool value)
@@ -249,8 +261,7 @@ namespace _001_Scripts.Controller
             ISubscriber<PlayerVehicleStateMsg> vehicleStateSubscriber,
             ISubscriber<VehicleControlAssignedMsg> vehicleControlSubscriber,
             IInputService inputService,
-            IWaterQueryService waterQuery,
-            IPublisher<PlayerWaterStateMessage> waterStatePublisher)
+            IWaterQueryService waterQuery)
         {
             var builder = DisposableBag.CreateBuilder();
             iMovementPublisher = movementPublisher;
@@ -259,8 +270,6 @@ namespace _001_Scripts.Controller
             EnsureWaterComponents();
             _waterSensor.Configure(waterQuery, footTrs, transform, _camCont != null ? _camCont.ViewTransform : null,
                 _camCont != null ? _camCont.ViewTransform : null);
-            _waterStateHandler = state => waterStatePublisher.Publish(new PlayerWaterStateMessage(state));
-            _waterSensor.StateChanged += _waterStateHandler;
             _underwaterVolume.Configure(_waterSensor);
 
             builder.Add(playerStatSubscriber.Subscribe(Stamina));
@@ -288,13 +297,12 @@ namespace _001_Scripts.Controller
                 _input.OnVerticalUp -= HandleVerticalUp;
                 _input.OnJump -= HandleJump;
                 _input.OnRun -= HandleRun;
+                _input.OnCrouch -= HandleCrouch;
                 _input.OnVerticalDown -= HandleVerticalDown;
                 _input.OnExitVehicle -= HandleExitVehicle;
             }
 
             _bag?.Dispose();
-            if (_waterSensor != null && _waterStateHandler != null)
-                _waterSensor.StateChanged -= _waterStateHandler;
         }
     }
 }

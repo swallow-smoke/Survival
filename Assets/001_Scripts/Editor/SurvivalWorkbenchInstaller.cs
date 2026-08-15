@@ -101,6 +101,11 @@ namespace _001_Scripts.Editor
             serialized.FindProperty("itemDatabase").objectReferenceValue =
                 AssetDatabase.LoadAssetAtPath<ItemDataBase>("Assets/003_Resources/Data/ItemDataBase.asset");
             serialized.ApplyModifiedPropertiesWithoutUndo();
+            var radial = panel.GetComponent<_001_Scripts.UI.Component.SimpleRadialMenuView>();
+            if (!radial) radial = Undo.AddComponent<_001_Scripts.UI.Component.SimpleRadialMenuView>(panel.gameObject);
+            radial.SetRoundedPanelSprite(AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/003_Resources/UI/SurvivalRoundedPanel.png"));
+            EditorUtility.SetDirty(radial);
             panel.RebuildVisualTreeForEditor();
             return panel;
         }

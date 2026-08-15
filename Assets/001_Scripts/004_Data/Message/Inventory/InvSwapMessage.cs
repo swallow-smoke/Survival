@@ -3,7 +3,8 @@ namespace _001_Scripts.Data.Message
     public enum InventorySlotArea
     {
         Inventory,
-        Hotbar
+        Hotbar,
+        Equipment
     }
 
     public readonly struct InvSwapMessage

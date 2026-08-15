@@ -8,10 +8,26 @@ using UnityEngine.UI;
 
 namespace _001_Scripts.Editor
 {
+    [InitializeOnLoad]
     internal static class SurvivalCraftUGUIBuilder
     {
         private const string RootName = "UGUI_CraftRoot";
         private const string PrefabPath = "Assets/002_Prefabs/UI/BlueprintSlot.prefab";
+        private const int LayoutVersion = 1;
+
+        static SurvivalCraftUGUIBuilder() => EditorApplication.delayCall += RebuildIfNeeded;
+
+        private static void RebuildIfNeeded()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+            var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            if (!scene.IsValid() || !scene.isLoaded || scene.name != "SampleScene") return;
+            var panel = UnityEngine.Object.FindFirstObjectByType<CraftPanel>(FindObjectsInactive.Include);
+            if (!panel) return;
+            var version = new SerializedObject(panel).FindProperty("editorLayoutVersion");
+            if (version != null && version.intValue >= LayoutVersion) return;
+            Build(panel, true);
+        }
 
         [MenuItem("Tools/Survival UI/Rebuild Craft Panel (UGUI)")]
         private static void RebuildFromMenu()
@@ -35,7 +51,7 @@ namespace _001_Scripts.Editor
             Stretch(root.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
             var card = Image("CraftCard", root.transform, new Color(0.035f, 0.16f, 0.20f, 0.98f));
-            Anchor(card.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(1140, 690), Vector2.zero);
+            Anchor(card.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(1500, 760), new Vector2(0, -24));
             Outline(card.gameObject, new Color(0.32f, 0.78f, 0.88f, 0.75f), 2);
 
             var header = Image("Header", card.transform, new Color(0.05f, 0.30f, 0.38f, 0.98f));
@@ -52,7 +68,7 @@ namespace _001_Scripts.Editor
                 new Vector2(-68, 6), new Vector2(-8, -6));
 
             var listPanel = Image("RecipeListPanel", card.transform, new Color(0.015f, 0.08f, 0.105f, 0.82f));
-            Stretch(listPanel.rectTransform, Vector2.zero, Vector2.one, new Vector2(20, 86), new Vector2(-725, -88));
+            Stretch(listPanel.rectTransform, Vector2.zero, Vector2.one, new Vector2(20, 88), new Vector2(-945, -94));
             Outline(listPanel.gameObject, new Color(0.22f, 0.55f, 0.62f, 0.55f), 1);
             var listTitle = Text("Title", listPanel.transform, "제작 설계도", 15, FontStyle.Bold, Color.white, TextAnchor.MiddleLeft);
             Stretch(listTitle.rectTransform, new Vector2(0, 1), Vector2.one, new Vector2(16, -40), new Vector2(-16, -5));
@@ -83,7 +99,7 @@ namespace _001_Scripts.Editor
             scroll.scrollSensitivity = 25;
 
             var detail = Image("RecipeDetailsPanel", card.transform, new Color(0.02f, 0.10f, 0.13f, 0.88f));
-            Stretch(detail.rectTransform, Vector2.zero, Vector2.one, new Vector2(435, 86), new Vector2(-20, -88));
+            Stretch(detail.rectTransform, Vector2.zero, Vector2.one, new Vector2(575, 88), new Vector2(-20, -94));
             Outline(detail.gameObject, new Color(0.22f, 0.55f, 0.62f, 0.55f), 1);
             var detailTitle = Text("Title", detail.transform, "설계도 정보", 15, FontStyle.Bold, Color.white, TextAnchor.MiddleLeft);
             Stretch(detailTitle.rectTransform, new Vector2(0, 1), Vector2.one, new Vector2(18, -40), new Vector2(-18, -5));
@@ -140,6 +156,7 @@ namespace _001_Scripts.Editor
             serialized.FindProperty("resultText").objectReferenceValue = result;
             serialized.FindProperty("craftButton").objectReferenceValue = craft;
             serialized.FindProperty("closeButton").objectReferenceValue = close;
+            serialized.FindProperty("editorLayoutVersion").intValue = LayoutVersion;
             serialized.ApplyModifiedPropertiesWithoutUndo();
             var inventoryPanel = UnityEngine.Object.FindFirstObjectByType<InventoryPanel>(FindObjectsInactive.Include);
             if (inventoryPanel) SurvivalUIInputBindingEditor.EnsureNavigationForPanels(inventoryPanel, panel);

@@ -11,12 +11,14 @@ namespace _001_Scripts.Controller.Handler
         event Action<float> OnVerticalUp;
         event Action<float> OnVerticalDown;
         event Action<bool> OnRun;
+        event Action<bool> OnCrouch;
         event Action OnJump;
     }
 
     public interface IInteractionInput
     {
         event Action OnInteract;
+        event Action<bool> OnScanHoldChanged;
     }
 
     public interface IVehicleInput
@@ -37,5 +39,11 @@ namespace _001_Scripts.Controller.Handler
         event Action<float> OnHotbarScroll;
     }
 
-    public interface IInputService : IMovementInput, IInteractionInput, IVehicleInput, IUIInput, IHotbarInput { }
+    public interface IHeldItemInput
+    {
+        event Action OnSecondaryAction;
+    }
+
+    public interface IInputService : IMovementInput, IInteractionInput, IVehicleInput, IUIInput, IHotbarInput,
+        IHeldItemInput { }
 }

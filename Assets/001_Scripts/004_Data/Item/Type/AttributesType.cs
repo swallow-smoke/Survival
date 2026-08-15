@@ -10,5 +10,6 @@
         Repairable, // 수리 가능
         Explosive, // 폭발물
         Scannable, // 스캔 도구
+        Buildable, // 건축 도구
     }
 }

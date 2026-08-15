@@ -15,7 +15,7 @@ namespace _001_Scripts.Editor
     internal static class SurvivalDataPanelsInstaller
     {
         private const string BlueprintAssetPath = "Assets/003_Resources/Data/BluePrints.asset";
-        private const int LayoutVersion = 2;
+        private const int LayoutVersion = 4;
 
         static SurvivalDataPanelsInstaller() => EditorApplication.delayCall += RebuildIfNeeded;
 
@@ -114,7 +114,7 @@ namespace _001_Scripts.Editor
             ConfigureCanvas(panel.gameObject);
             var frame = BuildFrame(panel.transform, "Log", "수집 로그", "월드에서 발견한 기록이 이곳에 보관됩니다.");
             var left = Image("LogList", frame.Card, new Color(.045f, .025f, .10f, .78f));
-            SetRect(left.rectTransform, new Vector2(0f, 1f), new Vector2(390f, 570f), new Vector2(20f, -96f),
+            SetRect(left.rectTransform, new Vector2(0f, 1f), new Vector2(430f, 630f), new Vector2(20f, -96f),
                 new Vector2(0f, 1f));
             Outline(left.gameObject);
             var content = Rect("Content", left.transform);
@@ -127,7 +127,7 @@ namespace _001_Scripts.Editor
             for (int i = 0; i < 24; i++)
             {
                 var button = Button($"LogSlot_{i:00}", content, "로그 슬롯", new Color(.13f, .08f, .23f, .88f));
-                ((RectTransform)button.transform).sizeDelta = new Vector2(366f, 54f);
+                ((RectTransform)button.transform).sizeDelta = new Vector2(406f, 54f);
                 var view = button.gameObject.AddComponent<LogEntryView>();
                 var so = new SerializedObject(view);
                 so.FindProperty("button").objectReferenceValue = button;
@@ -139,7 +139,7 @@ namespace _001_Scripts.Editor
             Stretch(empty.rectTransform, 16f);
 
             var detail = Image("LogDetails", frame.Card, new Color(.055f, .03f, .12f, .78f));
-            SetRect(detail.rectTransform, new Vector2(1f, 1f), new Vector2(770f, 570f), new Vector2(-20f, -96f),
+            SetRect(detail.rectTransform, new Vector2(1f, 1f), new Vector2(990f, 630f), new Vector2(-20f, -96f),
                 new Vector2(1f, 1f));
             Outline(detail.gameObject);
             var preview = Image("LogImage", detail.transform, new Color(.13f, .08f, .24f, .66f));
@@ -151,7 +151,7 @@ namespace _001_Scripts.Editor
             SetRect(title.rectTransform, new Vector2(0f, 1f), new Vector2(410f, 90f), new Vector2(340f, -35f),
                 new Vector2(0f, 1f));
             var body = Text("LogBody", detail.transform, string.Empty, 17, TextAnchor.UpperLeft);
-            SetRect(body.rectTransform, new Vector2(0f, 1f), new Vector2(700f, 190f), new Vector2(32f, -330f),
+            SetRect(body.rectTransform, new Vector2(0f, 1f), new Vector2(920f, 250f), new Vector2(32f, -330f),
                 new Vector2(0f, 1f));
             body.horizontalOverflow = HorizontalWrapMode.Wrap;
             body.verticalOverflow = VerticalWrapMode.Overflow;
@@ -185,7 +185,7 @@ namespace _001_Scripts.Editor
             var panel = go.GetComponent<BlueprintPanel>();
             var frame = BuildFrame(go.transform, "Blueprint", "청사진", "BLUEPRINT DATABASE");
             var bay = Image("BlueprintBay", frame.Card, new Color(.045f, .025f, .10f, .66f));
-            SetRect(bay.rectTransform, new Vector2(.5f, 1f), new Vector2(1180f, 570f), new Vector2(0f, -96f),
+            SetRect(bay.rectTransform, new Vector2(.5f, 1f), new Vector2(1460f, 630f), new Vector2(0f, -96f),
                 new Vector2(.5f, 1f));
             Outline(bay.gameObject);
             var viewport = Image("Viewport", bay.transform, new Color(0f, 0f, 0f, .08f));
@@ -223,12 +223,12 @@ namespace _001_Scripts.Editor
             foreach (string category in order)
             {
                 var entries = grouped[category];
-                int rows = Mathf.Max(1, Mathf.CeilToInt(entries.Count / 6f));
+                int rows = Mathf.Max(1, Mathf.CeilToInt(entries.Count / 7f));
                 var section = Image("Category_" + category.Replace('/', '_'), content,
                     new Color(.035f, .025f, .08f, .54f));
-                section.rectTransform.sizeDelta = new Vector2(1138f, 48f + rows * 154f);
+                section.rectTransform.sizeDelta = new Vector2(1418f, 48f + rows * 154f);
                 var bar = Image("CategoryBar", section.transform, new Color(.20f, .34f, .62f, .66f));
-                SetRect(bar.rectTransform, new Vector2(.5f, 1f), new Vector2(1110f, 34f), new Vector2(0f, -7f),
+                SetRect(bar.rectTransform, new Vector2(.5f, 1f), new Vector2(1390f, 34f), new Vector2(0f, -7f),
                     new Vector2(.5f, 1f));
                 Outline(bar.gameObject);
                 var categoryLabel = Text("Label", bar.transform, category, 15, TextAnchor.MiddleLeft);
@@ -239,16 +239,18 @@ namespace _001_Scripts.Editor
                 grid.offsetMin = new Vector2(14f, 4f);
                 grid.offsetMax = new Vector2(-14f, -48f);
                 var gridLayout = grid.gameObject.AddComponent<GridLayoutGroup>();
-                gridLayout.cellSize = new Vector2(172f, 146f);
+                gridLayout.cellSize = new Vector2(188f, 146f);
                 gridLayout.spacing = new Vector2(12f, 8f);
                 gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-                gridLayout.constraintCount = 6;
+                gridLayout.constraintCount = 7;
                 foreach (var blueprint in entries) tiles.Add(BuildBlueprintTile(grid, blueprint));
             }
+            var recipeTooltip = BuildBlueprintRecipeTooltip(frame.Card);
             var serialized = new SerializedObject(panel);
             serialized.FindProperty("summary").objectReferenceValue = frame.Subtitle;
             serialized.FindProperty("navigation").objectReferenceValue = frame.Navigation;
             AssignList(serialized.FindProperty("tiles"), tiles);
+            serialized.FindProperty("recipeTooltip").objectReferenceValue = recipeTooltip;
             serialized.FindProperty("editorLayoutVersion").intValue = LayoutVersion;
             serialized.ApplyModifiedPropertiesWithoutUndo();
             return panel;
@@ -293,16 +295,84 @@ namespace _001_Scripts.Editor
             return view;
         }
 
+        private static BlueprintRecipeTooltip BuildBlueprintRecipeTooltip(Transform card)
+        {
+            var background = Image("BlueprintRecipeTooltip", card, new Color(.095f, .045f, .18f, .96f));
+            SetRect(background.rectTransform, new Vector2(.5f, .5f), new Vector2(340f, 158f), Vector2.zero);
+            background.raycastTarget = false;
+            Outline(background.gameObject);
+            var group = background.gameObject.AddComponent<CanvasGroup>();
+            group.interactable = false;
+            group.blocksRaycasts = false;
+
+            var title = Text("Title", background.transform, "필요 재료", 14, TextAnchor.MiddleLeft);
+            SetRect(title.rectTransform, new Vector2(0f, 1f), new Vector2(300f, 28f), new Vector2(14f, -4f),
+                new Vector2(0f, 1f));
+            title.color = new Color(.82f, .74f, 1f, 1f);
+
+            var content = Rect("Ingredients", background.transform);
+            content.anchorMin = Vector2.zero;
+            content.anchorMax = Vector2.one;
+            content.offsetMin = new Vector2(12f, 10f);
+            content.offsetMax = new Vector2(-12f, -34f);
+            var horizontal = content.gameObject.AddComponent<HorizontalLayoutGroup>();
+            horizontal.spacing = 10f;
+            horizontal.childAlignment = TextAnchor.MiddleCenter;
+            horizontal.childControlHeight = horizontal.childControlWidth = false;
+            horizontal.childForceExpandHeight = horizontal.childForceExpandWidth = false;
+
+            var ingredients = new List<BlueprintRecipeTooltip.IngredientView>();
+            for (int i = 0; i < 8; i++)
+            {
+                var slot = Image($"Ingredient_{i:00}", content, new Color(.16f, .09f, .29f, .82f));
+                slot.rectTransform.sizeDelta = new Vector2(128f, 106f);
+                slot.raycastTarget = false;
+                Outline(slot.gameObject);
+
+                var iconDisc = Image("ImageBackground", slot.transform, new Color(.23f, .15f, .40f, .88f));
+                SetRect(iconDisc.rectTransform, new Vector2(.5f, 1f), new Vector2(64f, 64f), new Vector2(0f, -6f),
+                    new Vector2(.5f, 1f));
+                iconDisc.raycastTarget = false;
+                Outline(iconDisc.gameObject);
+                var icon = Image("Image", iconDisc.transform, Color.clear);
+                Stretch(icon.rectTransform, 8f);
+                icon.preserveAspect = true;
+                icon.raycastTarget = false;
+                var glyph = Text("FallbackGlyph", iconDisc.transform, "?", 25, TextAnchor.MiddleCenter);
+                Stretch(glyph.rectTransform, 6f);
+
+                var name = Text("Name", slot.transform, "재료", 12, TextAnchor.MiddleRight);
+                SetRect(name.rectTransform, new Vector2(.5f, 0f), new Vector2(82f, 28f), new Vector2(-15f, 5f),
+                    new Vector2(.5f, 0f));
+                name.horizontalOverflow = HorizontalWrapMode.Wrap;
+                name.verticalOverflow = VerticalWrapMode.Truncate;
+                var count = Text("Count", slot.transform, "x 1", 13, TextAnchor.MiddleLeft);
+                SetRect(count.rectTransform, new Vector2(.5f, 0f), new Vector2(42f, 28f), new Vector2(47f, 5f),
+                    new Vector2(.5f, 0f));
+                count.color = new Color(.88f, .78f, 1f, 1f);
+                ingredients.Add(new BlueprintRecipeTooltip.IngredientView(slot.gameObject, icon, glyph, name, count));
+            }
+
+            var empty = Text("Empty", background.transform, "필요 재료 없음", 14, TextAnchor.MiddleCenter);
+            SetRect(empty.rectTransform, new Vector2(.5f, .5f), new Vector2(210f, 44f), new Vector2(0f, -12f));
+            empty.gameObject.SetActive(false);
+
+            var tooltip = background.gameObject.AddComponent<BlueprintRecipeTooltip>();
+            tooltip.Configure(background.rectTransform, card as RectTransform, title, empty, ingredients);
+            EditorUtility.SetDirty(tooltip);
+            return tooltip;
+        }
+
         private static (Transform Card, ModalNavigation Navigation, Text Subtitle) BuildFrame(Transform parent,
             string key, string title, string subtitle)
         {
             var root = Image(key + "Root", parent, new Color(.012f, .006f, .035f, .94f));
             Stretch(root.rectTransform);
             var card = Image(key + "Card", root.transform, new Color(.04f, .02f, .09f, .96f));
-            SetRect(card.rectTransform, new Vector2(.5f, .5f), new Vector2(1220f, 700f), new Vector2(0f, -24f));
+            SetRect(card.rectTransform, new Vector2(.5f, .5f), new Vector2(1500f, 760f), new Vector2(0f, -24f));
             Outline(card.gameObject);
             var header = Image("Header", card.transform, new Color(.11f, .055f, .22f, .64f));
-            SetRect(header.rectTransform, new Vector2(.5f, 1f), new Vector2(1220f, 78f), Vector2.zero,
+            SetRect(header.rectTransform, new Vector2(.5f, 1f), new Vector2(1500f, 78f), Vector2.zero,
                 new Vector2(.5f, 1f));
             var accent = Image("Accent", header.transform, new Color(.52f, .72f, 1f, .9f));
             SetRect(accent.rectTransform, new Vector2(0f, .5f), new Vector2(5f, 78f), Vector2.zero,

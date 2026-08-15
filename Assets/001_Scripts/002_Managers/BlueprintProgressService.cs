@@ -55,6 +55,16 @@ namespace _001_Scripts.Managers
             return true;
         }
 
+        public bool Unlock(int id)
+        {
+            var blueprint = _database.GetBluePrint(id);
+            if (blueprint == null || blueprint.isUnlocked) return false;
+            blueprint.unlockProgress = blueprint.unlockRequired;
+            blueprint.isUnlocked = true;
+            _publisher.Publish(new BlueprintProgressChangedMessage(id));
+            return true;
+        }
+
         private static BlueprintUnlockStatus ToStatus(_001_Scripts.Data.BluePrint.BluePrint blueprint) =>
             new(blueprint.bluePrintId, blueprint.bluePrintName, blueprint.categoryPath, blueprint.iconResource,
                 blueprint.isUnlocked, blueprint.unlockProgress, blueprint.unlockRequired);

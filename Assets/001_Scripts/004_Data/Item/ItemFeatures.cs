@@ -11,6 +11,16 @@ namespace _001_Scripts.Data.Item
         Other
     }
 
+    public enum EquipmentSlotType
+    {
+        None,
+        Head,
+        Body,
+        Legs,
+        Feet,
+        UpgradeChip
+    }
+
     public interface IItemFeature
     {
         Item Item { get; }
@@ -24,6 +34,11 @@ namespace _001_Scripts.Data.Item
     public interface IEquippable : IItemFeature
     {
         float MaxDurability { get; }
+    }
+
+    public interface IEquipmentItem : IItemFeature
+    {
+        EquipmentSlotType SlotType { get; }
     }
 
     public interface ITool : IItemFeature
@@ -50,6 +65,7 @@ namespace _001_Scripts.Data.Item
     public interface IExplosiveItem : IItemFeature { float Power { get; } }
     public interface IScannableItem : IItemFeature { float Range { get; } }
     public interface IHoldable : IItemFeature { UnityEngine.GameObject FirstPersonPrefab { get; } }
+    public interface IBuildTool : IItemFeature { }
 
     public abstract class ItemFeature : IItemFeature
     {
@@ -69,6 +85,12 @@ namespace _001_Scripts.Data.Item
         public Equippable(Item item) : base(item) { }
         public float MaxDurability => UnityEngine.Mathf.Max(0f,
             Item.GetModifierValue(AttributesType.Equippable, ModifierType.DurabilityMax, 0f));
+    }
+
+    public sealed class EquipmentItem : ItemFeature, IEquipmentItem
+    {
+        public EquipmentItem(Item item) : base(item) { }
+        public EquipmentSlotType SlotType => Item.equipmentSlot;
     }
 
     public sealed class Tool : ItemFeature, ITool
@@ -117,6 +139,11 @@ namespace _001_Scripts.Data.Item
         public ScannableItem(Item item) : base(item) { }
         public float Range => UnityEngine.Mathf.Max(0f,
             Item.GetModifierValue(AttributesType.Scannable, ModifierType.ScanRange));
+    }
+
+    public sealed class BuildTool : ItemFeature, IBuildTool
+    {
+        public BuildTool(Item item) : base(item) { }
     }
 
     public sealed class Holdable : ItemFeature, IHoldable

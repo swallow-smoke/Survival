@@ -14,6 +14,10 @@ namespace _001_Scripts.Managers
         private bool focusedIsDroppedItem;
         private bool canInteract;
         private HarvestToolSelection selectedTool;
+        private Entity labelEntity = Entity.Null;
+        private bool labelCanInteract;
+        private bool labelIsDroppedItem;
+        private string cachedLabel;
 
         public DotsResourceInteractionService(IWorldResourceGateway gateway, IHarvestToolSelector toolSelector)
         {
@@ -35,11 +39,19 @@ namespace _001_Scripts.Managers
             focusedIsDroppedItem = info.IsDroppedItem;
             selectedTool = default;
             canInteract = info.IsDroppedItem || toolSelector.TrySelect(info, out selectedTool);
-            string label = info.IsDroppedItem
-                ? $"Pick up {info.DisplayName}"
-                : canInteract ? $"Harvest {info.DisplayName}" : "Required harvesting tool";
+            if (labelEntity != target || labelCanInteract != canInteract ||
+                labelIsDroppedItem != info.IsDroppedItem)
+            {
+                labelEntity = target;
+                labelCanInteract = canInteract;
+                labelIsDroppedItem = info.IsDroppedItem;
+                cachedLabel = info.IsDroppedItem
+                    ? $"Pick up {info.DisplayName}"
+                    : canInteract ? $"Harvest {info.DisplayName}" : "Required harvesting tool";
+            }
+
             Vector3 hitPoint = origin + direction.normalized * (Mathf.Max(0f, distance) * Mathf.Clamp01(fraction));
-            focus = new ResourceInteractionFocus(canInteract, label, hitPoint);
+            focus = new ResourceInteractionFocus(canInteract, cachedLabel, hitPoint);
             return true;
         }
 
@@ -57,6 +69,8 @@ namespace _001_Scripts.Managers
             focusedIsDroppedItem = false;
             canInteract = false;
             selectedTool = default;
+            labelEntity = Entity.Null;
+            cachedLabel = null;
         }
     }
 }

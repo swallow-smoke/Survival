@@ -67,7 +67,9 @@ namespace _001_Scripts.UI.Component
             CreateText("Body", toastRect, message.Body, new Vector2(70f, -35f), new Vector2(245f, 24f),
                 13, TextAnchor.MiddleLeft, new Color(.78f, .84f, .94f, 1f));
 
-            StartCoroutine(Animate(wrapper, toastRect, toast.GetComponent<CanvasGroup>(), message.Duration));
+            Image lifetimeProgress = CreateLifetimeProgress(toastRect, message.Kind);
+            StartCoroutine(Animate(wrapper, toastRect, toast.GetComponent<CanvasGroup>(), lifetimeProgress,
+                message.Duration));
         }
 
         private void TrimForIncomingNotification()
@@ -85,9 +87,11 @@ namespace _001_Scripts.UI.Component
             }
         }
 
-        private IEnumerator Animate(GameObject wrapper, RectTransform card, CanvasGroup group, float duration)
+        private IEnumerator Animate(GameObject wrapper, RectTransform card, CanvasGroup group,
+            Image lifetimeProgress, float duration)
         {
             group.alpha = 0f;
+            lifetimeProgress.fillAmount = 1f;
             yield return Tween(.3f, value =>
             {
                 if (!card || !group) return;
@@ -96,7 +100,17 @@ namespace _001_Scripts.UI.Component
                 group.alpha = Mathf.Clamp01(value * 2f);
             });
 
-            yield return new WaitForSecondsRealtime(Mathf.Max(.25f, duration));
+            float visibleDuration = Mathf.Max(.25f, duration);
+            float remaining = visibleDuration;
+            while (remaining > 0f)
+            {
+                remaining -= Time.unscaledDeltaTime;
+                if (lifetimeProgress)
+                    lifetimeProgress.fillAmount = Mathf.Clamp01(remaining / visibleDuration);
+                yield return null;
+            }
+
+            if (lifetimeProgress) lifetimeProgress.fillAmount = 0f;
             yield return Tween(.22f, value =>
             {
                 if (!card || !group) return;
@@ -105,6 +119,42 @@ namespace _001_Scripts.UI.Component
                 group.alpha = 1f - value;
             });
             if (wrapper) Destroy(wrapper);
+        }
+
+        private static Image CreateLifetimeProgress(RectTransform parent, NotificationKind kind)
+        {
+            var trackObject = new GameObject("LifetimeProgressTrack", typeof(RectTransform),
+                typeof(CanvasRenderer), typeof(Image));
+            var trackRect = trackObject.GetComponent<RectTransform>();
+            trackRect.SetParent(parent, false);
+            trackRect.anchorMin = new Vector2(0f, 0f);
+            trackRect.anchorMax = new Vector2(1f, 0f);
+            trackRect.pivot = new Vector2(.5f, 0f);
+            trackRect.anchoredPosition = new Vector2(0f, 3f);
+            trackRect.sizeDelta = new Vector2(0f, 3f);
+            var track = trackObject.GetComponent<Image>();
+            track.color = new Color(.02f, .025f, .045f, .55f);
+            track.raycastTarget = false;
+
+            var fillObject = new GameObject("LifetimeProgress", typeof(RectTransform),
+                typeof(CanvasRenderer), typeof(Image), typeof(Outline));
+            var fillRect = fillObject.GetComponent<RectTransform>();
+            fillRect.SetParent(trackRect, false);
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.offsetMin = Vector2.zero;
+            fillRect.offsetMax = Vector2.zero;
+            var fill = fillObject.GetComponent<Image>();
+            fill.color = ProgressColor(kind);
+            fill.type = Image.Type.Filled;
+            fill.fillMethod = Image.FillMethod.Horizontal;
+            fill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            fill.fillAmount = 1f;
+            fill.raycastTarget = false;
+            var glow = fillObject.GetComponent<Outline>();
+            glow.effectColor = new Color(fill.color.r, fill.color.g, fill.color.b, .3f);
+            glow.effectDistance = new Vector2(0f, 1f);
+            return fill;
         }
 
         private static IEnumerator Tween(float duration, System.Action<float> update)
@@ -128,10 +178,18 @@ namespace _001_Scripts.UI.Component
 
         private static Color Background(NotificationKind kind) => kind switch
         {
-            NotificationKind.Warning => new Color(.34f, .12f, .16f, .92f),
-            NotificationKind.ItemAdded => new Color(.08f, .18f, .24f, .9f),
-            NotificationKind.ItemRemoved => new Color(.17f, .12f, .22f, .9f),
-            _ => new Color(.08f, .1f, .16f, .9f)
+            NotificationKind.Warning => new Color(.34f, .12f, .16f, .78f),
+            NotificationKind.ItemAdded => new Color(.08f, .18f, .24f, .76f),
+            NotificationKind.ItemRemoved => new Color(.17f, .12f, .22f, .76f),
+            _ => new Color(.08f, .1f, .16f, .76f)
+        };
+
+        private static Color ProgressColor(NotificationKind kind) => kind switch
+        {
+            NotificationKind.Warning => new Color(1f, .48f, .4f, .95f),
+            NotificationKind.ItemAdded => new Color(.25f, .88f, 1f, .95f),
+            NotificationKind.ItemRemoved => new Color(.76f, .48f, 1f, .95f),
+            _ => new Color(.5f, .7f, 1f, .95f)
         };
 
         private static void CreateText(string name, Transform parent, string value, Vector2 position,

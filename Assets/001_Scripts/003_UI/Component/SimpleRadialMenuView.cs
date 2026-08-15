@@ -6,6 +6,35 @@ using UnityEngine.UI;
 
 namespace _001_Scripts.UI.Component
 {
+    public readonly struct SimpleRadialIngredientData
+    {
+        public readonly Sprite Icon;
+        public readonly string Glyph;
+        public readonly string Name;
+        public readonly int Count;
+
+        public SimpleRadialIngredientData(Sprite icon, string glyph, string name, int count)
+        {
+            Icon = icon;
+            Glyph = glyph;
+            Name = name;
+            Count = count;
+        }
+    }
+
+    public sealed class SimpleRadialRecipeTooltipData
+    {
+        public readonly string Description;
+        public readonly IReadOnlyList<SimpleRadialIngredientData> Ingredients;
+
+        public SimpleRadialRecipeTooltipData(string description,
+            IReadOnlyList<SimpleRadialIngredientData> ingredients)
+        {
+            Description = description;
+            Ingredients = ingredients ?? Array.Empty<SimpleRadialIngredientData>();
+        }
+    }
+
     public readonly struct SimpleRadialEntry
     {
         public readonly string Id;
@@ -15,9 +44,11 @@ namespace _001_Scripts.UI.Component
         public readonly Action Selected;
         public readonly string Tooltip;
         public readonly Action SecondarySelected;
+        public readonly SimpleRadialRecipeTooltipData RecipeTooltip;
 
         public SimpleRadialEntry(string id, string icon, string label, Action selected, bool interactable = true,
-            string tooltip = null, Action secondarySelected = null)
+            string tooltip = null, Action secondarySelected = null,
+            SimpleRadialRecipeTooltipData recipeTooltip = null)
         {
             Id = id;
             Icon = icon;
@@ -26,6 +57,7 @@ namespace _001_Scripts.UI.Component
             Interactable = interactable;
             Tooltip = tooltip;
             SecondarySelected = secondarySelected;
+            RecipeTooltip = recipeTooltip;
         }
     }
 
@@ -38,8 +70,8 @@ namespace _001_Scripts.UI.Component
         private static readonly Color NodeColor = new(.24f, .10f, .38f, .74f);
         private static readonly Color DisabledColor = new(.105f, .055f, .16f, .52f);
         private static readonly Color StrokeColor = new(.73f, .46f, 1f, .72f);
-        private static readonly Color TooltipColor = new(.105f, .045f, .18f, .88f);
-        private static readonly Color PinnedColor = new(.12f, .05f, .21f, .86f);
+        private static readonly Color TooltipColor = new(.18f, .18f, .20f, .70f);
+        private static readonly Color PinnedColor = new(.12f, .05f, .21f, .76f);
 
         [SerializeField, Min(1f)] private float radius = 210f;
         [SerializeField, Min(1f)] private float centerSize = 104f;
@@ -48,8 +80,10 @@ namespace _001_Scripts.UI.Component
         [SerializeField, Range(.05f, .5f)] private float openDuration = .18f;
         [SerializeField, Range(.05f, .5f)] private float closeDuration = .12f;
         [SerializeField, Range(0f, .1f)] private float nodeDelay = .025f;
+        [SerializeField] private Sprite roundedPanelSprite;
 
         private RectTransform _root;
+        private OrganicGradientGraphic _ambient;
         private RectTransform _menu;
         private Transform _nodes;
         private Text _centerIcon;
@@ -61,9 +95,14 @@ namespace _001_Scripts.UI.Component
         private readonly List<SimpleRadialNodeView> _nodePool = new(NodePoolSize);
         private RectTransform _tooltip;
         private Text _tooltipText;
+        private Text _tooltipIngredientsTitle;
+        private RectTransform _tooltipIngredientGrid;
+        private readonly List<TooltipIngredientView> _tooltipIngredients = new();
         private RectTransform _pinnedPanel;
         private Text _pinnedTitle;
         private Text _pinnedBody;
+
+        public void SetRoundedPanelSprite(Sprite sprite) => roundedPanelSprite = sprite;
 
         public void Rebuild(string centerIcon)
         {
@@ -79,21 +118,26 @@ namespace _001_Scripts.UI.Component
                 if (existing)
                 {
                     _root = existing as RectTransform;
+                    _ambient = existing.Find("OrganicAmbient")?.GetComponent<OrganicGradientGraphic>();
                     _menu = existing.Find("Menu") as RectTransform;
                     _nodes = existing.Find("Menu/Nodes");
                     _centerIcon = existing.Find("Menu/Center/Icon")?.GetComponent<Text>();
                     _rootGroup = existing.GetComponent<CanvasGroup>();
                     _outsideButton = existing.Find("Outside")?.GetComponent<Button>();
                     _tooltip = existing.Find("RecipeTooltip") as RectTransform;
-                    _tooltipText = existing.Find("RecipeTooltip/Text")?.GetComponent<Text>();
+                    _tooltipText = existing.Find("RecipeTooltip/Description")?.GetComponent<Text>();
+                    _tooltipIngredientsTitle = existing.Find("RecipeTooltip/IngredientsTitle")?.GetComponent<Text>();
+                    _tooltipIngredientGrid = existing.Find("RecipeTooltip/IngredientGrid") as RectTransform;
                     _pinnedPanel = existing.Find("PinnedRecipe") as RectTransform;
                     _pinnedTitle = existing.Find("PinnedRecipe/Title")?.GetComponent<Text>();
                     _pinnedBody = existing.Find("PinnedRecipe/Body")?.GetComponent<Text>();
                 }
             }
 
-            if (!_root || !_menu || !_nodes || !_centerIcon || !_rootGroup || !_outsideButton || !_tooltip ||
-                !_tooltipText || !_pinnedPanel || !_pinnedTitle || !_pinnedBody) Rebuild(centerIcon);
+            CollectTooltipIngredients();
+            if (!_root || !_ambient || !_menu || !_nodes || !_centerIcon || !_rootGroup || !_outsideButton || !_tooltip ||
+                !_tooltipText || !_tooltipIngredientsTitle || !_tooltipIngredientGrid || _tooltipIngredients.Count < 8 ||
+                !_pinnedPanel || !_pinnedTitle || !_pinnedBody) Rebuild(centerIcon);
             else _centerIcon.text = centerIcon;
             CollectNodePool();
             if (_nodePool.Count < NodePoolSize) Rebuild(centerIcon);
@@ -163,6 +207,36 @@ namespace _001_Scripts.UI.Component
         {
             if (!_tooltip || !_tooltipText || string.IsNullOrWhiteSpace(text)) return;
             _tooltipText.text = text;
+            _tooltipText.color = Color.white;
+            if (_tooltipIngredientsTitle) _tooltipIngredientsTitle.gameObject.SetActive(false);
+            for (int i = 0; i < _tooltipIngredients.Count; i++) _tooltipIngredients[i].Hide();
+            _tooltip.sizeDelta = new Vector2(360f, 150f);
+            RevealTooltip(screenPosition);
+        }
+
+        public void ShowRecipeTooltip(SimpleRadialRecipeTooltipData data, Vector2 screenPosition)
+        {
+            if (!_tooltip || !_tooltipText || data == null) return;
+            _tooltipText.text = data.Description;
+            _tooltipText.color = Color.white;
+            if (_tooltipIngredientsTitle)
+            {
+                _tooltipIngredientsTitle.text = "필요한 재료";
+                _tooltipIngredientsTitle.gameObject.SetActive(true);
+            }
+            int visible = Mathf.Min(data.Ingredients.Count, _tooltipIngredients.Count);
+            for (int i = 0; i < _tooltipIngredients.Count; i++)
+            {
+                if (i < visible) _tooltipIngredients[i].Show(data.Ingredients[i]);
+                else _tooltipIngredients[i].Hide();
+            }
+            float width = visible == 0 ? 380f : Mathf.Clamp(34f + visible * 138f, 380f, 1140f);
+            _tooltip.sizeDelta = new Vector2(width, 250f);
+            RevealTooltip(screenPosition);
+        }
+
+        private void RevealTooltip(Vector2 screenPosition)
+        {
             _tooltip.gameObject.SetActive(true);
             Camera eventCamera = GetComponentInParent<Canvas>()?.renderMode == RenderMode.ScreenSpaceOverlay
                 ? null
@@ -202,6 +276,12 @@ namespace _001_Scripts.UI.Component
             _root = Rect(RootName, transform);
             Stretch(_root);
             _rootGroup = _root.gameObject.AddComponent<CanvasGroup>();
+
+            var ambient = Rect("OrganicAmbient", _root);
+            Stretch(ambient);
+            _ambient = ambient.gameObject.AddComponent<OrganicGradientGraphic>();
+            _ambient.Configure(new Color(.105f, .04f, .19f, .34f), new Color(.008f, .003f, .03f, .62f),
+                new Color(.66f, .34f, 1f, .10f), new Color(.18f, .50f, 1f, .065f));
 
             var outside = new GameObject("Outside", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image),
                 typeof(Button));
@@ -262,12 +342,80 @@ namespace _001_Scripts.UI.Component
         {
             var image = Panel("RecipeTooltip", _root, TooltipColor);
             _tooltip = image.rectTransform;
-            Anchor(_tooltip, new Vector2(.5f, .5f), new Vector2(330f, 220f), Vector2.zero);
+            Anchor(_tooltip, new Vector2(.5f, .5f), new Vector2(380f, 250f), Vector2.zero);
             AddStroke(image);
-            _tooltipText = Label("Text", _tooltip, string.Empty, 14, TextAnchor.UpperLeft);
-            Stretch(_tooltipText.rectTransform, 14f);
+            var shadow = image.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, .30f);
+            shadow.effectDistance = new Vector2(0f, -6f);
+            shadow.useGraphicAlpha = true;
+            _tooltipText = Label("Description", _tooltip, string.Empty, 14, TextAnchor.UpperLeft);
+            Anchor(_tooltipText.rectTransform, new Vector2(0f, 1f), new Vector2(348f, 62f),
+                new Vector2(16f, -12f), new Vector2(0f, 1f));
+            _tooltipText.color = Color.white;
+            _tooltipIngredientsTitle = Label("IngredientsTitle", _tooltip, "필요한 재료", 12,
+                TextAnchor.MiddleLeft);
+            Anchor(_tooltipIngredientsTitle.rectTransform, new Vector2(0f, 1f), new Vector2(330f, 24f),
+                new Vector2(16f, -76f), new Vector2(0f, 1f));
+
+            _tooltipIngredientGrid = Rect("IngredientGrid", _tooltip);
+            _tooltipIngredientGrid.anchorMin = Vector2.zero;
+            _tooltipIngredientGrid.anchorMax = Vector2.one;
+            _tooltipIngredientGrid.offsetMin = new Vector2(12f, 12f);
+            _tooltipIngredientGrid.offsetMax = new Vector2(-12f, -102f);
+            var layout = _tooltipIngredientGrid.gameObject.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = 10f;
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childControlHeight = layout.childControlWidth = false;
+            layout.childForceExpandHeight = layout.childForceExpandWidth = false;
+            _tooltipIngredients.Clear();
+            for (int i = 0; i < 8; i++) _tooltipIngredients.Add(BuildTooltipIngredient(i));
             image.raycastTarget = false;
             _tooltip.gameObject.SetActive(false);
+        }
+
+        private TooltipIngredientView BuildTooltipIngredient(int index)
+        {
+            var slot = Panel($"Ingredient_{index:00}", _tooltipIngredientGrid,
+                new Color(.10f, .10f, .12f, .76f));
+            slot.rectTransform.sizeDelta = new Vector2(128f, 128f);
+            slot.raycastTarget = false;
+            AddStroke(slot);
+            var imageBackground = Panel("ImageBackground", slot.transform, new Color(.22f, .22f, .25f, .76f));
+            Anchor(imageBackground.rectTransform, new Vector2(.5f, 1f), new Vector2(62f, 62f),
+                new Vector2(0f, -7f), new Vector2(.5f, 1f));
+            imageBackground.raycastTarget = false;
+            AddStroke(imageBackground);
+            var icon = Panel("Image", imageBackground.transform, Color.clear);
+            Stretch(icon.rectTransform, 7f);
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            var glyph = Label("FallbackGlyph", imageBackground.transform, "?", 24, TextAnchor.MiddleCenter);
+            Stretch(glyph.rectTransform, 5f);
+            var name = Label("Name", slot.transform, "재료", 12, TextAnchor.MiddleCenter);
+            Anchor(name.rectTransform, new Vector2(.5f, 0f), new Vector2(118f, 28f), new Vector2(0f, 30f),
+                new Vector2(.5f, 0f));
+            var count = Label("Count", slot.transform, "x 1", 13, TextAnchor.MiddleCenter);
+            Anchor(count.rectTransform, new Vector2(.5f, 0f), new Vector2(118f, 24f), new Vector2(0f, 6f),
+                new Vector2(.5f, 0f));
+            count.color = new Color(.88f, .80f, 1f, 1f);
+            slot.gameObject.SetActive(false);
+            return new TooltipIngredientView(slot.gameObject, icon, glyph, name, count);
+        }
+
+        private void CollectTooltipIngredients()
+        {
+            _tooltipIngredients.Clear();
+            if (!_tooltipIngredientGrid) return;
+            for (int i = 0; i < _tooltipIngredientGrid.childCount; i++)
+            {
+                Transform slot = _tooltipIngredientGrid.GetChild(i);
+                var icon = slot.Find("ImageBackground/Image")?.GetComponent<Image>();
+                var glyph = slot.Find("ImageBackground/FallbackGlyph")?.GetComponent<Text>();
+                var name = slot.Find("Name")?.GetComponent<Text>();
+                var count = slot.Find("Count")?.GetComponent<Text>();
+                if (icon && glyph && name && count)
+                    _tooltipIngredients.Add(new TooltipIngredientView(slot.gameObject, icon, glyph, name, count));
+            }
         }
 
         private void BuildPinnedPanel()
@@ -284,7 +432,7 @@ namespace _001_Scripts.UI.Component
             _pinnedBody = Label("Body", _pinnedPanel, string.Empty, 14, TextAnchor.UpperLeft);
             Anchor(_pinnedBody.rectTransform, new Vector2(0f, 1f), new Vector2(318f, 180f), new Vector2(16f, -58f),
                 new Vector2(0f, 1f));
-            var close = Panel("Unpin", _pinnedPanel, new Color(.28f, .12f, .42f, .82f));
+            var close = Panel("Unpin", _pinnedPanel, new Color(.28f, .12f, .42f, .76f));
             Anchor(close.rectTransform, new Vector2(1f, 1f), new Vector2(34f, 34f), new Vector2(-10f, -10f),
                 new Vector2(1f, 1f));
             var button = close.gameObject.AddComponent<Button>();
@@ -320,7 +468,7 @@ namespace _001_Scripts.UI.Component
                 var image = _pinnedPanel.GetComponent<Image>();
                 if (image) image.color = PinnedColor;
                 var unpin = _pinnedPanel.Find("Unpin")?.GetComponent<Image>();
-                if (unpin) unpin.color = new Color(.28f, .12f, .42f, .82f);
+                if (unpin) unpin.color = new Color(.28f, .12f, .42f, .76f);
             }
             foreach (var outline in _root.GetComponentsInChildren<Outline>(true))
             {
@@ -493,18 +641,58 @@ namespace _001_Scripts.UI.Component
             _nodePool.Clear();
             _tooltip = null;
             _tooltipText = null;
+            _tooltipIngredientsTitle = null;
+            _tooltipIngredientGrid = null;
+            _tooltipIngredients.Clear();
             _pinnedPanel = null;
             _pinnedTitle = null;
             _pinnedBody = null;
         }
 
-        private static Image Panel(string name, Transform parent, Color color)
+        private sealed class TooltipIngredientView
+        {
+            private readonly GameObject _root;
+            private readonly Image _icon;
+            private readonly Text _glyph;
+            private readonly Text _name;
+            private readonly Text _count;
+
+            public TooltipIngredientView(GameObject root, Image icon, Text glyph, Text name, Text count)
+            {
+                _root = root;
+                _icon = icon;
+                _glyph = glyph;
+                _name = name;
+                _count = count;
+            }
+
+            public void Show(SimpleRadialIngredientData data)
+            {
+                _root.SetActive(true);
+                _icon.sprite = data.Icon;
+                _icon.color = data.Icon ? Color.white : Color.clear;
+                _glyph.gameObject.SetActive(!data.Icon);
+                _glyph.text = string.IsNullOrWhiteSpace(data.Glyph) ? "?" : data.Glyph;
+                _name.text = data.Name;
+                _count.text = $"x {Mathf.Max(0, data.Count)}";
+            }
+
+            public void Hide() => _root.SetActive(false);
+        }
+
+        private Image Panel(string name, Transform parent, Color color)
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             go.layer = 5;
             go.transform.SetParent(parent, false);
             var image = go.GetComponent<Image>();
             image.color = color;
+            if (roundedPanelSprite)
+            {
+                image.sprite = roundedPanelSprite;
+                image.type = Image.Type.Sliced;
+                image.pixelsPerUnitMultiplier = 1f;
+            }
             return image;
         }
 

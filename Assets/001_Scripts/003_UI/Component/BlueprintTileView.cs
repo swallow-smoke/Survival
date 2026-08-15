@@ -1,10 +1,13 @@
 using _001_Scripts.Data;
+using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace _001_Scripts.UI.Component
 {
-    public sealed class BlueprintTileView : MonoBehaviour
+    public sealed class BlueprintTileView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
+        IPointerClickHandler
     {
         [SerializeField] private int blueprintId;
         [SerializeField] private Text nameLabel;
@@ -13,8 +16,32 @@ namespace _001_Scripts.UI.Component
         [SerializeField] private Image disc;
         [SerializeField] private Image icon;
         [SerializeField] private RectTransform progressFill;
+        private Action<int, RectTransform> _pointerEntered;
+        private Action _pointerExited;
+        private Action<int> _selected;
 
         public int BlueprintId => blueprintId;
+
+        public void BindHover(Action<int, RectTransform> pointerEntered, Action pointerExited)
+        {
+            _pointerEntered = pointerEntered;
+            _pointerExited = pointerExited;
+        }
+
+        public void BindSelection(Action<int> selected) => _selected = selected;
+
+        public void OnPointerEnter(PointerEventData eventData)
+            => _pointerEntered?.Invoke(blueprintId, transform as RectTransform);
+
+        public void OnPointerExit(PointerEventData eventData) => _pointerExited?.Invoke();
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (eventData.button == PointerEventData.InputButton.Left)
+                _selected?.Invoke(blueprintId);
+        }
+
+        private void OnDisable() => _pointerExited?.Invoke();
 
         public void Show(BlueprintUnlockStatus status)
         {
@@ -27,8 +54,8 @@ namespace _001_Scripts.UI.Component
                 progressLabel.text = $"( {status.Progress} / {status.Required} )";
             }
             if (disc) disc.color = status.IsUnlocked
-                ? new Color(.16f, .43f, .72f, .92f)
-                : new Color(.23f, .22f, .30f, .88f);
+                ? new Color(.16f, .43f, .72f, .80f)
+                : new Color(.23f, .22f, .30f, .74f);
             if (progressFill)
             {
                 progressFill.parent.gameObject.SetActive(!status.IsUnlocked);

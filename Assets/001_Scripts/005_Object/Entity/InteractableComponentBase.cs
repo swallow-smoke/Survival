@@ -9,7 +9,7 @@ namespace _001_Scripts.Entities
     {
         [Header("Interaction")]
         [SerializeField] private string displayLabel;
-        [SerializeField] private string promptKey = "F";
+        [SerializeField] private string promptKey = "LMB";
 
         protected virtual string DefaultInteractionLabel => GetType().Name;
         public abstract void Interact();
@@ -17,6 +17,12 @@ namespace _001_Scripts.Entities
         public virtual string GetLabel()
             => string.IsNullOrWhiteSpace(displayLabel) ? DefaultInteractionLabel : displayLabel;
 
-        public string GetPromptKey() => string.IsNullOrWhiteSpace(promptKey) ? "F" : promptKey;
+        public string GetPromptKey() => string.IsNullOrWhiteSpace(promptKey) ? "LMB" : promptKey;
+
+        public void ConfigureInteraction(string label, string key = "LMB")
+        {
+            displayLabel = label;
+            promptKey = key;
+        }
     }
 }

@@ -17,6 +17,7 @@ namespace _001_Scripts.UI.Component
         private Action _primary;
         private Action _secondary;
         private string _tooltip;
+        private SimpleRadialRecipeTooltipData _recipeTooltip;
 
         public void BindSerializedReferences(RadialCircleGraphic nodeCircle, Button nodeButton, Text nodeContent)
         {
@@ -33,6 +34,7 @@ namespace _001_Scripts.UI.Component
             _primary = entry.Selected;
             _secondary = entry.SecondarySelected;
             _tooltip = entry.Tooltip;
+            _recipeTooltip = entry.RecipeTooltip;
             gameObject.name = string.IsNullOrWhiteSpace(entry.Id) ? "Node" : entry.Id;
             ((RectTransform)transform).anchoredPosition = position;
             if (circle) circle.color = entry.Interactable ? enabledColor : disabledColor;
@@ -50,12 +52,14 @@ namespace _001_Scripts.UI.Component
             _primary = null;
             _secondary = null;
             _tooltip = null;
+            _recipeTooltip = null;
             gameObject.SetActive(false);
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (!string.IsNullOrWhiteSpace(_tooltip)) _owner?.ShowTooltip(_tooltip, eventData.position);
+            if (_recipeTooltip != null) _owner?.ShowRecipeTooltip(_recipeTooltip, eventData.position);
+            else if (!string.IsNullOrWhiteSpace(_tooltip)) _owner?.ShowTooltip(_tooltip, eventData.position);
         }
 
         public void OnPointerExit(PointerEventData eventData) => _owner?.HideTooltip();

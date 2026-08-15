@@ -38,6 +38,8 @@ namespace _001_Scripts.Structure
         [SerializeField] private BuoyancyPoint[] buoyancyPoints = Array.Empty<BuoyancyPoint>();
         [Tooltip("Sleeping rigidbodies do not need repeated water queries until Physics wakes them.")]
         [SerializeField] private bool skipSleepingBodies = true;
+        [SerializeField, Tooltip("물 영역 밖에서는 Rigidbody 중력을 항상 복구합니다.")]
+        private bool forceGravityOutsideWater = true;
 
         [Header("Fallback Physics")]
         [Min(0f), SerializeField] private float waterDensity = 1000f;
@@ -256,7 +258,7 @@ namespace _001_Scripts.Structure
             if (_rb == null) return;
             _rb.linearDamping = _airLinearDamping;
             _rb.angularDamping = _airAngularDamping;
-            _rb.useGravity = _originalUseGravity;
+            _rb.useGravity = forceGravityOutsideWater || _originalUseGravity;
             UpdateWaterTransition(false);
         }
 

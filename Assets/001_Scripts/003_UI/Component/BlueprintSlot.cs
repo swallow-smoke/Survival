@@ -40,8 +40,8 @@ namespace _001_Scripts.UI.Component
         {
             if (background)
                 background.color = selected
-                    ? new Color(0.42f, 0.25f, 0.72f, 0.96f)
-                    : new Color(0.13f, 0.08f, 0.23f, 0.88f);
+                    ? new Color(0.42f, 0.25f, 0.72f, 0.80f)
+                    : new Color(0.13f, 0.08f, 0.23f, 0.74f);
             if (stateText)
             {
                 stateText.text = selected ? "SELECTED" : "READY";

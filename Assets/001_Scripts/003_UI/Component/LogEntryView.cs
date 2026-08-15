@@ -27,8 +27,8 @@ namespace _001_Scripts.UI.Component
         {
             if (button && button.targetGraphic)
                 button.targetGraphic.color = selected
-                    ? new Color(.31f, .20f, .52f, .98f)
-                    : new Color(.13f, .08f, .23f, .88f);
+                    ? new Color(.31f, .20f, .52f, .80f)
+                    : new Color(.13f, .08f, .23f, .74f);
         }
     }
 }

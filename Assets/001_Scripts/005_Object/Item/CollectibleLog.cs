@@ -55,7 +55,7 @@ namespace _001_Scripts.Structure
         }
 
         public string GetLabel() => _entry != null ? $"로그 수집: {_entry.title}" : $"로그 수집: {logId}";
-        public string GetPromptKey() => "F";
+        public string GetPromptKey() => "LMB";
 
         private void EnsureHologram()
         {

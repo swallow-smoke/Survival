@@ -19,6 +19,7 @@ namespace _001_Scripts.UI
         [SerializeField] private BluePrintDataBase bpDB;
         [SerializeField] private ItemDataBase itemDB;
         [SerializeField, HideInInspector] private int editorStyleVersion;
+        [SerializeField, HideInInspector] private int editorLayoutVersion;
 
         [Header("UGUI - Recipe List")]
         [SerializeField] private GameObject blueprintSlotPrefab;

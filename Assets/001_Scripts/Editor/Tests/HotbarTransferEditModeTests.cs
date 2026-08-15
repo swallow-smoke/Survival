@@ -4,6 +4,7 @@ using System.Reflection;
 using _001_Scripts.Controller;
 using _001_Scripts.Data.Item;
 using _001_Scripts.Data.Message;
+using _001_Scripts.Data.SOJ;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -77,6 +78,57 @@ namespace _001_Scripts.Editor.Tests
             finally
             {
                 UnityEngine.Object.DestroyImmediate(gameObject);
+            }
+        }
+
+        [Test]
+        public void SwapItem_EquipmentAcceptsOnlyMatchingSlotAndCanReturnToInventory()
+        {
+            var gameObject = new GameObject("Equipment Transfer Test");
+            var database = ScriptableObject.CreateInstance<ItemDataBase>();
+            try
+            {
+                database.itemList.Add(100, new Item
+                {
+                    itemId = 100,
+                    itemName = "Test Body",
+                    equipmentSlot = EquipmentSlotType.Body
+                });
+                var controller = gameObject.AddComponent<InventoryController>();
+                SetField(controller, "itemDB", database);
+                SetField(controller, "maxSlots", 2);
+                SetField(controller, "hotbarSlotCount", 1);
+                SetField(controller, "items", new List<InventorySlot>
+                {
+                    new(new Instance(100, 1, 50f), 1),
+                    new(null, 0)
+                });
+
+                InvokeSwap(controller, new InvSwapMessage(0, 0,
+                    InventorySlotArea.Inventory, InventorySlotArea.Equipment));
+                Assert.That(controller.GetSlot(0).ins.itemId, Is.EqualTo(100),
+                    "Body equipment must be rejected by the head slot.");
+
+                InvokeSwap(controller, new InvSwapMessage(0, 1,
+                    InventorySlotArea.Inventory, InventorySlotArea.Equipment));
+                Assert.That(controller.GetSlot(0).IsEmpty, Is.True);
+                Assert.That(controller.GetEquipmentSlot(1).ins.itemId, Is.EqualTo(100));
+
+                InvokeSwap(controller, new InvSwapMessage(1, 0,
+                    InventorySlotArea.Equipment, InventorySlotArea.Inventory));
+                Assert.That(controller.GetEquipmentSlot(1).IsEmpty, Is.True);
+                Assert.That(controller.GetSlot(0).ins.itemId, Is.EqualTo(100));
+
+                InvokeSwap(controller, new InvSwapMessage(0, 0,
+                    InventorySlotArea.Inventory, InventorySlotArea.Hotbar));
+                Assert.That(controller.GetSlot(0).ins.itemId, Is.EqualTo(100),
+                    "Wearable equipment must not move into the hotbar.");
+                Assert.That(controller.GetHotbarSlot(0).IsEmpty, Is.True);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(gameObject);
+                UnityEngine.Object.DestroyImmediate(database);
             }
         }
 

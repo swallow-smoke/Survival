@@ -3,6 +3,11 @@ using _001_Scripts.Data.Item;
 
 namespace _001_Scripts.Interface
 {
+    public interface IItemCatalog
+    {
+        bool TryGetItem(int id, out Item item);
+    }
+
     public interface IInventoryReader
     {
         bool HasItem(int id, int count = 1);
@@ -39,6 +44,13 @@ namespace _001_Scripts.Interface
     {
         bool SelectHotbar(int index);
         void CycleHotbar(int direction);
+    }
+
+    public interface IEquipmentReader
+    {
+        int EquipmentSlotCount { get; }
+        EquipmentSlotType GetEquipmentSlotType(int index);
+        InventorySlot GetEquipmentSlot(int index);
     }
 
     public interface IInventoryService : IInventoryReader, IInventoryWriter, IInventoryActions { }

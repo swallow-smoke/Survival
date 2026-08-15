@@ -3,6 +3,7 @@ using _001_Scripts.Managers;
 using _001_Scripts.Entities;
 using _001_Scripts.Structure;
 using _001_Scripts.UI;
+using _001_Scripts.Vehicle.Component;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -15,6 +16,8 @@ namespace _001_Scripts.Editor
     {
         private const string StationName = "SubmarineFabricatorStation";
         private const string PanelName = "SubmarineFabricatorPanel";
+        private const string PrototypeName = "PrototypeSmallSubmarine";
+        private const string PrototypePrefabPath = "Assets/002_Prefabs/testsub.prefab";
         private const string MaterialFolder = "Assets/003_Resources/Materials/SubmarineFabricator";
 
         [InitializeOnLoadMethod]
@@ -27,7 +30,10 @@ namespace _001_Scripts.Editor
                 if (!scene.IsValid() || scene.path != "Assets/000_Scenes/SampleScene.unity") return;
                 var panel = UnityEngine.Object.FindAnyObjectByType<SubmarineFabricatorPanel>(FindObjectsInactive.Include);
                 var station = GameObject.Find(StationName);
+                var prototype = GameObject.Find(PrototypeName);
                 if (panel && station && panel.VisualVersion == SubmarineFabricatorPanel.CurrentVisualVersion &&
+                    prototype && prototype.GetComponent<SmallSubVehicle>() is
+                        { ConfigurationVersion: SmallSubVehicle.CurrentConfigurationVersion } &&
                     panel.GetComponent<CanvasGroup>() is { alpha: <= .001f, interactable: false, blocksRaycasts: false })
                     return;
                 InstallExperience();
@@ -44,7 +50,10 @@ namespace _001_Scripts.Editor
                 return;
             }
 
-            var station = EnsureStation();
+            var submarinePrefab = EnsurePrototypePrefab();
+            if (!submarinePrefab) return;
+            var station = EnsureStation(submarinePrefab);
+            EnsureScenePrototype(submarinePrefab, station);
             var panel = EnsurePanel(uiManager, station);
             uiManager.uiPanels["SubmarineFabricator"] = panel;
             EditorUtility.SetDirty(uiManager);
@@ -53,7 +62,7 @@ namespace _001_Scripts.Editor
             EditorSceneManager.MarkSceneDirty(uiManager.gameObject.scene);
             EditorSceneManager.SaveScene(uiManager.gameObject.scene);
             AssetDatabase.SaveAssets();
-            Debug.Log("[SubmarineFabricator] Installed circular prototype station, radial UI, and spawn point.");
+            Debug.Log("[SubmarineFabricator] Installed the one-seat submarine prefab, scene test vehicle, and fabricator.");
         }
 
         private static SubmarineFabricatorPanel EnsurePanel(UIManager uiManager,
@@ -86,12 +95,17 @@ namespace _001_Scripts.Editor
             scaler.referenceResolution = new Vector2(1600, 900);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = .5f;
+            var radial = panel.GetComponent<_001_Scripts.UI.Component.SimpleRadialMenuView>();
+            if (!radial) radial = Undo.AddComponent<_001_Scripts.UI.Component.SimpleRadialMenuView>(panel.gameObject);
+            radial.SetRoundedPanelSprite(AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/003_Resources/UI/SurvivalRoundedPanel.png"));
+            EditorUtility.SetDirty(radial);
             panel.Configure(station);
             panel.RebuildVisualTreeForEditor();
             return panel;
         }
 
-        private static SubmarineFabricator EnsureStation()
+        private static SubmarineFabricator EnsureStation(GameObject submarinePrefab)
         {
             var station = GameObject.Find(StationName);
             if (!station)
@@ -122,10 +136,104 @@ namespace _001_Scripts.Editor
                 spawn.transform.localPosition = new Vector3(0, .15f, -5.8f);
                 spawnPoint = spawn.transform;
             }
-            interactable.Configure(spawnPoint);
+            interactable.Configure(spawnPoint, submarinePrefab);
 
             if (!station.transform.Find("FabricatorVisuals")) BuildStationVisuals(station.transform);
             return interactable;
+        }
+
+        private static GameObject EnsurePrototypePrefab()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrototypePrefabPath);
+            if (!prefab)
+            {
+                Debug.LogError($"[Submarine] Source prefab was not found: {PrototypePrefabPath}");
+                return null;
+            }
+
+            var root = PrefabUtility.LoadPrefabContents(PrototypePrefabPath);
+            try
+            {
+                var entity = root.GetComponent<Entity>() ?? root.AddComponent<Entity>();
+                entity.Configure("prototype_small_submarine", "1인용 소형 잠수함", EntityKind.Submarine);
+                if (!root.GetComponent<Health>()) root.AddComponent<Health>();
+                if (!root.GetComponent<_001_Scripts.Entities.Vehicle>())
+                    root.AddComponent<_001_Scripts.Entities.Vehicle>();
+                if (!root.GetComponent<Submarine>()) root.AddComponent<Submarine>();
+                if (!root.GetComponent<PrototypeSubmarine>()) root.AddComponent<PrototypeSubmarine>();
+
+                var body = root.GetComponent<Rigidbody>() ?? root.AddComponent<Rigidbody>();
+                body.mass = 400f;
+                body.useGravity = false;
+                body.linearDamping = 1.5f;
+                body.angularDamping = 2f;
+                body.interpolation = RigidbodyInterpolation.Interpolate;
+                body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+                var cameraAnchor = root.transform.Find("CameraAnchor");
+                if (!cameraAnchor)
+                {
+                    var anchor = new GameObject("CameraAnchor");
+                    anchor.transform.SetParent(root.transform, false);
+                    anchor.transform.localPosition = new Vector3(0f, .55f, .65f);
+                    cameraAnchor = anchor.transform;
+                }
+
+                var exitPoint = root.transform.Find("ExitPoint");
+                if (!exitPoint)
+                {
+                    var exit = new GameObject("ExitPoint");
+                    exit.transform.SetParent(root.transform, false);
+                    exit.transform.localPosition = new Vector3(-1.7f, .2f, 0f);
+                    exitPoint = exit.transform;
+                }
+
+                var controller = root.GetComponent<SmallSubVehicle>() ?? root.AddComponent<SmallSubVehicle>();
+                controller.Configure(body, cameraAnchor, 10f, 8f, .5f);
+                var seat = root.GetComponentInChildren<SeatComponent>(true) ?? root.AddComponent<SeatComponent>();
+                seat.Configure(cameraAnchor, exitPoint, controller);
+
+                var hatch = root.GetComponentInChildren<HatchComponent>(true);
+                if (!hatch)
+                {
+                    var boardingPoint = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    boardingPoint.name = "BoardingPoint";
+                    boardingPoint.transform.SetParent(root.transform, false);
+                    boardingPoint.transform.localPosition = new Vector3(-.75f, .35f, 0f);
+                    boardingPoint.transform.localScale = new Vector3(.35f, .7f, .8f);
+                    var renderer = boardingPoint.GetComponent<Renderer>();
+                    if (renderer) renderer.enabled = false;
+                    hatch = boardingPoint.AddComponent<HatchComponent>();
+                }
+                hatch.gameObject.layer = 12;
+                hatch.ConfigureSmallSeat(seat);
+
+                PrefabUtility.SaveAsPrefabAsset(root, PrototypePrefabPath);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+
+            AssetDatabase.SaveAssets();
+            return AssetDatabase.LoadAssetAtPath<GameObject>(PrototypePrefabPath);
+        }
+
+        private static void EnsureScenePrototype(GameObject prefab, SubmarineFabricator station)
+        {
+            var instance = GameObject.Find(PrototypeName);
+            if (!instance)
+            {
+                instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                Undo.RegisterCreatedObjectUndo(instance, "Place Prototype Small Submarine");
+                instance.name = PrototypeName;
+            }
+
+            var spawnPoint = station.transform.Find("SubmarineSpawnPoint");
+            Vector3 basePosition = spawnPoint ? spawnPoint.position : station.transform.position;
+            instance.transform.SetPositionAndRotation(basePosition + station.transform.right * 3.2f,
+                station.transform.rotation);
+            EditorUtility.SetDirty(instance);
         }
 
         private static Vector3 GetStationPosition()

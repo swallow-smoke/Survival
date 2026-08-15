@@ -17,7 +17,7 @@ namespace _001_Scripts.Editor
         private const string RootName = "UGUI_InventoryRoot";
         private const string PrefabPath = "Assets/002_Prefabs/UI/InventorySlot.prefab";
         private const int SlotCount = 40;
-        private const int LayoutVersion = 4;
+        private const int LayoutVersion = 7;
 
         static SurvivalInventoryUGUIBuilder()
         {
@@ -70,7 +70,7 @@ namespace _001_Scripts.Editor
             Stretch(root.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
             var card = Image("InventoryCard", root.transform, new Color(.04f, .02f, .09f, .96f));
-            Anchor(card.rectTransform, new Vector2(.5f, .5f), new Vector2(1220, 700), new Vector2(0, -24));
+            Anchor(card.rectTransform, new Vector2(.5f, .5f), new Vector2(1500, 760), new Vector2(0, -24));
             AddOutline(card.gameObject, new Color(.62f, .49f, 1f, .48f), 2);
 
             var header = Image("Header", card.transform, new Color(.11f, .055f, .22f, .64f));
@@ -90,6 +90,30 @@ namespace _001_Scripts.Editor
             var close = MakeButton("CloseButton", header.transform, "×", new Color(0, 0, 0, 0), 30);
             Stretch(close.GetComponent<RectTransform>(), new Vector2(1, 0), Vector2.one,
                 new Vector2(-68, 6), new Vector2(-8, -6));
+            var equipmentArea = Image("PlayerEquipment", card.transform, new Color(.055f, .03f, .12f, .62f));
+            Stretch(equipmentArea.rectTransform, new Vector2(1, 0), Vector2.one,
+                new Vector2(-418, 88), new Vector2(-20, -94));
+            AddOutline(equipmentArea.gameObject, new Color(.55f, .48f, .91f, .34f), 1);
+            var equipmentHeader = Label("Title", equipmentArea.transform, "플레이어 장비", 15,
+                FontStyle.Bold, Color.white, TextAnchor.MiddleLeft);
+            Stretch(equipmentHeader.rectTransform, new Vector2(0, 1), Vector2.one,
+                new Vector2(16, -42), new Vector2(-12, -5));
+            var equipmentMeta = Label("Meta", equipmentArea.transform, "DRAG TO EQUIP", 9,
+                FontStyle.Bold, new Color(.65f, .58f, .82f), TextAnchor.MiddleRight);
+            Stretch(equipmentMeta.rectTransform, new Vector2(.45f, 1), Vector2.one,
+                new Vector2(0, -42), new Vector2(-14, -5));
+
+            var equipmentContent = CreateRect("EquipmentSlots", equipmentArea.transform);
+            Stretch(equipmentContent, Vector2.zero, Vector2.one, new Vector2(8, 12), new Vector2(-8, -52));
+            var equipmentGrid = equipmentContent.gameObject.AddComponent<GridLayoutGroup>();
+            equipmentGrid.padding = new RectOffset(2, 2, 2, 2);
+            equipmentGrid.cellSize = new Vector2(174, 104);
+            equipmentGrid.spacing = new Vector2(10, 10);
+            equipmentGrid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            equipmentGrid.constraintCount = 2;
+            equipmentGrid.startAxis = GridLayoutGroup.Axis.Horizontal;
+            equipmentGrid.childAlignment = TextAnchor.UpperCenter;
+
             var itemArea = Image("SlotBay", card.transform, new Color(.045f, .025f, .10f, .58f));
             Stretch(itemArea.rectTransform, Vector2.zero, Vector2.one, new Vector2(20, 88), new Vector2(-438, -94));
             AddOutline(itemArea.gameObject, new Color(.55f, .48f, .91f, .34f), 1);
@@ -143,76 +167,73 @@ namespace _001_Scripts.Editor
             scroll.verticalScrollbarSpacing = 4f;
 
             var slotPrefab = BuildSlotPrefab();
+            string[] equipmentNames = { "머리", "몸체", "다리", "발", "강화 칩 1", "강화 칩 2", "강화 칩 3", "강화 칩 4" };
+            string[] equipmentGlyphs = { "◉", "◇", "Ⅱ", "⌞", "⬡", "⬡", "⬡", "⬡" };
+            for (int i = 0; i < equipmentNames.Length; i++)
+            {
+                var equipmentSlotObject = (GameObject)PrefabUtility.InstantiatePrefab(slotPrefab, equipmentContent);
+                equipmentSlotObject.name = $"EquipmentSlot_{i:00}_{equipmentNames[i]}";
+                var equipmentSlot = equipmentSlotObject.GetComponent<ItemSlot>();
+                equipmentSlot.ConfigurePlaceholder(equipmentGlyphs[i], equipmentNames[i]);
+                PrefabUtility.RecordPrefabInstancePropertyModifications(equipmentSlot);
+            }
             for (int i = 0; i < SlotCount; i++)
             {
                 var slot = (GameObject)PrefabUtility.InstantiatePrefab(slotPrefab, content);
                 slot.name = $"Slot_{i:00}";
             }
 
-            var detail = Image("ItemDetails", card.transform, new Color(.055f, .03f, .12f, .62f));
-            Stretch(detail.rectTransform, new Vector2(1, 0), Vector2.one,
-                new Vector2(-418, 88), new Vector2(-20, -94));
-            AddOutline(detail.gameObject, new Color(.55f, .48f, .91f, .34f), 1);
-            var detailHeader = Label("Title", detail.transform, "아이템 분석", 15, FontStyle.Bold, Color.white, TextAnchor.MiddleLeft);
-            Stretch(detailHeader.rectTransform, new Vector2(0, 1), Vector2.one,
-                new Vector2(16, -40), new Vector2(-16, -5));
-
-            var preview = Image("Preview", detail.transform, new Color(.13f, .08f, .24f, .66f));
-            Stretch(preview.rectTransform, new Vector2(0, 1), new Vector2(0, 1),
-                new Vector2(18, -190), new Vector2(158, -50));
-            AddOutline(preview.gameObject, new Color(.63f, .51f, 1f, .42f), 1);
-            var glyph = Label("Glyph", preview.transform, "◇", 64, FontStyle.Bold,
-                new Color(.57f, .76f, 1f), TextAnchor.MiddleCenter);
-            Stretch(glyph.rectTransform, Vector2.zero, Vector2.one, new Vector2(8, 8), new Vector2(-8, -8));
-
-            var itemName = Label("ItemName", detail.transform, "아이템을 선택하세요", 22, FontStyle.Bold,
-                Color.white, TextAnchor.MiddleLeft);
-            Stretch(itemName.rectTransform, new Vector2(0, 1), Vector2.one,
-                new Vector2(176, -104), new Vector2(-16, -52));
-            var itemType = Label("ItemType", detail.transform, "NO ITEM SELECTED", 12, FontStyle.Bold,
-                new Color(.63f, .72f, 1f), TextAnchor.MiddleLeft);
-            Stretch(itemType.rectTransform, new Vector2(0, 1), Vector2.one,
-                new Vector2(176, -139), new Vector2(-16, -105));
-            var quantity = Label("ItemQuantity", detail.transform, string.Empty, 12, FontStyle.Normal,
-                new Color(.61f, .76f, .80f), TextAnchor.MiddleLeft);
-            Stretch(quantity.rectTransform, new Vector2(0, 1), Vector2.one,
-                new Vector2(176, -176), new Vector2(-16, -140));
-            var divider = Image("Divider", detail.transform, new Color(.68f, .56f, 1f, .32f));
-            Stretch(divider.rectTransform, new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(18, -211), new Vector2(-18, -209));
-            var description = Label("Description", detail.transform,
-                "슬롯을 클릭하면 아이템 정보가 표시됩니다.", 13, FontStyle.Normal,
-                new Color(.76f, .86f, .88f), TextAnchor.UpperLeft);
-            description.horizontalOverflow = HorizontalWrapMode.Wrap;
-            description.verticalOverflow = VerticalWrapMode.Overflow;
-            Stretch(description.rectTransform, Vector2.zero, Vector2.one,
-                new Vector2(18, 74), new Vector2(-18, -228));
-
-            var use = MakeButton("UseButton", detail.transform, "사용", new Color(.48f, .31f, .82f, .84f), 14);
-            Stretch(use.GetComponent<RectTransform>(), Vector2.zero, new Vector2(.5f, 0),
-                new Vector2(18, 16), new Vector2(-6, 60));
-            var drop = MakeButton("DropButton", detail.transform, "버리기", new Color(.17f, .11f, .29f, .78f), 14);
-            Stretch(drop.GetComponent<RectTransform>(), new Vector2(.5f, 0), new Vector2(1, 0),
-                new Vector2(6, 16), new Vector2(-18, 60));
             var sort = MakeButton("SortButton", card.transform, "≡  자동 정렬", new Color(.22f, .14f, .38f, .78f), 14);
             Stretch(sort.GetComponent<RectTransform>(), Vector2.zero, Vector2.zero,
                 new Vector2(20, 20), new Vector2(176, 66));
-            var hint = Label("Hint", card.transform, "클릭: 선택   •   드래그: 슬롯 이동   •   Tab: 닫기", 12,
+            var hint = Label("Hint", card.transform, "호버: 정보   •   장비 좌클릭: 장착/해제   •   드래그: 슬롯 이동", 12,
                 FontStyle.Normal, new Color(.61f, .76f, .80f), TextAnchor.MiddleLeft);
             Stretch(hint.rectTransform, Vector2.zero, new Vector2(1, 0),
                 new Vector2(196, 20), new Vector2(-20, 66));
+
+            var tooltip = Image("ItemTooltip", root.transform, new Color(.065f, .035f, .14f, .96f));
+            tooltip.rectTransform.anchorMin = tooltip.rectTransform.anchorMax = Vector2.zero;
+            tooltip.rectTransform.pivot = new Vector2(0, 1);
+            tooltip.rectTransform.sizeDelta = new Vector2(340, 190);
+            tooltip.rectTransform.anchoredPosition = new Vector2(24, 220);
+            AddOutline(tooltip.gameObject, new Color(.68f, .55f, 1f, .72f), 2);
+            var tooltipName = Label("Name", tooltip.transform, string.Empty, 18, FontStyle.Bold,
+                Color.white, TextAnchor.MiddleLeft);
+            Stretch(tooltipName.rectTransform, new Vector2(0, 1), Vector2.one,
+                new Vector2(16, -38), new Vector2(-16, -6));
+            var tooltipType = Label("Type", tooltip.transform, string.Empty, 10, FontStyle.Bold,
+                new Color(.65f, .75f, 1f), TextAnchor.MiddleLeft);
+            Stretch(tooltipType.rectTransform, new Vector2(0, 1), Vector2.one,
+                new Vector2(16, -62), new Vector2(-16, -38));
+            var tooltipDescription = Label("Description", tooltip.transform, string.Empty, 12, FontStyle.Normal,
+                new Color(.82f, .86f, .95f), TextAnchor.UpperLeft);
+            tooltipDescription.horizontalOverflow = HorizontalWrapMode.Wrap;
+            tooltipDescription.verticalOverflow = VerticalWrapMode.Truncate;
+            Stretch(tooltipDescription.rectTransform, Vector2.zero, Vector2.one,
+                new Vector2(16, 40), new Vector2(-16, -70));
+            var tooltipMeta = Label("Meta", tooltip.transform, string.Empty, 11, FontStyle.Bold,
+                new Color(.76f, .64f, 1f), TextAnchor.MiddleLeft);
+            Stretch(tooltipMeta.rectTransform, Vector2.zero, new Vector2(1, 0),
+                new Vector2(16, 8), new Vector2(-16, 36));
+            tooltip.gameObject.SetActive(false);
 
             var serialized = new SerializedObject(panel);
             serialized.FindProperty("maxInvSlot").intValue = SlotCount;
             serialized.FindProperty("invSlotPrefab").objectReferenceValue = slotPrefab;
             serialized.FindProperty("parentTrs").objectReferenceValue = content;
-            serialized.FindProperty("itemNameText").objectReferenceValue = itemName;
-            serialized.FindProperty("itemTypeText").objectReferenceValue = itemType;
-            serialized.FindProperty("itemDescriptionText").objectReferenceValue = description;
-            serialized.FindProperty("itemQuantityText").objectReferenceValue = quantity;
-            serialized.FindProperty("itemGlyphText").objectReferenceValue = glyph;
-            serialized.FindProperty("useButton").objectReferenceValue = use;
-            serialized.FindProperty("dropButton").objectReferenceValue = drop;
+            serialized.FindProperty("equipmentRoot").objectReferenceValue = equipmentContent;
+            serialized.FindProperty("itemNameText").objectReferenceValue = null;
+            serialized.FindProperty("itemTypeText").objectReferenceValue = null;
+            serialized.FindProperty("itemDescriptionText").objectReferenceValue = null;
+            serialized.FindProperty("itemQuantityText").objectReferenceValue = null;
+            serialized.FindProperty("itemGlyphText").objectReferenceValue = null;
+            serialized.FindProperty("useButton").objectReferenceValue = null;
+            serialized.FindProperty("dropButton").objectReferenceValue = null;
+            serialized.FindProperty("tooltipRoot").objectReferenceValue = tooltip.rectTransform;
+            serialized.FindProperty("tooltipNameText").objectReferenceValue = tooltipName;
+            serialized.FindProperty("tooltipTypeText").objectReferenceValue = tooltipType;
+            serialized.FindProperty("tooltipDescriptionText").objectReferenceValue = tooltipDescription;
+            serialized.FindProperty("tooltipMetaText").objectReferenceValue = tooltipMeta;
             serialized.FindProperty("sortButton").objectReferenceValue = sort;
             serialized.FindProperty("closeButton").objectReferenceValue = close;
             serialized.FindProperty("editorLayoutVersion").intValue = LayoutVersion;
@@ -225,7 +246,7 @@ namespace _001_Scripts.Editor
             AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(panel.gameObject.scene);
             if (saveScene) EditorSceneManager.SaveScene(panel.gameObject.scene);
-            Debug.Log("[Survival UI] Rebuilt translucent survival inventory with 40 serialized UGUI slots.");
+            Debug.Log("[Survival UI] Rebuilt inventory with 40 storage slots and 8 player equipment slots.");
         }
 
         private static void EnsureCraftController(InventoryPanel panel)

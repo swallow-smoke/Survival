@@ -28,7 +28,9 @@ namespace _001_Scripts.Controller
             
             builder.Add(playerMovementSubscriber.Subscribe(OnAnimation));
 
-            builder.Build();
+            bag = builder.Build();
         }
+
+        private void OnDestroy() => bag?.Dispose();
     }
 }

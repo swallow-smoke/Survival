@@ -7,6 +7,7 @@ namespace _001_Scripts.UI.Component
     public sealed class CrosshairGraphic : MaskableGraphic
     {
         [SerializeField] private bool interaction;
+        [SerializeField, Range(-1f, 1f)] private float progress = -1f;
 
         public bool Interaction
         {
@@ -19,12 +20,33 @@ namespace _001_Scripts.UI.Component
             }
         }
 
+        public float Progress
+        {
+            get => progress;
+            set
+            {
+                float next = value < 0f ? -1f : Mathf.Clamp01(value);
+                if (Mathf.Approximately(progress, next)) return;
+                progress = next;
+                SetVerticesDirty();
+            }
+        }
+
         protected override void OnPopulateMesh(VertexHelper helper)
         {
             helper.Clear();
             Vector2 center = GetPixelAdjustedRect().center;
             if (interaction) DrawInteraction(helper, center);
             else DrawDefault(helper, center);
+            if (progress >= 0f) DrawProgress(helper, center);
+        }
+
+        private void DrawProgress(VertexHelper helper, Vector2 center)
+        {
+            Color background = new(color.r, color.g, color.b, color.a * .2f);
+            AddArc(helper, center, 27f, 3.2f, 1f, -90f, background);
+            if (progress > .001f)
+                AddArc(helper, center, 27f, 3.2f, progress, -90f, color);
         }
 
         private void DrawDefault(VertexHelper helper, Vector2 center)
@@ -115,6 +137,30 @@ namespace _001_Scripts.UI.Component
             }
         }
 
+        private void AddArc(VertexHelper helper, Vector2 center, float radius, float thickness,
+            float normalized, float startDegrees, Color vertexColor)
+        {
+            int segments = Mathf.Max(1, Mathf.CeilToInt(64f * Mathf.Clamp01(normalized)));
+            float inner = radius - thickness * .5f;
+            float outer = radius + thickness * .5f;
+            int start = helper.currentVertCount;
+            float arc = Mathf.PI * 2f * Mathf.Clamp01(normalized);
+            float startRadians = startDegrees * Mathf.Deg2Rad;
+            for (int i = 0; i <= segments; i++)
+            {
+                float angle = startRadians + arc * (i / (float)segments);
+                Vector2 direction = new(Mathf.Cos(angle), Mathf.Sin(angle));
+                AddVertex(helper, center + direction * outer, vertexColor);
+                AddVertex(helper, center + direction * inner, vertexColor);
+            }
+            for (int i = 0; i < segments; i++)
+            {
+                int current = start + i * 2;
+                helper.AddTriangle(current, current + 2, current + 3);
+                helper.AddTriangle(current, current + 3, current + 1);
+            }
+        }
+
         private void AddQuad(VertexHelper helper, Vector2 min, Vector2 max)
         {
             int start = helper.currentVertCount;
@@ -127,9 +173,12 @@ namespace _001_Scripts.UI.Component
         }
 
         private void AddVertex(VertexHelper helper, Vector2 position)
+            => AddVertex(helper, position, color);
+
+        private void AddVertex(VertexHelper helper, Vector2 position, Color vertexColor)
         {
             var vertex = UIVertex.simpleVert;
-            vertex.color = color;
+            vertex.color = vertexColor;
             vertex.position = position;
             helper.AddVert(vertex);
         }

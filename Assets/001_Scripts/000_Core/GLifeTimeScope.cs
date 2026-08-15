@@ -53,13 +53,11 @@ namespace _001_Scripts.Core
 
             #region Player
             
-            builder.RegisterMessageBroker<PlayerMovementStateMsg>(options);
             builder.RegisterMessageBroker<PlayerUIStateMsg>(options);
             builder.RegisterMessageBroker<PlayerVehicleStateMsg>(options);
             builder.RegisterMessageBroker<VehicleControlAssignedMsg>(options);
 
             builder.RegisterMessageBroker<PlayerMovementMessage>(options);
-            builder.RegisterMessageBroker<PlayerWaterStateMessage>(options);
             builder.RegisterMessageBroker<PlayerStatMessage>(options);
 
             #endregion
@@ -84,11 +82,17 @@ namespace _001_Scripts.Core
                 .As<IPickupSpawner>();
             builder.RegisterComponentInHierarchy<InventoryController>()
                 .As<IInventoryService>()
+                .As<IItemCatalog>()
+                .As<IEquipmentReader>()
                 .As<IInventoryReader>()
                 .As<IInventoryWriter>()
                 .As<IInventoryActions>()
                 .As<IHotbarReader>()
                 .As<IHotbarActions>();
+            builder.RegisterComponentInHierarchy<BuildingPlacementController>()
+                .As<IBuildingPlacementService>()
+                .As<IBuildSelectionReader>();
+            builder.Register<_001_Scripts.Managers.ScanRewardService>(Lifetime.Singleton).As<IScanRewardService>();
             builder.RegisterComponentInHierarchy<GameManager>().As<IGameService>().As<IInitializable>();
             builder.RegisterComponentInHierarchy<UIManager>()
                 .As<IUIService>()
@@ -107,7 +111,8 @@ namespace _001_Scripts.Core
                 .As<IInteractionInput>()
                 .As<IVehicleInput>()
                 .As<IUIInput>()
-                .As<IHotbarInput>();
+                .As<IHotbarInput>()
+                .As<IHeldItemInput>();
             builder.RegisterComponentInHierarchy<CraftController>()
                 .As<ICraftService>()
                 .As<ICraftingService>();
@@ -122,6 +127,12 @@ namespace _001_Scripts.Core
             builder.Register<InventoryHarvestToolSelector>(Lifetime.Singleton).As<IHarvestToolSelector>();
             builder.Register<DotsResourceInteractionService>(Lifetime.Singleton).As<IResourceInteractionService>();
             builder.RegisterEntryPoint<DotsResourceInventoryBridge>();
+
+            builder.Register<DotsWorldCreatureGateway>(Lifetime.Singleton)
+                .As<IWorldCreatureGateway>()
+                .As<ICreatureSpawner>();
+            builder.Register<InventoryCreatureToolSelector>(Lifetime.Singleton).As<ICreatureToolSelector>();
+            builder.Register<DotsCreatureInteractionService>(Lifetime.Singleton).As<ICreatureInteractionService>();
 
             #endregion
             

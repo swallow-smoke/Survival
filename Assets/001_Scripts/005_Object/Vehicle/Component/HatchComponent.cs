@@ -41,13 +41,20 @@ namespace _001_Scripts.Vehicle.Component
 
         protected override string DefaultInteractionLabel => "Enter";
 
+        public void ConfigureSmallSeat(SeatComponent seat)
+        {
+            type = HatchType.SmallSeat;
+            linkedSeat = seat;
+            ConfigureInteraction("잠수함 탑승", "LMB");
+        }
+
         public override void Interact()
         {
             var player = _playerContext.PlayerTrs;
             switch (type)
             {
                 case HatchType.SmallSeat:
-                    linkedSeat.Sit(player);
+                    if (linkedSeat) linkedSeat.Sit(player);
                     break;
                 case HatchType.LargeEntrance:
                     EnterLarge(player);

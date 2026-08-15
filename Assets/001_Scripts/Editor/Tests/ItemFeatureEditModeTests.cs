@@ -103,6 +103,40 @@ namespace _001_Scripts.Editor.Tests
             }
         }
 
+        [Test]
+        public void FirstPersonHolder_UsesSceneAuthoredProceduralMotionWithoutAnimatorController()
+        {
+            var holderObject = new UnityEngine.GameObject("Player");
+            var cameraObject = new UnityEngine.GameObject("Camera");
+            var rigObject = new UnityEngine.GameObject("FirstPersonItemRig");
+            var viewPrefab = new UnityEngine.GameObject("ToolView");
+            try
+            {
+                rigObject.transform.SetParent(cameraObject.transform, false);
+                rigObject.transform.localPosition = new UnityEngine.Vector3(.28f, -.25f, .52f);
+                var motion = rigObject.AddComponent<FirstPersonItemMotion>();
+                motion.Configure(rigObject.transform);
+                var holder = holderObject.AddComponent<FirstPersonItemHolder>();
+                holder.Configure(rigObject.transform, motion);
+
+                Assert.That(holder.TryEquip(viewPrefab), Is.True);
+                Assert.That(holder.HeldObject.transform.parent, Is.SameAs(rigObject.transform));
+                Assert.That(holder.TryPerformPrimaryAction(), Is.True);
+                Assert.That(holder.TryPerformHarvestAction(), Is.True);
+
+                holder.Unequip();
+                Assert.That(holder.IsHolding, Is.False);
+                Assert.That(rigObject.transform.localPosition,
+                    Is.EqualTo(new UnityEngine.Vector3(.28f, -.25f, .52f)));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(holderObject);
+                UnityEngine.Object.DestroyImmediate(cameraObject);
+                UnityEngine.Object.DestroyImmediate(viewPrefab);
+            }
+        }
+
         private static Item CreateItem(params ItemAttribute[] attributes) => new()
         {
             itemType = ItemType.materials,

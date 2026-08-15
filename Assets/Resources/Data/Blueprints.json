@@ -127,12 +127,12 @@
       ],
       "craftTime": 3.0,
       "requiredLevel": 0,
-      "isUnlocked": false,
-      "unlockProgress": 2,
-      "unlockRequired": 3,
-      "categoryPath": "Structures/Components",
+      "isUnlocked": true,
+      "unlockProgress": 1,
+      "unlockRequired": 1,
+      "categoryPath": "Structures/Foundation",
       "iconResource": "",
-      "bluePrintName": "방수 구조 패널",
+      "bluePrintName": "Habitat Foundation",
       "bluePrintId": 15
     },
     {

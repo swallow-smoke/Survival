@@ -15,7 +15,7 @@ namespace _001_Scripts.UI
 {
     public sealed class WorkbenchPanel : PanelBase
     {
-        public const int CurrentVisualVersion = 9;
+        public const int CurrentVisualVersion = 14;
         private const string LegacyRootName = "WorkbenchRadialRoot";
 
         [Header("Data")]
@@ -152,7 +152,27 @@ namespace _001_Scripts.UI
             string tooltip = BuildRecipeText(blueprint, label, true);
             entries.Add(new SimpleRadialEntry($"Recipe_{blueprint.bluePrintId}",
                 InventoryPanel.GetGlyph(result.itemType), label, () => Craft(blueprint), affordable, tooltip,
-                () => PinRecipe(blueprint)));
+                () => PinRecipe(blueprint), BuildRecipeTooltip(blueprint, label)));
+        }
+
+        private SimpleRadialRecipeTooltipData BuildRecipeTooltip(BlueprintModel blueprint, string label)
+        {
+            var ingredients = new List<SimpleRadialIngredientData>();
+            if (blueprint.recipe != null)
+            {
+                for (int i = 0; i < blueprint.recipe.Count; i++)
+                {
+                    var required = blueprint.recipe[i];
+                    var item = TryGetItem(required.item);
+                    ingredients.Add(new SimpleRadialIngredientData(item?.icon,
+                        item != null ? InventoryPanel.GetGlyph(item.itemType) : "?",
+                        item != null && !string.IsNullOrWhiteSpace(item.itemName)
+                            ? item.itemName
+                            : $"Item {required.item}", required.count));
+                }
+            }
+            string description = $"{label}\n제작 시간 {blueprint.craftTime:0.#}초\n좌클릭 제작 · 우클릭 제작법 고정";
+            return new SimpleRadialRecipeTooltipData(description, ingredients);
         }
 
         private void EnterCategory(string path)
@@ -298,6 +318,19 @@ namespace _001_Scripts.UI
             catch (KeyNotFoundException)
             {
                 return $"아이템 {itemId}";
+            }
+        }
+
+        private _001_Scripts.Data.Item.Item TryGetItem(int itemId)
+        {
+            if (!itemDatabase) return null;
+            try
+            {
+                return itemDatabase.GetItem(itemId);
+            }
+            catch (KeyNotFoundException)
+            {
+                return null;
             }
         }
 

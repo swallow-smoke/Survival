@@ -6,6 +6,7 @@ using _001_Scripts.Data.Message.Player;
 using _001_Scripts.Data.Structure.Interface;
 using _001_Scripts.Entities;
 using _001_Scripts.Interface;
+using _001_Scripts.Structure;
 using _001_Scripts.Type.States;
 using MessagePipe;
 using UnityEngine;
@@ -21,6 +22,7 @@ namespace _001_Scripts.Controller
     {
         [SerializeField] private Transform _trs;
         [SerializeField] private float maxDistance = 2.0f;
+        [SerializeField, Min(.1f)] private float scanTargetPromptDistance = 8f;
         [SerializeField] private LayerMask interactLayer;
         [SerializeField] private Material _outlineMat;
 
@@ -31,6 +33,9 @@ namespace _001_Scripts.Controller
         private PlayerUIState _uiState;
         private IInputService _input;
         private IResourceInteractionService _resourceInteraction;
+        private ICreatureInteractionService _creatureInteraction;
+        private bool _hasCreatureTarget;
+        private string _creatureLabel;
         private IDisposable _bag;
         private OutlineHighlighter _highlighter;
         private bool _hasResourceTarget;
@@ -38,16 +43,33 @@ namespace _001_Scripts.Controller
         private FirstPersonItemHolder _itemHolder;
         [SerializeField] private ResourceHitParticlePool resourceHitParticles;
         private Vector3 _resourceHitPoint;
+        private ScannableTarget _scanTarget;
+        private float _scanElapsed;
+        private bool _scanHeld;
+        private bool _hasScanTarget;
+        private string _scanNeedScannerLabel;
+        private string _scanPromptLabel;
+        private string _scanProgressPrefix;
+        private string _scanProgressLabel;
+        private int _scanProgressPercent = -1;
+        private IScanRewardService _scanRewards;
+        private IBuildingPlacementService _buildingPlacement;
 
         [Inject]
         public void Construct(IPublisher<InteractionUIMessage> uiPublisher,
             ISubscriber<PlayerUIStateMsg> uiStateSubscriber,
             IInputService inputService,
-            IResourceInteractionService resourceInteraction)
+            IResourceInteractionService resourceInteraction,
+            ICreatureInteractionService creatureInteraction,
+            IScanRewardService scanRewards,
+            IBuildingPlacementService buildingPlacement)
         {
             _uiPublisher = uiPublisher;
             _input = inputService;
             _resourceInteraction = resourceInteraction;
+            _creatureInteraction = creatureInteraction;
+            _scanRewards = scanRewards;
+            _buildingPlacement = buildingPlacement;
             _highlighter = new OutlineHighlighter(_outlineMat);
             var builder = DisposableBag.CreateBuilder();
             builder.Add(uiStateSubscriber.Subscribe(OnUIStateChanged));
@@ -60,6 +82,7 @@ namespace _001_Scripts.Controller
             if (_input == null) return;
 
             _input.OnInteract += HandleInteract;
+            _input.OnScanHoldChanged += HandleScanHoldChanged;
         }
 
         private void OnUIStateChanged(PlayerUIStateMsg msg)
@@ -78,18 +101,33 @@ namespace _001_Scripts.Controller
             _hasResourceTarget = false;
             _resourceLabel = null;
             _resourceInteraction?.ClearFocus();
-            _uiPublisher.Publish(new InteractionUIMessage(false, "", "F"));
+            ClearCreatureFocus();
+            CancelScan();
+            _uiPublisher.Publish(new InteractionUIMessage(false, "", "LMB"));
         }
 
         private void Update()
         {
-            if (_uiState != PlayerUIState.None) return;
+            if (_buildingPlacement?.IsPlacing == true)
+            {
+                if (_lastHitTrs != null || _hasResourceTarget || _hasCreatureTarget || _hasScanTarget) ClearTarget();
+                return;
+            }
+
+            if (_uiState != PlayerUIState.None)
+            {
+                CancelScan();
+                return;
+            }
+
+            if (TryUpdateScan()) return;
 
             RaycastHit hit;
             if (Physics.Raycast(_trs.position, _trs.forward, out hit, maxDistance, interactLayer))
             {
                 _hasResourceTarget = false;
                 _resourceInteraction?.ClearFocus();
+                ClearCreatureFocus();
                 Transform hitTrs = hit.collider.transform;
                 if (!ReferenceEquals(_lastHitTrs, hitTrs))
                 {
@@ -121,7 +159,7 @@ namespace _001_Scripts.Controller
                         label = _current?.GetLabel() ?? "";
                     }
 
-                    string promptKey = _current is IInteractionPrompt prompt ? prompt.GetPromptKey() : "F";
+                    string promptKey = _current is IInteractionPrompt prompt ? prompt.GetPromptKey() : "LMB";
                     _uiPublisher.Publish(new InteractionUIMessage(_current != null, label, promptKey));
                 }
             }
@@ -135,15 +173,35 @@ namespace _001_Scripts.Controller
                     _current = null;
                 }
 
+                ClearCreatureFocus();
                 if (!_hasResourceTarget || _resourceLabel != resourceFocus.Label)
                 {
                     _hasResourceTarget = true;
                     _resourceLabel = resourceFocus.Label;
-                    _uiPublisher.Publish(new InteractionUIMessage(true, resourceFocus.Label, "F"));
+                    _uiPublisher.Publish(new InteractionUIMessage(true, resourceFocus.Label, "LMB"));
                 }
                 _resourceHitPoint = resourceFocus.HitPoint;
             }
-            else if (_lastHitTrs != null || _hasResourceTarget)
+            else if (_creatureInteraction != null &&
+                     _creatureInteraction.TryFocus(_trs.position, _trs.forward, maxDistance, out var creatureFocus))
+            {
+                if (_lastHitTrs != null)
+                {
+                    _highlighter.SetHighlight(_lastHitTrs.gameObject, false);
+                    _lastHitTrs = null;
+                    _current = null;
+                }
+
+                _hasResourceTarget = false;
+                if (!_hasCreatureTarget || _creatureLabel != creatureFocus.Label)
+                {
+                    _hasCreatureTarget = true;
+                    _creatureLabel = creatureFocus.Label;
+                    _uiPublisher.Publish(new InteractionUIMessage(creatureFocus.CanInteract, creatureFocus.Label,
+                        "LMB"));
+                }
+            }
+            else if (_lastHitTrs != null || _hasResourceTarget || _hasCreatureTarget)
             {
                 ClearTarget();
             }
@@ -151,25 +209,174 @@ namespace _001_Scripts.Controller
 
         private void HandleInteract()
         {
+            if (_buildingPlacement?.IsPlacing == true) return;
             if (_uiState != PlayerUIState.None) return;
             if (_current is IConditionalInteractionTarget && !_canInteract) return;
             if (_current != null)
             {
                 _current.Interact();
+                if (_current is ResourceNode)
+                    _itemHolder?.TryPerformHarvestAction();
                 return;
             }
 
             if (_resourceInteraction?.InteractFocused() == true)
             {
                 resourceHitParticles?.Play(_resourceHitPoint);
-                _itemHolder?.TryPerformPrimaryAction();
+                _itemHolder?.TryPerformHarvestAction();
+                return;
             }
+
+            if (_creatureInteraction?.InteractFocused() == true)
+            {
+                _itemHolder?.TryPerformPrimaryAction();
+                return;
+            }
+
+            _itemHolder?.TryPerformPrimaryAction();
+        }
+
+        private void ClearCreatureFocus()
+        {
+            _hasCreatureTarget = false;
+            _creatureLabel = null;
+            _creatureInteraction?.ClearFocus();
+        }
+
+        private bool TryUpdateScan()
+        {
+            bool hasScanner = TryGetScannerRange(out float scanRange);
+            float detectionRange = hasScanner ? scanRange : Mathf.Max(maxDistance, scanTargetPromptDistance);
+            if (!Physics.Raycast(_trs.position, _trs.forward, out RaycastHit hit, detectionRange, interactLayer))
+            {
+                ClearScanFocus();
+                return false;
+            }
+
+            ScannableTarget target = hit.collider.GetComponentInParent<ScannableTarget>();
+            if (!target || target.IsScanned)
+            {
+                ClearScanFocus();
+                return false;
+            }
+
+            if (_scanTarget != target)
+            {
+                if (_scanTarget) _scanTarget.SetVisual(0f, false);
+                _scanTarget = target;
+                _scanElapsed = 0f;
+                CacheScanLabels(target);
+            }
+
+            if (_lastHitTrs != null)
+            {
+                _highlighter.SetHighlight(_lastHitTrs.gameObject, false);
+                _lastHitTrs = null;
+                _current = null;
+            }
+            _hasResourceTarget = false;
+            _resourceInteraction?.ClearFocus();
+            ClearCreatureFocus();
+            _hasScanTarget = true;
+            float progress = Mathf.Clamp01(_scanElapsed / target.ScanTime);
+
+            if (!hasScanner)
+            {
+                target.SetVisual(progress, false);
+                _uiPublisher.Publish(new InteractionUIMessage(
+                    true, _scanNeedScannerLabel, "", progress, true));
+                return true;
+            }
+
+            if (_scanHeld)
+            {
+                if (_scanElapsed <= 0f) _itemHolder?.TryPerformPrimaryAction();
+                _scanElapsed = Mathf.Min(target.ScanTime, _scanElapsed + Time.deltaTime);
+                progress = _scanElapsed / target.ScanTime;
+                target.SetVisual(progress, true);
+                int percent = Mathf.RoundToInt(progress * 100f);
+                if (percent != _scanProgressPercent)
+                {
+                    _scanProgressPercent = percent;
+                    _scanProgressLabel = $"{_scanProgressPrefix}{percent}%";
+                }
+                _uiPublisher.Publish(new InteractionUIMessage(
+                    true, _scanProgressLabel, "RMB", progress));
+
+                if (_scanElapsed >= target.ScanTime)
+                    CompleteScan(target);
+            }
+            else
+            {
+                target.SetVisual(progress, false);
+                _uiPublisher.Publish(new InteractionUIMessage(
+                    true, _scanPromptLabel, "RMB", progress));
+            }
+
+            return true;
+        }
+
+        private void CacheScanLabels(ScannableTarget target)
+        {
+            string displayName = target.DisplayName;
+            _scanNeedScannerLabel = $"스캔 대상: {displayName} - 스캐너가 필요합니다!";
+            _scanPromptLabel = $"우클릭을 누르고 스캔: {displayName}";
+            _scanProgressPrefix = $"스캔 중: {displayName}  ";
+            _scanProgressLabel = null;
+            _scanProgressPercent = -1;
+        }
+
+        private bool TryGetScannerRange(out float range)
+        {
+            range = 0f;
+            if (!_itemHolder || _itemHolder.HeldItem == null ||
+                !_itemHolder.HeldItem.TryGetFeature<_001_Scripts.Data.Item.IScannableItem>(out var scanner))
+                return false;
+
+            range = Mathf.Max(maxDistance, scanner.Range);
+            return range > 0f;
+        }
+
+        private void HandleScanHoldChanged(bool held)
+        {
+            _scanHeld = held;
+            if (!held && _scanTarget)
+            {
+                _scanTarget.SetVisual(0f, false);
+            }
+        }
+
+        private void CompleteScan(ScannableTarget target)
+        {
+            target.MarkScanned();
+            _scanRewards?.Grant(target);
+
+            _scanTarget = null;
+            _scanElapsed = 0f;
+            _hasScanTarget = false;
+            _uiPublisher.Publish(new InteractionUIMessage(false, "", "RMB"));
+        }
+
+        private void ClearScanFocus()
+        {
+            if (_scanTarget) _scanTarget.SetVisual(0f, false);
+            bool hadFocus = _hasScanTarget;
+            _hasScanTarget = false;
+            if (hadFocus) _uiPublisher.Publish(new InteractionUIMessage(false, "", "RMB"));
+        }
+
+        private void CancelScan()
+        {
+            ClearScanFocus();
         }
 
         private void OnDestroy()
         {
             if (_input != null)
+            {
                 _input.OnInteract -= HandleInteract;
+                _input.OnScanHoldChanged -= HandleScanHoldChanged;
+            }
 
             _bag?.Dispose();
         }

@@ -93,9 +93,15 @@ namespace _001_Scripts.UI
         {
             _hasInteraction = message.isVisible;
             _crosshair.Interaction = _hasInteraction;
-            _crosshair.color = _hasInteraction
+            _crosshair.Progress = message.isVisible ? message.progress : -1f;
+            _crosshair.color = message.isWarning
+                ? new Color(1f, .58f, .24f, 1f)
+                : _hasInteraction
                 ? new Color(.3f, .88f, 1f, 1f)
                 : new Color(.94f, .97f, 1f, .9f);
+            _prompt.color = message.isWarning
+                ? new Color(1f, .62f, .28f, 1f)
+                : new Color(.78f, .92f, 1f, 1f);
             _prompt.gameObject.SetActive(_hasInteraction);
             _prompt.text = !_hasInteraction
                 ? string.Empty
