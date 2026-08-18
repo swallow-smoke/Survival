@@ -3,14 +3,19 @@
     "com.cysharp.messagepipe": "1.8.1",
     "com.cysharp.messagepipe.vcontainer": "1.8.1",
     "com.cysharp.unitask": "2.5.11",
+    "com.emiteat.worldbuilder": "https://github.com/swallow-smoke/WorldBuilder.git",
+    "com.unity.entities": "6.4.0",
+    "com.unity.entities.graphics": "6.4.0",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.cinemachine": "3.1.6",
     "com.unity.ide.rider": "3.0.40",
     "com.unity.inputsystem": "1.19.0",
     "com.unity.multiplayer.center": "1.0.1",
     "com.unity.postprocessing": "3.5.4",
+    "com.unity.physics": "1.4.3",
     "com.unity.probuilder": "6.0.9",
     "com.unity.render-pipelines.universal": "17.4.0",
+    "com.unity.splines": "2.8.4",
     "com.unity.terrain-tools": "5.3.2",
     "jp.hadashikick.vcontainer": "1.18.0",
     "com.unity.modules.accessibility": "1.0.0",
@@ -47,7 +52,7 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0",
-    "com.emiteat.worldbuilder": "file:com.emiteat.worldbuilder"
+    "com.unity.ai.assistant": "2.14.0-pre.1"
   },
   "scopedRegistries": [
     {

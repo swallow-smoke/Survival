@@ -27,6 +27,7 @@ namespace _001_Scripts.Core
     public class GLifeTimeScope : LifetimeScope
     {
         [SerializeField] private HarvestToolCatalog harvestToolCatalog;
+        [SerializeField] private CreatureColorFoodCatalog creatureColorFoodCatalog;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -130,9 +131,22 @@ namespace _001_Scripts.Core
 
             builder.Register<DotsWorldCreatureGateway>(Lifetime.Singleton)
                 .As<IWorldCreatureGateway>()
-                .As<ICreatureSpawner>();
+                .As<ICreatureSpawner>()
+                .As<IWorldEntityGateway>();
+            builder.RegisterInstance(creatureColorFoodCatalog != null
+                ? creatureColorFoodCatalog
+                : ScriptableObject.CreateInstance<CreatureColorFoodCatalog>());
             builder.Register<InventoryCreatureToolSelector>(Lifetime.Singleton).As<ICreatureToolSelector>();
             builder.Register<DotsCreatureInteractionService>(Lifetime.Singleton).As<ICreatureInteractionService>();
+            builder.RegisterEntryPoint<CreaturePlayerFocusBridge>();
+            builder.RegisterEntryPoint<EntityManager>()
+                .AsSelf()
+                .As<IEntityManager>()
+                .As<IEntitySpawnService>()
+                .As<IEntityDirectory>()
+                .As<IEntityLifecycle>()
+                .As<IEntityInteractions>()
+                .As<IEntitySettlement>();
 
             #endregion
             
