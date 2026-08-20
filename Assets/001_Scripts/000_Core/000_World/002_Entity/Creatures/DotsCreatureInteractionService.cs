@@ -1,10 +1,11 @@
+using _001_Scripts._000_Core._000_World._002_Entity.Interface;
 using _001_Scripts.Data.Item;
 using _001_Scripts.Interface;
 using Unity.Entities;
 using UnityEngine;
 using WorldBuilder.Entities.Creatures;
 
-namespace _001_Scripts.Managers
+namespace _001_Scripts._000_Core._000_World._002_Entity.Creatures
 {
     public sealed class DotsCreatureInteractionService : ICreatureInteractionService
     {

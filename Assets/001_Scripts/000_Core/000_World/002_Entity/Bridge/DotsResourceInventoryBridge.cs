@@ -1,8 +1,9 @@
+using _001_Scripts._000_Core._000_World._002_Entity.Interface;
 using _001_Scripts.Interface;
 using VContainer;
 using VContainer.Unity;
 
-namespace _001_Scripts.Managers
+namespace _001_Scripts._000_Core._000_World._002_Entity.Bridge
 {
     public sealed class DotsResourceInventoryBridge : ITickable
     {

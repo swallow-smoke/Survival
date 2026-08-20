@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b015192c3a9f4743a68c4ecebe404e2, type: 3}
+  m_Script: {fileID: 11500000, guid: f3560b707698026498b6f782af1b9805, type: 3}
   m_Name: PrefabBrushSettings
   m_EditorClassIdentifier: WorldBuilder.Editor::WorldBuilder.Editor.PrefabBrush.PrefabBrushSettings
-  seed: 31796
+  seed: 15880
   brushRadius: 3
   brushDensity: 10
   eraseMode: 0

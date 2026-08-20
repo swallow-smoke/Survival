@@ -1,4 +1,5 @@
 using System;
+using _001_Scripts._000_Core._000_World._002_Entity.Interface;
 using _001_Scripts.Controller.Handler;
 using _001_Scripts.Controller.Interaction;
 using _001_Scripts.Data.Message;

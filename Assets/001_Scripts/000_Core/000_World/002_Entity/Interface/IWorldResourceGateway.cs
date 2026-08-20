@@ -4,7 +4,7 @@ using Unity.Entities;
 using UnityEngine;
 using WorldBuilder.Entities.Resources;
 
-namespace _001_Scripts.Interface
+namespace _001_Scripts._000_Core._000_World._002_Entity.Interface
 {
     public interface IWorldResourceGateway
     {

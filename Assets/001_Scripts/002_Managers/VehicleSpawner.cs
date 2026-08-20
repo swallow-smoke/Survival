@@ -1,3 +1,4 @@
+using _001_Scripts._000_Core._000_World._002_Entity.Interface;
 using _001_Scripts.Interface;
 using UnityEngine;
 

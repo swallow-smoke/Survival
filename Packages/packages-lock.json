@@ -22,7 +22,7 @@
       "url": "https://package.openupm.com"
     },
     "com.emiteat.worldbuilder": {
-      "version": "file:com.emiteat.worldbuilder",
+      "version": "file:WorldBuilder",
       "depth": 0,
       "source": "embedded",
       "dependencies": {

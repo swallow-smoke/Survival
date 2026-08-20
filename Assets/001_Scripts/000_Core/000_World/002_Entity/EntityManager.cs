@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using _001_Scripts._000_Core._000_World._002_Entity.Interface;
 using _001_Scripts.Interface;
 using Unity.Mathematics;
 using UnityEngine;
@@ -7,7 +8,7 @@ using VContainer;
 using VContainer.Unity;
 using WorldBuilder.Entities.Creatures;
 
-namespace _001_Scripts.Managers
+namespace _001_Scripts._000_Core._000_World._002_Entity
 {
     public sealed class EntityManager : IEntityManager, ITickable
     {
