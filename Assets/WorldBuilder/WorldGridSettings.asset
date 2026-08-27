@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4ac05d59b9c5ca4db3172896a7b5171, type: 3}
+  m_Script: {fileID: 11500000, guid: 4daae4d25c6fc754497758f797a9b5c9, type: 3}
   m_Name: WorldGridSettings
   m_EditorClassIdentifier: WorldBuilder.Runtime::WorldBuilder.Runtime.Grid.WorldGridSettings
   worldId: SurvivalWorld

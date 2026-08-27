@@ -123,7 +123,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5801832349333290715}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7dc00f85f397d447838027a5b0169e8, type: 3}
+  m_Script: {fileID: 11500000, guid: 3718356e4c8108e4c895b60602624d19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Authoring.WorldEntityAuthoring
   prefabId: 1000
@@ -142,7 +142,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5801832349333290715}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57ccacbff2c05da44be697958b43e025, type: 3}
+  m_Script: {fileID: 11500000, guid: 48a3740674b519f47be9bb080619afdf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Resources.Authoring.DroppedItemAuthoring
   itemId: 0

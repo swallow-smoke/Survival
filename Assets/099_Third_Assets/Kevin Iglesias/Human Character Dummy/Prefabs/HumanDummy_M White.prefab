@@ -39688,7 +39688,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3503167532966410781}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f825255551b5f374dbf89a559ca03723, type: 3}
+  m_Script: {fileID: 11500000, guid: 9bb3908da9454d7449c140834d2cc14f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Authoring.WorldEntityRegionFocus
   gridSettings: {fileID: 11400000, guid: 4e2dd4f0c3851a146bd5ac93a22f5682, type: 2}

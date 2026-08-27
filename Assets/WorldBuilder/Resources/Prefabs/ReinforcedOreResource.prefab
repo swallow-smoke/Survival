@@ -123,7 +123,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3325906750323105707}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7dc00f85f397d447838027a5b0169e8, type: 3}
+  m_Script: {fileID: 11500000, guid: 3718356e4c8108e4c895b60602624d19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Authoring.WorldEntityAuthoring
   prefabId: 1300
@@ -142,7 +142,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3325906750323105707}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62de53e2481e3764f85e459e3c01e4fd, type: 3}
+  m_Script: {fileID: 11500000, guid: 87a9a47bca456914f9d5caff927d6dbe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Resources.Authoring.ResourceNodeAuthoring
   displayName: Reinforced Deposit
