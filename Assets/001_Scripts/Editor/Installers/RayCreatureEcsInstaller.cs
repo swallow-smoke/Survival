@@ -230,7 +230,7 @@ namespace AstraNope.Editor
 
         private static WorldEntityRuntimeAuthoring GetOrRepairRuntime()
         {
-            WorldEntityRuntimeAuthoring runtime = UnityEngine.Object.FindFirstObjectByType<WorldEntityRuntimeAuthoring>();
+            WorldEntityRuntimeAuthoring runtime = UnityEngine.Object.FindAnyObjectByType<WorldEntityRuntimeAuthoring>();
             if (runtime != null) return runtime;
 
             GameObject runtimeObject = GameObject.Find("WorldEntityRuntime") ?? new GameObject("WorldEntityRuntime");
@@ -348,7 +348,7 @@ namespace AstraNope.Editor
         private static Vector3 DefaultSpawnCenter(int index)
         {
             float angle = index * Mathf.PI * 2f / 5f;
-            return new Vector3(Mathf.Cos(angle) * 18f, -8f, Mathf.Sin(angle) * 18f);
+            return new Vector3(6.5f + Mathf.Cos(angle) * 5f, -2.5f, Mathf.Sin(angle) * 5f);
         }
 
         private static float DefaultSpeed(string modelName)

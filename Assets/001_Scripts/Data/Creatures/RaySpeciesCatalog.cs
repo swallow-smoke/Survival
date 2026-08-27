@@ -19,9 +19,9 @@ namespace AstraNope.Data.Creatures
         [Range(0f, 45f), SerializeField] private float maximumBankDegrees = 18f;
         [Min(0f), SerializeField] private float bankResponsiveness = 4f;
         [SerializeField] private Vector3 spawnCenter;
-        [SerializeField] private Vector3 spawnVolume = new Vector3(48f, 14f, 48f);
+        [SerializeField] private Vector3 spawnVolume = new Vector3(8f, 3f, 8f);
         [Min(0), SerializeField] private int maximumAlive = 6;
-        [Min(1), SerializeField] private int spawnPerTick = 1;
+        [Min(1), SerializeField] private int spawnPerTick = 2;
         [Min(0.01f), SerializeField] private float spawnInterval = 8f;
 
         public string DisplayName => displayName;

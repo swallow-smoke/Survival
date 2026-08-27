@@ -24,10 +24,10 @@ MonoBehaviour:
     fleeDistance: 8
     maximumBankDegrees: 18
     bankResponsiveness: 4
-    spawnCenter: {x: 18, y: -8, z: 0}
-    spawnVolume: {x: 48, y: 14, z: 48}
+    spawnCenter: {x: 10, y: -2.5, z: 0}
+    spawnVolume: {x: 8, y: 3, z: 8}
     maximumAlive: 6
-    spawnPerTick: 1
+    spawnPerTick: 2
     spawnInterval: 8
   - displayName: Coral Ray
     prefabId: 2101
@@ -40,10 +40,10 @@ MonoBehaviour:
     fleeDistance: 8
     maximumBankDegrees: 18
     bankResponsiveness: 4
-    spawnCenter: {x: 5.5623055, y: -8, z: 17.119019}
-    spawnVolume: {x: 48, y: 14, z: 48}
+    spawnCenter: {x: 7, y: -2.5, z: 5}
+    spawnVolume: {x: 8, y: 3, z: 8}
     maximumAlive: 6
-    spawnPerTick: 1
+    spawnPerTick: 2
     spawnInterval: 8
   - displayName: Electric Manta
     prefabId: 2102
@@ -56,10 +56,10 @@ MonoBehaviour:
     fleeDistance: 8
     maximumBankDegrees: 18
     bankResponsiveness: 4
-    spawnCenter: {x: -14.562307, y: -8, z: 10.580133}
-    spawnVolume: {x: 48, y: 14, z: 48}
+    spawnCenter: {x: 3, y: -2.5, z: 3}
+    spawnVolume: {x: 8, y: 3, z: 8}
     maximumAlive: 6
-    spawnPerTick: 1
+    spawnPerTick: 2
     spawnInterval: 8
   - displayName: King Ray
     prefabId: 2103
@@ -72,10 +72,10 @@ MonoBehaviour:
     fleeDistance: 8
     maximumBankDegrees: 18
     bankResponsiveness: 4
-    spawnCenter: {x: -14.562305, y: -8, z: -10.580136}
-    spawnVolume: {x: 48, y: 14, z: 48}
+    spawnCenter: {x: 3, y: -3.5, z: -3}
+    spawnVolume: {x: 8, y: 3, z: 8}
     maximumAlive: 6
-    spawnPerTick: 1
+    spawnPerTick: 2
     spawnInterval: 8
   - displayName: Night Ray
     prefabId: 2104
@@ -88,8 +88,8 @@ MonoBehaviour:
     fleeDistance: 8
     maximumBankDegrees: 18
     bankResponsiveness: 4
-    spawnCenter: {x: 5.5623083, y: -8, z: -17.119017}
-    spawnVolume: {x: 48, y: 14, z: 48}
+    spawnCenter: {x: 7, y: -2.5, z: -5}
+    spawnVolume: {x: 8, y: 3, z: 8}
     maximumAlive: 6
-    spawnPerTick: 1
+    spawnPerTick: 2
     spawnInterval: 8
