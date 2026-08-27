@@ -21,6 +21,13 @@ namespace AstraNope.Localization
             if (!UiText.Defaults.TryGetValue(key, out var fallback))
                 return key;
 #if ENABLE_LOCALIZATION
+            // Accessing StringDatabase creates/initializes LocalizationSettings. When the
+            // project intentionally has no localization/addressables settings yet, that
+            // initialization emits asynchronous Addressables errors that try/catch cannot
+            // suppress. Keep serving the embedded defaults until real settings exist.
+            if (!UnityEngine.Localization.Settings.LocalizationSettings.HasSettings)
+                return fallback;
+
             try
             {
                 var resolved = UnityEngine.Localization.Settings.LocalizationSettings
