@@ -11,6 +11,7 @@ using AstraNope.WorldObjects.Items;
 using AstraNope.WorldObjects.Structures;
 using AstraNope.WorldObjects.Vehicles;
 using AstraNope.UI.Panels;
+using AstraNope.UI.World;
 using AstraNope.WorldObjects.Vehicles.Core;
 using System;
 using AstraNope.Core.World.Entities;
@@ -147,6 +148,7 @@ namespace AstraNope.Core
             builder.Register<InventoryCreatureToolSelector>(Lifetime.Singleton).As<ICreatureToolSelector>();
             builder.Register<DotsCreatureInteractionService>(Lifetime.Singleton).As<ICreatureInteractionService>();
             builder.RegisterEntryPoint<CreaturePlayerFocusBridge>();
+            builder.RegisterEntryPoint<CreatureNameplatePresenter>();
             builder.RegisterEntryPoint<EntityManager>()
                 .AsSelf()
                 .As<IEntityManager>()
