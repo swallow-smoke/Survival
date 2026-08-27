@@ -1,12 +1,12 @@
 #if UNITY_EDITOR
-using _001_Scripts.Data;
-using _001_Scripts.Data.Message;
-using _001_Scripts.Managers;
+using AstraNope.Data;
+using AstraNope.Data.Messages;
+using AstraNope.Services;
 using MessagePipe;
 using NUnit.Framework;
 using System;
 
-namespace _001_Scripts.Editor.Tests
+namespace AstraNope.Editor.Tests
 {
     public sealed class LogCollectionEditModeTests
     {

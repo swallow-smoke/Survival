@@ -21,7 +21,7 @@ MonoBehaviour:
         itemDesc: "\uBD80\uC11C\uC9C4 \uAD6C\uC870\uBB3C\uC5D0\uC11C \uD68C\uC218\uD55C
           \uAE08\uC18D \uC870\uAC01\uC785\uB2C8\uB2E4. \uAE30\uBCF8 \uC81C\uC791
           \uC7AC\uB8CC\uB85C \uC0AC\uC6A9\uB429\uB2C8\uB2E4."
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 0
         weight: 0.4
         ItemAttributes:
@@ -40,7 +40,7 @@ MonoBehaviour:
         itemName: "\uD574\uC870 \uC12C\uC720"
         itemDesc: "\uD574\uC870\uC5D0\uC11C \uCD94\uCD9C\uD55C \uC9C8\uAE34 \uC12C\uC720\uC785\uB2C8\uB2E4.
           \uD544\uD130\uC640 \uC0DD\uC874 \uB3C4\uAD6C \uC81C\uC791\uC5D0 \uC0AC\uC6A9\uB429\uB2C8\uB2E4."
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 0
         weight: 0.2
         ItemAttributes:
@@ -59,7 +59,7 @@ MonoBehaviour:
         itemName: "\uAC04\uC774 \uC0B0\uC18C \uD544\uD130"
         itemDesc: "\uAE08\uC18D \uD30C\uD3B8\uC744 \uC870\uB9BD\uD574 \uB9CC\uB4E0
           \uC751\uAE09\uC6A9 \uC0B0\uC18C \uC815\uD654 \uD544\uD130\uC785\uB2C8\uB2E4."
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 0
         weight: 0.8
         ItemAttributes:
@@ -77,7 +77,7 @@ MonoBehaviour:
         itemId: 3
         itemName: Wood
         itemDesc: Basic material gathered from trees.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 0
         weight: 0.5
         ItemAttributes:
@@ -95,7 +95,7 @@ MonoBehaviour:
         itemId: 4
         itemName: Copper Ore
         itemDesc: Raw copper ore extracted from mineral nodes.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 0
         weight: 0.8
         ItemAttributes:
@@ -113,7 +113,7 @@ MonoBehaviour:
         itemId: 5
         itemName: Stone Axe
         itemDesc: A basic axe for harvesting trees.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 1
         weight: 1.2
         ItemAttributes:
@@ -137,7 +137,7 @@ MonoBehaviour:
         itemId: 6
         itemName: Stone Pickaxe
         itemDesc: A basic pickaxe for mining mineral nodes.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 1
         weight: 1.4
         ItemAttributes:
@@ -164,7 +164,7 @@ MonoBehaviour:
         itemId: 7
         itemName: Portable Drill
         itemDesc: Powered mining equipment for reinforced deposits.
-        itemGrade: 1
+        ItemGrade: 0
         itemType: 1
         weight: 2.5
         ItemAttributes:
@@ -188,7 +188,7 @@ MonoBehaviour:
         itemId: 8
         itemName: Titanium Ore
         itemDesc: Raw titanium-bearing mineral gathered from pale deposits.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 0
         weight: 0.8
         ItemAttributes:
@@ -206,7 +206,7 @@ MonoBehaviour:
         itemId: 9
         itemName: Quartz Crystal
         itemDesc: Clear crystal used for batteries and electronic components.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 0
         weight: 0.5
         ItemAttributes:
@@ -224,7 +224,7 @@ MonoBehaviour:
         itemId: 10
         itemName: Carbon Powder
         itemDesc: Fine conductive powder used in advanced fabrication tests.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 0
         weight: 0.2
         ItemAttributes:
@@ -242,7 +242,7 @@ MonoBehaviour:
         itemId: 11
         itemName: Titanium Ingot
         itemDesc: Refined structural metal for equipment and construction.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 0
         weight: 1.2
         ItemAttributes:
@@ -260,7 +260,7 @@ MonoBehaviour:
         itemId: 12
         itemName: Copper Wire
         itemDesc: Flexible wiring used by powered tools and machinery.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 0
         weight: 0.3
         ItemAttributes:
@@ -278,7 +278,7 @@ MonoBehaviour:
         itemId: 13
         itemName: Compact Battery
         itemDesc: A small rechargeable cell for handheld equipment.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 0
         weight: 0.6
         ItemAttributes:
@@ -296,7 +296,7 @@ MonoBehaviour:
         itemId: 14
         itemName: Handheld Scanner
         itemDesc: Exploration tool that records nearby targets.
-        itemGrade: 1
+        ItemGrade: 0
         itemType: 1
         weight: 1
         ItemAttributes:
@@ -329,7 +329,7 @@ MonoBehaviour:
         itemId: 15
         itemName: Field Repair Tool
         itemDesc: Compact maintenance tool for damaged structures and vehicles.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 1
         weight: 1.1
         ItemAttributes:
@@ -357,7 +357,7 @@ MonoBehaviour:
         itemId: 16
         itemName: Waterproof Structural Panel
         itemDesc: Reinforced panel used by underwater structures.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 0
         weight: 1.8
         ItemAttributes:
@@ -375,7 +375,7 @@ MonoBehaviour:
         itemId: 17
         itemName: Compact Oxygen Tank
         itemDesc: Wearable tank that extends underwater operation time.
-        itemGrade: 1
+        ItemGrade: 0
         itemType: 2
         weight: 2.2
         ItemAttributes:
@@ -393,7 +393,7 @@ MonoBehaviour:
         itemId: 18
         itemName: Field Flashlight
         itemDesc: Compact waterproof flashlight for dark underwater spaces.
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 1
         weight: 0.7
         ItemAttributes:
@@ -416,7 +416,7 @@ MonoBehaviour:
         itemDesc: "\uCCAD\uC0AC\uC9C4\uC744 \uD640\uB85C\uADF8\uB7A8\uC73C\uB85C
           \uD22C\uC0AC\uD574 \uAD6C\uC870\uBB3C\uC744 \uBC30\uCE58\uD558\uB294 \uD734\uB300\uC6A9
           \uAC74\uCD95 \uB3C4\uAD6C\uC785\uB2C8\uB2E4."
-        itemGrade: 0
+        ItemGrade: 0
         itemType: 1
         weight: 1.4
         ItemAttributes:

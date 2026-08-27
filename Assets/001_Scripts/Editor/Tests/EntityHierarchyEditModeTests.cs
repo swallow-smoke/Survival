@@ -1,15 +1,17 @@
 using System.Linq;
 using System.Reflection;
-using _001_Scripts.Controller;
-using _001_Scripts.Data.Structure.Interface;
-using _001_Scripts.Entities;
-using _001_Scripts.Structure;
+using AstraNope.Gameplay.Player;
+using AstraNope.Contracts.WorldObjects;
+using AstraNope.WorldObjects.Entities;
+using AstraNope.WorldObjects.Items;
+using AstraNope.WorldObjects.Structures;
+using AstraNope.WorldObjects.Vehicles;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace _001_Scripts.Editor.Tests
+namespace AstraNope.Editor.Tests
 {
     public sealed class EntityHierarchyEditModeTests
     {

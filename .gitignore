@@ -76,3 +76,4 @@ cmake-build-*/
 out/
 Assets/001_Scripts/CLAUDE.md
 Assets/001_Scripts/CLAUDE.md.meta
+.codex

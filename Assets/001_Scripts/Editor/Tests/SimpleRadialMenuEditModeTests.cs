@@ -1,13 +1,13 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using System.Collections.Generic;
 using System.Reflection;
-using _001_Scripts.UI.Component;
+using AstraNope.UI.Components;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace _001_Scripts.Editor.Tests
+namespace AstraNope.Editor.Tests
 {
     public sealed class SimpleRadialMenuEditModeTests
     {

@@ -1,13 +1,13 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
-using _001_Scripts.Controller;
-using _001_Scripts.Data.Item;
-using _001_Scripts.Type.Item;
+using AstraNope.Gameplay.Player;
+using AstraNope.Data.Items;
+using AstraNope.Data.Items.Types;
 using NUnit.Framework;
-using ItemAttribute = _001_Scripts.Data.Item.Attributes.Attributes;
-using ItemModifier = _001_Scripts.Data.Item.Modifier.Modifier;
+using ItemAttribute = AstraNope.Data.Items.Attributes.Attributes;
+using ItemModifier = AstraNope.Data.Items.Modifiers.Modifier;
 
-namespace _001_Scripts.Editor.Tests
+namespace AstraNope.Editor.Tests
 {
     public sealed class ItemFeatureEditModeTests
     {

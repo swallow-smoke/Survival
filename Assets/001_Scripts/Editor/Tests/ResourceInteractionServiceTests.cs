@@ -1,11 +1,11 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
-using _001_Scripts._000_Core._000_World._002_Entity.Interface;
-using _001_Scripts._000_Core._000_World._002_Entity.Resources;
-using _001_Scripts.Data.Item;
-using _001_Scripts.Interface;
-using _001_Scripts.Managers;
+using AstraNope.Core.World.Entities.Interfaces;
+using AstraNope.Core.World.Entities.Resources;
+using AstraNope.Data.Items;
+using AstraNope.Contracts;
+using AstraNope.Services;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Entities;
@@ -13,7 +13,7 @@ using UnityEditor;
 using UnityEngine;
 using WorldBuilder.Entities.Resources;
 
-namespace _001_Scripts.Editor.Tests
+namespace AstraNope.Editor.Tests
 {
     public sealed class ResourceInteractionServiceTests
     {
@@ -149,7 +149,7 @@ namespace _001_Scripts.Editor.Tests
         private sealed class FakeHotbar : IHotbarReader
         {
             private readonly InventorySlot slot;
-            public FakeHotbar(int itemId) => slot = new InventorySlot(new Instance(itemId, 1, 100f), 1);
+            public FakeHotbar(int itemId) => slot = new InventorySlot(new ItemInstance(itemId, 1, 100f), 1);
             public int HotbarSlotCount => 1;
             public int SelectedHotbarIndex => 0;
             public InventorySlot GetHotbarSlot(int index) => slot;

@@ -2,17 +2,17 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using _001_Scripts.Controller;
-using _001_Scripts.Data.Item;
-using _001_Scripts.Data.Message;
-using _001_Scripts.Data.SOJ;
-using _001_Scripts.Interface;
+using AstraNope.Gameplay.Player;
+using AstraNope.Data.Items;
+using AstraNope.Data.Messages;
+using AstraNope.Data.Databases;
+using AstraNope.Contracts;
 using MessagePipe;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace _001_Scripts.Editor.Tests
+namespace AstraNope.Editor.Tests
 {
     public sealed class BlueprintJsonEditModeTests
     {
@@ -135,7 +135,7 @@ namespace _001_Scripts.Editor.Tests
             public int Count(int itemId) => _counts.TryGetValue(itemId, out int count) ? count : 0;
             public bool HasItem(int id, int count = 1) => Count(id) >= count;
             public bool HasItem(Item item, int count = 1) => HasItem(item.itemId, count);
-            public bool HasItem(Instance ins) => HasItem(ins.itemId);
+            public bool HasItem(ItemInstance ins) => HasItem(ins.itemId);
             public IReadOnlyList<InventorySlot> GetAllItems() => Array.Empty<InventorySlot>();
             public InventorySlot GetSlot(int index) => throw new IndexOutOfRangeException();
 
@@ -152,7 +152,7 @@ namespace _001_Scripts.Editor.Tests
             }
 
             public void RemoveItem(Item item) => RemoveItem(item.itemId, Count(item.itemId));
-            public void RemoveItem(Instance ins) => RemoveItem(ins.itemId, 1);
+            public void RemoveItem(ItemInstance ins) => RemoveItem(ins.itemId, 1);
         }
     }
 }

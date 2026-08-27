@@ -1,0 +1,96 @@
+using AstraNope.Data.Messages;
+using AstraNope.Data.Messages.Player;
+using AstraNope.Contracts.WorldObjects;
+using AstraNope.Contracts;
+using AstraNope.WorldObjects.Vehicles;
+using AstraNope.Types.States;
+using MessagePipe;
+using UnityEngine;
+using VContainer;
+
+namespace AstraNope.WorldObjects.Vehicles.Components
+{
+    public class SeatComponent : MonoBehaviour, ISeat
+    {
+        [SerializeField] private Transform seatAnchor;
+        [SerializeField] private Transform standSpawnPoint;
+        [SerializeField] private MonoBehaviour controllerBehaviour;
+        [SerializeField] private PlayerVehicleState standState = PlayerVehicleState.None;
+        [SerializeField] private Transform standReparentTarget;
+
+        private IVehicleControllable _controller;
+        private IPublisher<PlayerVehicleStateMessage> _statePublisher;
+        private IPublisher<VehicleControlAssignedMessage> _vehicleControlPublisher;
+        private Transform _playerTrs;
+
+        public bool IsOccupied { get; private set; }
+        public Transform CameraAnchor => seatAnchor;
+        public IVehicleControllable Controller => _controller;
+
+        public void Configure(Transform anchor, Transform exitPoint, MonoBehaviour controller)
+        {
+            seatAnchor = anchor;
+            standSpawnPoint = exitPoint;
+            controllerBehaviour = controller;
+            standState = PlayerVehicleState.None;
+            standReparentTarget = null;
+            _controller = controllerBehaviour as IVehicleControllable;
+        }
+
+        [Inject]
+        public void Construct(
+            IPublisher<PlayerVehicleStateMessage> statePublisher,
+            IPublisher<VehicleControlAssignedMessage> vehicleControlPublisher,
+            IPlayerContext playerContext)
+        {
+            _statePublisher = statePublisher;
+            _vehicleControlPublisher = vehicleControlPublisher;
+            _playerTrs = playerContext.PlayerTrs;
+        }
+
+        private void Awake()
+        {
+            _controller = controllerBehaviour as IVehicleControllable;
+            if (_controller == null)
+                Debug.LogError($"[SeatComponent] {controllerBehaviour} does not implement IVehicleControllable");
+        }
+
+        public void Sit(Transform player)
+        {
+            if (IsOccupied || !player || !seatAnchor || _controller == null) return;
+
+            if (player.TryGetComponent<Rigidbody>(out var playerRb))
+            {
+                playerRb.linearVelocity = Vector3.zero;
+                playerRb.angularVelocity = Vector3.zero;
+            }
+
+            IsOccupied = true;
+            player.SetParent(seatAnchor);
+            player.localPosition = Vector3.zero;
+            player.localRotation = Quaternion.identity;
+
+            _controller.EnterControl();
+            _statePublisher.Publish(new PlayerVehicleStateMessage(PlayerVehicleState.Seated));
+            _vehicleControlPublisher.Publish(new VehicleControlAssignedMessage(_controller, this));
+        }
+
+        public void Stand(Transform player, Transform spawnPoint, Transform reparentTo)
+        {
+            if (!IsOccupied) return;
+
+            IsOccupied = false;
+            _controller.ExitControl();
+
+            player.SetParent(reparentTo);
+            player.position = spawnPoint != null ? spawnPoint.position : player.position;
+            player.rotation = spawnPoint != null ? spawnPoint.rotation : player.rotation;
+
+            _statePublisher.Publish(new PlayerVehicleStateMessage(standState));
+            _vehicleControlPublisher.Publish(new VehicleControlAssignedMessage(null, null));
+        }
+
+        public void StandWithDefaults()
+            => Stand(_playerTrs, standSpawnPoint, standReparentTarget);
+    }
+}
