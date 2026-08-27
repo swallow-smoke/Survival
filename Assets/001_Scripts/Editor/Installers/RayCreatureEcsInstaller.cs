@@ -13,6 +13,7 @@ using WorldBuilder.Entities;
 using WorldBuilder.Entities.Authoring;
 using WorldBuilder.Entities.Creatures;
 using WorldBuilder.Entities.Creatures.Authoring;
+using WorldBuilder.Runtime.Grid;
 
 namespace AstraNope.Editor
 {
@@ -30,7 +31,8 @@ namespace AstraNope.Editor
         private const string EntityScenePath = "Assets/000_Scenes/WorldEntities.unity";
         private const string SpawnRootName = "RayCreatureSpawnZones";
         private const int FirstPrefabId = 2100;
-        private const string AutoInstallSessionKey = "Survival.RayCreatureEcsInstaller.AutoInstall.v1";
+        private const string GridPath = "Assets/WorldBuilder/WorldGridSettings.asset";
+        private const string AutoInstallSessionKey = "Survival.RayCreatureEcsInstaller.AutoInstall.v2";
 
         [InitializeOnLoadMethod]
         private static void ScheduleInitialInstall()
@@ -65,6 +67,7 @@ namespace AstraNope.Editor
 
             RaySpeciesCatalog catalog = LoadOrCreateCatalog();
             RefreshCatalogModels(catalog);
+            AssetDatabase.SaveAssets();
             List<RayPrefabRecord> rayPrefabs = BuildPrefabs(catalog);
             if (rayPrefabs.Count == 0)
                 throw new InvalidOperationException($"No ray FBX models were found under '{ModelFolder}'.");
@@ -73,13 +76,11 @@ namespace AstraNope.Editor
             try
             {
                 Scene entityScene = EditorSceneManager.OpenScene(EntityScenePath, OpenSceneMode.Single);
-                WorldEntityRuntimeAuthoring runtime = UnityEngine.Object.FindFirstObjectByType<WorldEntityRuntimeAuthoring>();
-                if (runtime == null)
-                    throw new InvalidOperationException($"'{EntityScenePath}' has no WorldEntityRuntimeAuthoring.");
+                WorldEntityRuntimeAuthoring runtime = GetOrRepairRuntime();
 
                 EnsureCreatureRuntime(runtime.gameObject);
                 RegisterPrefabs(runtime, rayPrefabs);
-                RebuildSpawnZones(rayPrefabs);
+                EnsureRaySpawnZones(runtime.gameObject, catalog);
                 EditorSceneManager.MarkSceneDirty(entityScene);
                 EditorSceneManager.SaveScene(entityScene);
             }
@@ -220,28 +221,68 @@ namespace AstraNope.Editor
                 runtimeObject.AddComponent<CreatureRuntimeAuthoring>();
         }
 
+        private static void EnsureRaySpawnZones(GameObject runtimeObject, RaySpeciesCatalog catalog)
+        {
+            RaySpawnZonesAuthoring authoring = runtimeObject.GetComponent<RaySpawnZonesAuthoring>() ??
+                                                runtimeObject.AddComponent<RaySpawnZonesAuthoring>();
+            SetObjectReference(authoring, "catalog", catalog);
+        }
+
+        private static WorldEntityRuntimeAuthoring GetOrRepairRuntime()
+        {
+            WorldEntityRuntimeAuthoring runtime = UnityEngine.Object.FindFirstObjectByType<WorldEntityRuntimeAuthoring>();
+            if (runtime != null) return runtime;
+
+            GameObject runtimeObject = GameObject.Find("WorldEntityRuntime") ?? new GameObject("WorldEntityRuntime");
+            if (GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(runtimeObject) > 0)
+                GameObjectUtility.RemoveMonoBehavioursWithMissingScript(runtimeObject);
+            runtime = runtimeObject.AddComponent<WorldEntityRuntimeAuthoring>();
+            WorldGridSettings grid = AssetDatabase.LoadAssetAtPath<WorldGridSettings>(GridPath);
+            if (grid == null) throw new InvalidOperationException($"Missing WorldGridSettings at '{GridPath}'.");
+            SetObjectReference(runtime, "gridSettings", grid);
+            return runtime;
+        }
+
         private static void RegisterPrefabs(WorldEntityRuntimeAuthoring runtime, List<RayPrefabRecord> rays)
         {
             SerializedObject serialized = new SerializedObject(runtime);
             SerializedProperty entries = serialized.FindProperty("prefabs");
             HashSet<int> rayIds = new HashSet<int>(rays.Select(value => value.Definition.PrefabId));
-            List<WorldEntityPrefabEntry> preserved = new List<WorldEntityPrefabEntry>();
+            Dictionary<int, GameObject> preserved = CollectWorldEntityPrefabs(rayIds);
             for (int i = 0; i < entries.arraySize; i++)
             {
                 SerializedProperty entry = entries.GetArrayElementAtIndex(i);
                 int id = entry.FindPropertyRelative("PrefabId").intValue;
                 GameObject prefab = (GameObject)entry.FindPropertyRelative("Prefab").objectReferenceValue;
-                if (!rayIds.Contains(id)) preserved.Add(new WorldEntityPrefabEntry { PrefabId = id, Prefab = prefab });
+                if (!rayIds.Contains(id) && prefab != null) preserved[id] = prefab;
             }
 
             entries.arraySize = preserved.Count + rays.Count;
             int index = 0;
-            foreach (WorldEntityPrefabEntry value in preserved)
-                WriteEntry(entries.GetArrayElementAtIndex(index++), value.PrefabId, value.Prefab);
+            foreach (KeyValuePair<int, GameObject> value in preserved.OrderBy(value => value.Key))
+                WriteEntry(entries.GetArrayElementAtIndex(index++), value.Key, value.Value);
             foreach (RayPrefabRecord value in rays)
                 WriteEntry(entries.GetArrayElementAtIndex(index++), value.Definition.PrefabId, value.Prefab);
             serialized.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(runtime);
+        }
+
+        private static Dictionary<int, GameObject> CollectWorldEntityPrefabs(HashSet<int> excludedIds)
+        {
+            Dictionary<int, GameObject> result = new Dictionary<int, GameObject>();
+            string[] prefabPaths = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/WorldBuilder" })
+                .Select(AssetDatabase.GUIDToAssetPath).ToArray();
+            foreach (string path in prefabPaths)
+            {
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                WorldEntityAuthoring authoring = prefab != null ? prefab.GetComponent<WorldEntityAuthoring>() : null;
+                if (authoring == null || excludedIds.Contains(authoring.PrefabId)) continue;
+                if (result.TryGetValue(authoring.PrefabId, out GameObject duplicate) && duplicate != prefab)
+                    throw new InvalidOperationException($"Duplicate WorldEntity prefab id {authoring.PrefabId}: " +
+                                                        $"'{AssetDatabase.GetAssetPath(duplicate)}' and '{path}'.");
+                result[authoring.PrefabId] = prefab;
+            }
+            return result;
         }
 
         private static void RebuildSpawnZones(List<RayPrefabRecord> rays)
@@ -288,6 +329,18 @@ namespace AstraNope.Editor
                 case Vector3 vector: property.vector3Value = vector; break;
                 default: throw new ArgumentOutOfRangeException(nameof(value), value, null);
             }
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(target);
+        }
+
+        private static void SetObjectReference(UnityEngine.Object target, string propertyName,
+            UnityEngine.Object value)
+        {
+            SerializedObject serialized = new SerializedObject(target);
+            serialized.Update();
+            SerializedProperty property = serialized.FindProperty(propertyName) ??
+                                          throw new InvalidOperationException($"Missing property '{propertyName}' on {target.GetType().Name}.");
+            property.objectReferenceValue = value;
             serialized.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(target);
         }

@@ -146,7 +146,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7384c0e7194ce8c4b834a68596a89934, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Resources.Authoring.ResourceFieldSpawnZoneAuthoring
   kind: 0
   prefabId: 1200
@@ -184,6 +184,8 @@ GameObject:
   m_Component:
   - component: {fileID: 505866271}
   - component: {fileID: 505866270}
+  - component: {fileID: 505866272}
+  - component: {fileID: 505866273}
   m_Layer: 0
   m_Name: WorldEntityRuntime
   m_TagString: Untagged
@@ -200,8 +202,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 505866269}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fec1e53766847ee4ca8ccee9e4f3ca24, type: 3}
-  m_Name: 
+  m_Script: {fileID: 11500000, guid: 108d5b03a38283d4ca234c3e700809c1, type: 3}
+  m_Name:
   m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Authoring.WorldEntityRuntimeAuthoring
   gridSettings: {fileID: 11400000, guid: 4e2dd4f0c3851a146bd5ac93a22f5682, type: 2}
   prefabs:
@@ -223,6 +225,48 @@ MonoBehaviour:
   - PrefabId: 1500
     Prefab: {fileID: 4165307778059918261, guid: 001a602acb8ddde4e831fccaf6206a33,
       type: 3}
+  - PrefabId: 2100
+    Prefab: {fileID: 9118345261673318476, guid: f9c5ecf1ca1606147a2e5b5576571bfa,
+      type: 3}
+  - PrefabId: 2101
+    Prefab: {fileID: 1162674087276767313, guid: 2ad13867ea03b464199adfe6828a89ed,
+      type: 3}
+  - PrefabId: 2102
+    Prefab: {fileID: 5866598433739225667, guid: 445af3202cf215148b7e0cad0f8f560d,
+      type: 3}
+  - PrefabId: 2103
+    Prefab: {fileID: 8091573805631885994, guid: dca24d9b2d63e2d47824994bb0a3bdbd,
+      type: 3}
+  - PrefabId: 2104
+    Prefab: {fileID: 7061181728662879632, guid: 346a50bec8e4f9b4eaa57956cbd76abf,
+      type: 3}
+--- !u!114 &505866272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 505866269}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb06b1e55e93168419475cad63a8f3aa, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Creatures.Authoring.CreatureRuntimeAuthoring
+  grades: []
+  palette: {fileID: 0}
+--- !u!114 &505866273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 505866269}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 814b1b0c8b2b4fc0afc7520f9f7fe021, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::AstraNope.Core.World.Entities.Creatures.AI.RaySpawnZonesAuthoring
+  catalog: {fileID: 11400000, guid: 2cf814f1a6ce3ed4b92cac78559f7a61, type: 2}
 --- !u!4 &505866271
 Transform:
   m_ObjectHideFlags: 0

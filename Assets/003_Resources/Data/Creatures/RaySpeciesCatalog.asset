@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c014fdad7c5a0849a148d4e2bb6efdb, type: 3}
+  m_Name: RaySpeciesCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::AstraNope.Data.Creatures.RaySpeciesCatalog
+  species:
+  - displayName: Bubble Ray
+    prefabId: 2100
+    model: {fileID: 919132149155446097, guid: 60fa63b362930c34dbcdbdfeec724c2a, type: 3}
+    modelScale: 1
+    cruiseSpeed: 2
+    turnSpeedDegrees: 75
+    wanderRadius: 24
+    verticalRadius: 7
+    fleeDistance: 8
+    maximumBankDegrees: 18
+    bankResponsiveness: 4
+    spawnCenter: {x: 18, y: -8, z: 0}
+    spawnVolume: {x: 48, y: 14, z: 48}
+    maximumAlive: 6
+    spawnPerTick: 1
+    spawnInterval: 8
+  - displayName: Coral Ray
+    prefabId: 2101
+    model: {fileID: 919132149155446097, guid: c8573897f27683d47be6b43e930514a3, type: 3}
+    modelScale: 1
+    cruiseSpeed: 2
+    turnSpeedDegrees: 75
+    wanderRadius: 24
+    verticalRadius: 7
+    fleeDistance: 8
+    maximumBankDegrees: 18
+    bankResponsiveness: 4
+    spawnCenter: {x: 5.5623055, y: -8, z: 17.119019}
+    spawnVolume: {x: 48, y: 14, z: 48}
+    maximumAlive: 6
+    spawnPerTick: 1
+    spawnInterval: 8
+  - displayName: Electric Manta
+    prefabId: 2102
+    model: {fileID: 919132149155446097, guid: fd1026ee1d311954caeda551cbd99bc1, type: 3}
+    modelScale: 1
+    cruiseSpeed: 2.8
+    turnSpeedDegrees: 75
+    wanderRadius: 24
+    verticalRadius: 7
+    fleeDistance: 8
+    maximumBankDegrees: 18
+    bankResponsiveness: 4
+    spawnCenter: {x: -14.562307, y: -8, z: 10.580133}
+    spawnVolume: {x: 48, y: 14, z: 48}
+    maximumAlive: 6
+    spawnPerTick: 1
+    spawnInterval: 8
+  - displayName: King Ray
+    prefabId: 2103
+    model: {fileID: 919132149155446097, guid: 974f924a2b5fc464b83e214e960d2a7f, type: 3}
+    modelScale: 1.25
+    cruiseSpeed: 1.4
+    turnSpeedDegrees: 75
+    wanderRadius: 24
+    verticalRadius: 7
+    fleeDistance: 8
+    maximumBankDegrees: 18
+    bankResponsiveness: 4
+    spawnCenter: {x: -14.562305, y: -8, z: -10.580136}
+    spawnVolume: {x: 48, y: 14, z: 48}
+    maximumAlive: 6
+    spawnPerTick: 1
+    spawnInterval: 8
+  - displayName: Night Ray
+    prefabId: 2104
+    model: {fileID: 919132149155446097, guid: 45040cc198f638d468bbb93d395c7bb3, type: 3}
+    modelScale: 1
+    cruiseSpeed: 2
+    turnSpeedDegrees: 75
+    wanderRadius: 24
+    verticalRadius: 7
+    fleeDistance: 8
+    maximumBankDegrees: 18
+    bankResponsiveness: 4
+    spawnCenter: {x: 5.5623083, y: -8, z: -17.119017}
+    spawnVolume: {x: 48, y: 14, z: 48}
+    maximumAlive: 6
+    spawnPerTick: 1
+    spawnInterval: 8

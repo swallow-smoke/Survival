@@ -1,0 +1,219 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1162674087276767313
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2664304978687035346}
+  - component: {fileID: 1655861786147570539}
+  - component: {fileID: 1185349109309799927}
+  - component: {fileID: 6010630879384399597}
+  - component: {fileID: 6948035748974001036}
+  m_Layer: 0
+  m_Name: 2101_CoralRay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2664304978687035346
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1162674087276767313}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5532503251803504464}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1655861786147570539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1162674087276767313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3718356e4c8108e4c895b60602624d19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Authoring.WorldEntityAuthoring
+  prefabId: 2101
+  kind: 1
+  flags: 2
+  trackChunk: 1
+  useVelocity: 0
+  initialVelocity: {x: 0, y: 0, z: 0}
+  lifetimeSeconds: 0
+--- !u!114 &1185349109309799927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1162674087276767313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a0f0f17d084d7a40976b94ac4539eef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: WorldBuilder.Entities.Authoring::WorldBuilder.Entities.Creatures.Authoring.CreatureAuthoring
+  displayName: Coral Ray
+  fallbackGrade: 0
+  sizeClass: 1
+  personality: 2
+  interactions: 2
+  randomSeed: 2101
+  supportedPatterns: 0
+  primaryColor: {r: 0.72, g: 0.74, b: 0.75, a: 1}
+  secondaryColor: {r: 0.58, g: 0.6, b: 0.62, a: 1}
+  accentColor: {r: 0.84, g: 0.85, b: 0.86, a: 1}
+  patternColor: {r: 0.35, g: 0.36, b: 0.38, a: 1}
+  cruiseSpeed: 2
+  turnSpeedDegrees: 75
+  wanderRadius: 24
+  verticalRadius: 7
+  arriveRadius: 1.25
+  repathIntervalSeconds: 5
+  leashToHomeRegion: 1
+  regionMargin: 3
+  despawnGraceSeconds: 12
+  guaranteedAfterAttempts: 4
+  preferredFoodBonus: 0.2
+  preferredFeedItemId: -1
+  maximumAffinity: 100
+  affinityPerFeed: 25
+  feedCooldownSeconds: 2
+  fleeDistanceOverride: 8
+  wildReaction: 0
+  tamedReaction: 3
+  detectionRadius: 0
+  personalSpace: 0
+  approachDistance: 2.5
+  roles: 6
+  baseWorkSpeed: 1
+  baseCarryCapacity: 1
+  requiredEnvironment: 16
+  preferredEnvironment: 0
+  captureItemId: -1
+  captureBaseCount: 1
+  requiredToolItemId: -1
+  minimumToolTier: 0
+--- !u!114 &6010630879384399597
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1162674087276767313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f71c341b7a1043442803bc05d9d9da55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AstraNope.Core.World.Entities.Creatures.AI.RayAIAuthoring
+  maximumBankDegrees: 18
+  bankResponsiveness: 4
+--- !u!65 &6948035748974001036
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1162674087276767313}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.9433594, y: 0.47460938, z: 0.9980469}
+  m_Center: {x: 0, y: 0.23730469, z: 0}
+--- !u!1001 &5426238421780502715
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2664304978687035346}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: c8573897f27683d47be6b43e930514a3,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c8573897f27683d47be6b43e930514a3,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c8573897f27683d47be6b43e930514a3,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c8573897f27683d47be6b43e930514a3,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c8573897f27683d47be6b43e930514a3,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c8573897f27683d47be6b43e930514a3,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c8573897f27683d47be6b43e930514a3,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c8573897f27683d47be6b43e930514a3,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c8573897f27683d47be6b43e930514a3,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c8573897f27683d47be6b43e930514a3,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: c8573897f27683d47be6b43e930514a3,
+        type: 3}
+      propertyPath: m_Name
+      value: Visual
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: c8573897f27683d47be6b43e930514a3, type: 3}
+--- !u!4 &5532503251803504464 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c8573897f27683d47be6b43e930514a3,
+    type: 3}
+  m_PrefabInstance: {fileID: 5426238421780502715}
+  m_PrefabAsset: {fileID: 0}
