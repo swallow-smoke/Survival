@@ -30,8 +30,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7183684888961502041}
   m_Father: {fileID: 0}
@@ -78,12 +78,20 @@ MonoBehaviour:
   secondaryColor: {r: 0.58, g: 0.6, b: 0.62, a: 1}
   accentColor: {r: 0.84, g: 0.85, b: 0.86, a: 1}
   patternColor: {r: 0.35, g: 0.36, b: 0.38, a: 1}
+  locomotion: 0
   cruiseSpeed: 2
   turnSpeedDegrees: 75
   wanderRadius: 24
   verticalRadius: 7
   arriveRadius: 1.25
   repathIntervalSeconds: 5
+  rayAcceleration: 0.8
+  rayDeceleration: 1.2
+  rayYawSpeedDegrees: 42
+  rayPitchSpeedDegrees: 18
+  rayMaximumPitchDegrees: 20
+  rayMaximumBankDegrees: 28
+  rayBankResponsiveness: 2.5
   leashToHomeRegion: 1
   regionMargin: 3
   despawnGraceSeconds: 12

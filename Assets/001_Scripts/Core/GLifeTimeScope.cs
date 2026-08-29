@@ -26,6 +26,7 @@ using VContainer;
 using VContainer.Unity;
 using UnityEngine;
 using AstraNope.Data.Databases;
+using WorldBuilder.Runtime.Grid;
 
 namespace AstraNope.Core
 {
@@ -37,6 +38,7 @@ namespace AstraNope.Core
     {
         [SerializeField] private HarvestToolCatalog harvestToolCatalog;
         [SerializeField] private CreatureColorFoodCatalog creatureColorFoodCatalog;
+        [SerializeField] private WorldGridSettings worldGridSettings;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -149,6 +151,11 @@ namespace AstraNope.Core
             builder.Register<DotsCreatureInteractionService>(Lifetime.Singleton).As<ICreatureInteractionService>();
             builder.RegisterEntryPoint<CreaturePlayerFocusBridge>();
             builder.RegisterEntryPoint<CreatureNameplatePresenter>();
+            if (worldGridSettings == null)
+                throw new InvalidOperationException(
+                    "WorldGridSettings is required on GLifeTimeScope to stream world entity regions.");
+            builder.RegisterInstance(worldGridSettings);
+            builder.RegisterEntryPoint<WorldEntityRegionStreamingBridge>();
             builder.RegisterEntryPoint<EntityManager>()
                 .AsSelf()
                 .As<IEntityManager>()

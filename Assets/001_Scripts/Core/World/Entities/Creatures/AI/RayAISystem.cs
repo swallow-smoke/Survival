@@ -23,6 +23,7 @@ namespace AstraNope.Core.World.Entities.Creatures.AI
 
         [BurstCompile]
         [WithDisabled(typeof(CreatureCaptured))]
+        [WithNone(typeof(CreatureRayLocomotion))]
         private partial struct BankJob : IJobEntity
         {
             public float DeltaTime;

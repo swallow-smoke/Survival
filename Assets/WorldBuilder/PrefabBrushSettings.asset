@@ -23,7 +23,19 @@ MonoBehaviour:
   randomYaw: 1
   scaleRange: {x: 1, y: 1}
   duplicateSharedScriptableObjects: 1
-  prefabEntries: []
+  prefabEntries:
+  - prefab: {fileID: 3076202399719121764, guid: 4a6c1218fe24d9a4c8adcbc8663e1a55,
+      type: 3}
+    weight: 1
+    envType: 1
+  - prefab: {fileID: 1433998383584863353, guid: 79b9c3e9d14488d4c8e16247356a16c0,
+      type: 3}
+    weight: 1
+    envType: 1
+  - prefab: {fileID: 9213457108487431015, guid: 3cf1eac1c3ce0f046b6454dc035e587c,
+      type: 3}
+    weight: 1
+    envType: 1
   mask:
     useHeightMask: 0
     minHeight: 0
